@@ -1,4 +1,4 @@
-name: Build Android APK (Expo/React Native)
+name: Build Android APK
 
 on:
   push:
@@ -33,26 +33,21 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Setup Expo CLI
-        run: npm install -g expo-cli
-
-      - name: Prebuild Android (Expo)
+      - name: Prebuild Android
         run: npx expo prebuild --platform android --clean
 
-      - name: Build Android APK
+      - name: Grant execute permission for gradlew
+        run: chmod +x android/gradlew
+
+      - name: Build APK (Debug)
         run: |
           cd android
-          chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon
+          ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Rename APK
         run: |
           mkdir -p release
-          if [ -f android/app/build/outputs/apk/release/app-release.apk ]; then
-            cp android/app/build/outputs/apk/release/app-release.apk release/jarvis-native.apk
-          elif [ -f android/app/build/outputs/apk/release/app-release-unsigned.apk ]; then
-            cp android/app/build/outputs/apk/release/app-release-unsigned.apk release/jarvis-native.apk
-          fi
+          cp android/app/build/outputs/apk/debug/app-debug.apk release/jarvis-native.apk
 
       - name: Upload APK as Artifact
         uses: actions/upload-artifact@v4
@@ -79,38 +74,28 @@ jobs:
 
             **Release Date:** ${{ steps.date.outputs.date }}
             **Build:** #${{ github.run_number }}
-            **Type:** React Native + Expo
 
-            ## 📥 Installation Instructions
+            ## 📥 Installation
 
-            1. Download `jarvis-native.apk` from the assets below
-            2. Enable "Install from Unknown Sources" on your Android device
-            3. Open the APK file to install
-            4. Configure backend URL in Settings after first launch
+            1. Download `jarvis-native.apk` below
+            2. Enable "Install from Unknown Sources"
+            3. Install and launch
 
-            ## ⚙️ Backend Setup Required
+            ## ⚙️ Setup
 
-            This app connects to the claude-dash backend API:
-            - Update `API_URL` in app settings
-            - Default: `http://localhost:800` (for development)
-            - For production: Deploy backend and use your server URL
+            Configure backend URL in Settings:
+            - Development: `http://10.0.2.2:800` (Android emulator)
+            - Production: Your deployed backend URL
 
             ## 📱 Requirements
-            - Android 7.0 (API 24) or higher
-            - ~60MB storage space
-            - Backend API access
+            - Android 7.0+
+            - ~60MB storage
 
             ## ✨ Features
-            - 🤖 AI Chat (Claude/GPT)
-            - ✅ Task Management
-            - 🎯 Habit Tracking
-            - 💰 Finance Dashboard
-            - 📅 Calendar Integration
-            - 🎤 Voice Input/Output
-            - 📷 Camera for AI Vision
-            - 🔔 Push Notifications
+            - AI Chat, Tasks, Habits, Finance, Calendar
+            - Voice input, Camera, Notifications
 
             ---
-            *Built automatically from commit ${{ github.sha }}*
+            *Auto-built from ${{ github.sha }}*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
