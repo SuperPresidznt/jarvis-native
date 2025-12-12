@@ -5,9 +5,9 @@
 
 // Backend API Configuration
 export const API_CONFIG = {
-  // Default to localhost for development
-  // In production, this should point to your deployed backend
-  BASE_URL: __DEV__ ? 'http://localhost:800' : 'https://your-backend.com',
+  // Use local IP for both dev and release builds during testing
+  // Change this to your deployed backend URL when ready for production
+  BASE_URL: 'http://172.27.178.137:800',
   TIMEOUT: 30000, // 30 seconds
   RETRY_ATTEMPTS: 3,
 };
