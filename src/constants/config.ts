@@ -41,9 +41,9 @@ export const FEATURES = {
 export const ENDPOINTS = {
   // Authentication
   AUTH: {
-    LOGIN: '/api/auth/login',
-    REGISTER: '/api/auth/register',
-    REFRESH: '/api/auth/refresh',
+    LOGIN: '/api/auth/mobile/login',
+    REGISTER: '/api/auth/mobile/register',
+    REFRESH: '/api/auth/mobile/refresh',
     LOGOUT: '/api/auth/logout',
     SESSION: '/api/auth/sessions',
   },
