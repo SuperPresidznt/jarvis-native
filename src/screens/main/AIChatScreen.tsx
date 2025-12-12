@@ -1,6 +1,7 @@
 /**
  * AI Chat Screen
  * Primary interface for interacting with the AI assistant
+ * PRODUCTION-READY with proper safe areas and typography
  */
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -11,6 +12,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  TextInput as RNTextInput,
 } from 'react-native';
 import {
   TextInput,
@@ -20,9 +22,11 @@ import {
   ActivityIndicator,
   FAB,
 } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Speech from 'expo-speech';
 import { ChatMessage } from '../../types';
 import { aiApi } from '../../services/ai.api';
+import { colors, typography, spacing, borderRadius, textStyles, shadows } from '../../theme';
 
 export default function AIChatScreen() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -30,6 +34,7 @@ export default function AIChatScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState<string | undefined>();
   const flatListRef = useRef<FlatList>(null);
+  const insets = useSafeAreaInsets();
 
   const handleSend = async () => {
     if (!inputText.trim() || isLoading) return;
@@ -94,7 +99,7 @@ export default function AIChatScreen() {
             isUser ? styles.userMessageCard : styles.assistantMessageCard,
           ]}
         >
-          <Card.Content>
+          <Card.Content style={styles.messageContent}>
             <Text
               variant="bodyMedium"
               style={isUser ? styles.userMessageText : styles.assistantMessageText}
@@ -106,8 +111,10 @@ export default function AIChatScreen() {
               <View style={styles.messageActions}>
                 <IconButton
                   icon="volume-high"
-                  size={16}
+                  size={18}
+                  iconColor={colors.text.tertiary}
                   onPress={() => speakMessage(item.content)}
+                  style={styles.actionButton}
                 />
               </View>
             )}
@@ -125,8 +132,8 @@ export default function AIChatScreen() {
     >
       <View style={styles.container}>
         {messages.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <Text variant="headlineMedium" style={styles.emptyTitle}>
+          <View style={[styles.emptyContainer, { paddingTop: insets.top + spacing['4xl'] }]}>
+            <Text variant="displaySmall" style={styles.emptyTitle}>
               Hi, I'm Jarvis
             </Text>
             <Text variant="bodyLarge" style={styles.emptySubtitle}>
@@ -162,41 +169,46 @@ export default function AIChatScreen() {
             data={messages}
             renderItem={renderMessage}
             keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.messageList}
+            contentContainerStyle={[styles.messageList, { paddingBottom: spacing.lg }]}
             onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
           />
         )}
 
-        <View style={styles.inputContainer}>
-          <TextInput
-            mode="outlined"
-            placeholder="Ask Jarvis anything..."
-            value={inputText}
-            onChangeText={setInputText}
-            multiline
-            maxLength={1000}
-            disabled={isLoading}
-            style={styles.input}
-            right={
-              <TextInput.Icon
-                icon="send"
-                onPress={handleSend}
-                disabled={!inputText.trim() || isLoading}
-              />
-            }
-            left={
-              <TextInput.Icon
-                icon="microphone"
-                onPress={handleVoiceInput}
-                disabled={isLoading}
-              />
-            }
-          />
+        <View style={[styles.inputContainer, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}>
+          <View style={styles.inputWrapper}>
+            <IconButton
+              icon="microphone"
+              onPress={handleVoiceInput}
+              disabled={isLoading}
+              iconColor={colors.text.tertiary}
+              size={22}
+              style={styles.iconButton}
+            />
+            <RNTextInput
+              placeholder="Ask Jarvis anything..."
+              placeholderTextColor={colors.text.placeholder}
+              value={inputText}
+              onChangeText={setInputText}
+              multiline
+              maxLength={1000}
+              editable={!isLoading}
+              style={styles.input}
+              onSubmitEditing={handleSend}
+            />
+            <IconButton
+              icon="send"
+              onPress={handleSend}
+              disabled={!inputText.trim() || isLoading}
+              iconColor={inputText.trim() && !isLoading ? colors.accent.primary : colors.text.disabled}
+              size={22}
+              style={styles.iconButton}
+            />
+          </View>
         </View>
 
         {isLoading && (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="small" />
+            <ActivityIndicator size="small" color={colors.accent.primary} />
             <Text variant="bodySmall" style={styles.loadingText}>
               Jarvis is thinking...
             </Text>
@@ -210,54 +222,51 @@ export default function AIChatScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.background.primary,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 32,
+    padding: spacing['3xl'],
   },
   emptyTitle: {
-    fontWeight: '700',
-    color: '#007AFF',
-    marginBottom: 12,
-    fontSize: 32,
+    ...textStyles.h1,
+    color: colors.accent.primary,
+    marginBottom: spacing.md,
   },
   emptySubtitle: {
-    color: '#8E8E93',
-    marginBottom: 32,
-    fontSize: 16,
+    ...textStyles.bodySecondary,
+    fontSize: typography.size.md,
+    marginBottom: spacing['3xl'],
   },
   emptyText: {
-    color: '#000000',
-    marginBottom: 20,
-    fontSize: 16,
-    fontWeight: '600',
+    ...textStyles.body,
+    fontWeight: typography.weight.semibold,
+    marginBottom: spacing.lg,
   },
   featureList: {
     alignSelf: 'stretch',
-    marginBottom: 32,
-    paddingHorizontal: 8,
+    marginBottom: spacing['3xl'],
+    paddingHorizontal: spacing.sm,
   },
   featureItem: {
-    color: '#3C3C43',
-    marginBottom: 12,
-    fontSize: 15,
-    lineHeight: 22,
+    ...textStyles.bodySecondary,
+    fontSize: typography.size.base,
+    marginBottom: spacing.md,
+    lineHeight: typography.size.base * typography.lineHeight.relaxed,
   },
   emptyPrompt: {
-    color: '#8E8E93',
+    ...textStyles.bodySecondary,
     fontStyle: 'italic',
-    fontSize: 15,
   },
   messageList: {
-    padding: 20,
-    paddingBottom: 8,
+    padding: spacing.lg,
+    paddingTop: spacing.base,
   },
   messageContainer: {
-    marginBottom: 16,
-    maxWidth: '82%',
+    marginBottom: spacing.base,
+    maxWidth: '85%',
   },
   userMessageContainer: {
     alignSelf: 'flex-end',
@@ -266,62 +275,78 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   messageCard: {
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    borderRadius: 16,
+    borderRadius: borderRadius.xl,
+    ...shadows.sm,
   },
   userMessageCard: {
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.accent.primary,
   },
   assistantMessageCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background.secondary,
+  },
+  messageContent: {
+    padding: spacing.sm,
   },
   userMessageText: {
     color: '#FFFFFF',
-    fontSize: 15,
-    lineHeight: 22,
+    fontSize: typography.size.base,
+    lineHeight: typography.size.base * typography.lineHeight.relaxed,
+    fontWeight: typography.weight.regular,
   },
   assistantMessageText: {
-    color: '#000000',
-    fontSize: 15,
-    lineHeight: 22,
+    ...textStyles.body,
+    lineHeight: typography.size.base * typography.lineHeight.relaxed,
   },
   messageActions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    marginTop: 4,
+    marginTop: spacing.xs,
+  },
+  actionButton: {
+    margin: 0,
   },
   inputContainer: {
-    padding: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background.secondary,
     borderTopWidth: 1,
-    borderTopColor: '#E5E5EA',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    borderTopColor: colors.border.default,
+    paddingHorizontal: spacing.base,
+    paddingTop: spacing.md,
+    ...shadows.md,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.xl,
+    borderWidth: 1.5,
+    borderColor: colors.border.default,
+    paddingHorizontal: spacing.xs,
   },
   input: {
+    flex: 1,
     maxHeight: 120,
-    backgroundColor: '#F9F9F9',
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.sm,
+    color: colors.text.primary,
+    fontSize: typography.size.base,
+    lineHeight: typography.size.base * typography.lineHeight.relaxed,
+    fontWeight: typography.weight.regular,
+  },
+  iconButton: {
+    margin: 0,
   },
   loadingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 12,
-    backgroundColor: '#F9F9F9',
-    marginHorizontal: 16,
-    marginBottom: 8,
-    borderRadius: 12,
+    padding: spacing.md,
+    backgroundColor: colors.background.secondary,
+    marginHorizontal: spacing.base,
+    marginBottom: spacing.sm,
+    borderRadius: borderRadius.md,
   },
   loadingText: {
-    marginLeft: 12,
-    color: '#8E8E93',
-    fontSize: 14,
+    ...textStyles.caption,
+    marginLeft: spacing.md,
   },
 });

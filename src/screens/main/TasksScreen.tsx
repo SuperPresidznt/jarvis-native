@@ -12,6 +12,8 @@ import {
   Modal,
   TextInput,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import {
   Card,
@@ -24,7 +26,9 @@ import {
   Checkbox,
 } from 'react-native-paper';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { tasksApi } from '../../services/tasks.api';
+import { colors, typography, spacing, borderRadius, textStyles, cardStyle, inputStyle, shadows } from '../../theme';
 
 type ViewMode = 'list' | 'kanban' | 'matrix';
 type TaskStatus = 'todo' | 'in_progress' | 'blocked' | 'completed' | 'cancelled';
@@ -63,6 +67,7 @@ export default function TasksScreen() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [filterStatus, setFilterStatus] = useState<TaskStatus | 'all'>('all');
+  const insets = useSafeAreaInsets();
 
   // Fetch tasks
   const { data: tasks = [], isLoading } = useQuery({
@@ -471,6 +476,7 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
   onClose,
 }) => {
   const queryClient = useQueryClient();
+  const insets = useSafeAreaInsets();
   const [title, setTitle] = useState(task?.title || '');
   const [description, setDescription] = useState(task?.description || '');
   const [priority, setPriority] = useState<TaskPriority>(task?.priority || 'medium');
@@ -509,79 +515,86 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <View style={styles.modalHeader}>
-            <Text variant="headlineSmall" style={styles.modalTitle}>
-              {task ? 'Edit Task' : 'New Task'}
-            </Text>
-            <IconButton icon="close" onPress={onClose} />
-          </View>
-
-          <ScrollView style={styles.modalBody}>
-            <View style={styles.formGroup}>
-              <Text variant="labelMedium" style={styles.label}>
-                Title
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.modalOverlay}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { paddingBottom: Math.max(insets.bottom, spacing.base) }]}>
+            <View style={styles.modalHeader}>
+              <Text variant="headlineSmall" style={styles.modalTitle}>
+                {task ? 'Edit Task' : 'New Task'}
               </Text>
-              <TextInput
-                value={title}
-                onChangeText={setTitle}
-                placeholder="Task title..."
-                placeholderTextColor="#64748B"
-                style={styles.input}
-              />
+              <IconButton icon="close" onPress={onClose} iconColor={colors.text.secondary} />
             </View>
 
-            <View style={styles.formGroup}>
-              <Text variant="labelMedium" style={styles.label}>
-                Description
-              </Text>
-              <TextInput
-                value={description}
-                onChangeText={setDescription}
-                placeholder="Task description..."
-                placeholderTextColor="#64748B"
-                style={[styles.input, styles.textArea]}
-                multiline
-                numberOfLines={4}
-              />
-            </View>
-
-            <View style={styles.formGroup}>
-              <Text variant="labelMedium" style={styles.label}>
-                Priority
-              </Text>
-              <View style={styles.priorityButtons}>
-                {(['low', 'medium', 'high', 'urgent'] as TaskPriority[]).map((p) => (
-                  <Chip
-                    key={p}
-                    selected={priority === p}
-                    onPress={() => setPriority(p)}
-                    style={styles.priorityOption}
-                  >
-                    {p.toUpperCase()}
-                  </Chip>
-                ))}
+            <ScrollView style={styles.modalBody} keyboardShouldPersistTaps="handled">
+              <View style={styles.formGroup}>
+                <Text variant="labelMedium" style={styles.label}>
+                  Title
+                </Text>
+                <TextInput
+                  value={title}
+                  onChangeText={setTitle}
+                  placeholder="Task title..."
+                  placeholderTextColor={colors.text.placeholder}
+                  style={styles.input}
+                />
               </View>
-            </View>
-          </ScrollView>
 
-          <View style={styles.modalFooter}>
-            <Button mode="outlined" onPress={onClose} style={styles.modalButton}>
-              Cancel
-            </Button>
-            <Button
-              mode="contained"
-              onPress={handleSubmit}
-              loading={createMutation.isPending || updateMutation.isPending}
-              disabled={!title.trim()}
-              style={styles.modalButton}
-            >
-              {task ? 'Update' : 'Create'}
-            </Button>
+              <View style={styles.formGroup}>
+                <Text variant="labelMedium" style={styles.label}>
+                  Description
+                </Text>
+                <TextInput
+                  value={description}
+                  onChangeText={setDescription}
+                  placeholder="Task description..."
+                  placeholderTextColor={colors.text.placeholder}
+                  style={[styles.input, styles.textArea]}
+                  multiline
+                  numberOfLines={4}
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text variant="labelMedium" style={styles.label}>
+                  Priority
+                </Text>
+                <View style={styles.priorityButtons}>
+                  {(['low', 'medium', 'high', 'urgent'] as TaskPriority[]).map((p) => (
+                    <Chip
+                      key={p}
+                      selected={priority === p}
+                      onPress={() => setPriority(p)}
+                      style={styles.priorityOption}
+                      textStyle={{ fontWeight: typography.weight.semibold }}
+                    >
+                      {p.toUpperCase()}
+                    </Chip>
+                  ))}
+                </View>
+              </View>
+            </ScrollView>
+
+            <View style={styles.modalFooter}>
+              <Button mode="outlined" onPress={onClose} style={styles.modalButton} textColor={colors.text.secondary}>
+                Cancel
+              </Button>
+              <Button
+                mode="contained"
+                onPress={handleSubmit}
+                loading={createMutation.isPending || updateMutation.isPending}
+                disabled={!title.trim()}
+                style={styles.modalButton}
+                buttonColor={colors.accent.primary}
+              >
+                {task ? 'Update' : 'Create'}
+              </Button>
+            </View>
           </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };
@@ -589,47 +602,46 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: colors.background.primary,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#0F172A',
+    backgroundColor: colors.background.primary,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
-    paddingTop: 12,
+    padding: spacing.lg,
+    paddingTop: spacing.md,
   },
   title: {
-    color: '#FFFFFF',
-    fontWeight: '700',
+    ...textStyles.h2,
   },
   createButton: {
-    backgroundColor: '#10B981',
+    backgroundColor: colors.accent.primary,
   },
   viewSelector: {
-    marginHorizontal: 20,
-    marginBottom: 12,
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.md,
   },
   filterRow: {
     flexDirection: 'row',
-    gap: 10,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    gap: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
   },
   filterChip: {
-    backgroundColor: '#1E293B',
+    backgroundColor: colors.background.secondary,
   },
   content: {
     flex: 1,
   },
   listView: {
-    padding: 20,
-    gap: 14,
+    padding: spacing.lg,
+    gap: spacing.md,
   },
   kanbanView: {
     flexDirection: 'row',
@@ -679,17 +691,11 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   taskCard: {
-    backgroundColor: '#1E293B',
-    marginBottom: 14,
-    borderRadius: 14,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
+    ...cardStyle,
+    marginBottom: spacing.md,
   },
   taskCardCompact: {
-    marginBottom: 10,
+    marginBottom: spacing.sm,
   },
   taskHeader: {
     flexDirection: 'row',
@@ -697,18 +703,21 @@ const styles = StyleSheet.create({
   },
   taskInfo: {
     flex: 1,
-    marginLeft: 8,
+    marginLeft: spacing.sm,
   },
   taskTitle: {
-    color: '#FFFFFF',
+    ...textStyles.body,
+    fontWeight: typography.weight.semibold,
   },
   taskTitleCompleted: {
     textDecorationLine: 'line-through',
-    color: '#64748B',
+    color: colors.text.disabled,
   },
   taskDescription: {
-    color: '#94A3B8',
-    marginTop: 4,
+    ...textStyles.bodySecondary,
+    fontSize: typography.size.sm,
+    marginTop: spacing.xs,
+    lineHeight: typography.size.sm * typography.lineHeight.relaxed,
   },
   taskMeta: {
     flexDirection: 'row',
@@ -735,88 +744,84 @@ const styles = StyleSheet.create({
   emptyState: {
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 48,
-    marginTop: 40,
+    padding: spacing['5xl'],
+    marginTop: spacing['4xl'],
   },
   emptyIcon: {
     fontSize: 64,
-    marginBottom: 20,
+    marginBottom: spacing.lg,
   },
   emptyText: {
-    color: '#FFFFFF',
-    marginBottom: 12,
-    fontWeight: '600',
+    ...textStyles.h3,
+    marginBottom: spacing.md,
   },
   emptySubtext: {
-    color: '#94A3B8',
+    ...textStyles.bodySecondary,
     textAlign: 'center',
-    marginBottom: 24,
-    lineHeight: 22,
+    marginBottom: spacing.xl,
+    lineHeight: typography.size.base * typography.lineHeight.relaxed,
   },
   emptyButton: {
-    backgroundColor: '#10B981',
-    paddingHorizontal: 16,
+    backgroundColor: colors.accent.primary,
+    paddingHorizontal: spacing.base,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#1E293B',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    backgroundColor: colors.background.secondary,
+    borderTopLeftRadius: borderRadius['2xl'],
+    borderTopRightRadius: borderRadius['2xl'],
     maxHeight: '90%',
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    padding: spacing.base,
     borderBottomWidth: 1,
-    borderBottomColor: '#334155',
+    borderBottomColor: colors.border.default,
   },
   modalTitle: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
+    ...textStyles.h3,
   },
   modalBody: {
-    padding: 16,
+    padding: spacing.base,
   },
   formGroup: {
-    marginBottom: 20,
+    marginBottom: spacing.lg,
   },
   label: {
-    color: '#94A3B8',
-    marginBottom: 8,
+    ...textStyles.label,
+    fontSize: typography.size.sm,
+    marginBottom: spacing.sm,
   },
   input: {
-    backgroundColor: '#0F172A',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#334155',
-    padding: 12,
-    color: '#FFFFFF',
-    fontSize: 14,
+    ...inputStyle,
+    fontSize: typography.size.base,
+    lineHeight: typography.size.base * typography.lineHeight.normal,
   },
   textArea: {
     textAlignVertical: 'top',
     minHeight: 100,
+    lineHeight: typography.size.base * typography.lineHeight.relaxed,
   },
   priorityButtons: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: spacing.sm,
   },
   priorityOption: {
-    backgroundColor: '#334155',
+    backgroundColor: colors.background.tertiary,
   },
   modalFooter: {
     flexDirection: 'row',
-    gap: 12,
-    padding: 16,
+    gap: spacing.md,
+    padding: spacing.base,
     borderTopWidth: 1,
-    borderTopColor: '#334155',
+    borderTopColor: colors.border.default,
   },
   modalButton: {
     flex: 1,

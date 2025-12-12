@@ -7,13 +7,16 @@ import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, RefreshControl, TextInput } from 'react-native';
 import { Card, Text, Button, ActivityIndicator } from 'react-native-paper';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { dashboardApi } from '../../services/dashboard.api';
 import { MetricCard } from '../../components/MetricCard';
 import { StartControls } from '../../components/StartControls';
+import { colors, typography, spacing, borderRadius, textStyles, cardStyle, inputStyle } from '../../theme';
 
 export default function DashboardScreen() {
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
+  const insets = useSafeAreaInsets();
 
   // Fetch today's metrics
   const { data: metrics, isLoading: metricsLoading } = useQuery({
@@ -72,15 +75,16 @@ export default function DashboardScreen() {
   return (
     <ScrollView
       style={styles.container}
+      contentContainerStyle={[styles.contentContainer, { paddingBottom: insets.bottom + spacing.xl }]}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          tintColor="#10B981"
+          tintColor={colors.accent.primary}
         />
       }
     >
-      <View style={styles.content}>
+      <View style={[styles.content, { paddingTop: insets.top + spacing.sm }]}>
         {/* Header */}
         <View style={styles.header}>
           <Text variant="labelSmall" style={styles.todayLabel}>
@@ -191,7 +195,7 @@ const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
               value={value}
               onChangeText={setValue}
               placeholder={placeholder}
-              placeholderTextColor="#64748B"
+              placeholderTextColor={colors.text.placeholder}
               style={styles.quickCaptureInput}
               multiline
               numberOfLines={3}
@@ -204,7 +208,7 @@ const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
                   setValue('');
                   setIsExpanded(false);
                 }}
-                textColor="#64748B"
+                textColor={colors.text.tertiary}
               >
                 Cancel
               </Button>
@@ -235,96 +239,79 @@ const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: colors.background.primary,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#0F172A',
+    backgroundColor: colors.background.primary,
+  },
+  contentContainer: {
+    flexGrow: 1,
   },
   content: {
-    padding: 20,
-    gap: 28,
-    paddingBottom: 40,
+    padding: spacing.lg,
+    gap: spacing['2xl'],
   },
   header: {
-    gap: 6,
-    paddingTop: 8,
+    gap: spacing.xs,
   },
   todayLabel: {
-    color: '#64748B',
-    letterSpacing: 3,
-    fontWeight: '600',
+    ...textStyles.label,
+    color: colors.text.disabled,
+    letterSpacing: typography.letterSpacing.widest,
   },
   dateText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-    marginTop: 4,
+    ...textStyles.h2,
+    marginTop: spacing.xs,
   },
   greeting: {
-    color: '#94A3B8',
-    marginTop: 2,
+    ...textStyles.bodySecondary,
+    fontSize: typography.size.md,
+    marginTop: spacing.xs,
   },
   metricsGrid: {
-    gap: 14,
+    gap: spacing.md,
   },
   controlsCard: {
-    backgroundColor: '#1E293B',
-    borderRadius: 16,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
+    ...cardStyle,
+    borderRadius: borderRadius.xl,
   },
   quickCaptureSection: {
-    gap: 14,
+    gap: spacing.md,
   },
   sectionTitle: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-    fontSize: 18,
+    ...textStyles.h4,
   },
   quickCaptureGrid: {
-    gap: 14,
+    gap: spacing.md,
   },
   quickCaptureCard: {
-    backgroundColor: '#1E293B',
-    borderRadius: 14,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
+    ...cardStyle,
   },
   quickCaptureTitle: {
-    color: '#FFFFFF',
-    marginBottom: 12,
-    fontWeight: '600',
+    ...textStyles.h4,
+    fontSize: typography.size.md,
+    marginBottom: spacing.md,
   },
   quickCaptureInput: {
-    backgroundColor: '#0F172A',
-    borderRadius: 10,
-    borderWidth: 1.5,
-    borderColor: '#334155',
-    padding: 14,
-    color: '#FFFFFF',
-    fontSize: 15,
-    marginBottom: 12,
+    ...inputStyle,
     textAlignVertical: 'top',
     minHeight: 90,
+    marginBottom: spacing.md,
+    lineHeight: typography.size.base * typography.lineHeight.relaxed,
   },
   quickCaptureButtons: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    gap: 10,
+    gap: spacing.sm,
   },
   submitButton: {
-    backgroundColor: '#10B981',
+    backgroundColor: colors.accent.primary,
   },
   expandButton: {
-    borderColor: '#475569',
+    borderColor: colors.border.default,
     borderWidth: 1.5,
   },
 });
