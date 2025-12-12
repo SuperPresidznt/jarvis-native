@@ -1,15 +1,22 @@
 /**
  * Main Navigator
- * Bottom tab navigation for authenticated users
+ * Professional dark-themed bottom tab navigation
  */
 
 import React from 'react';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MainTabParamList } from '../types';
+import {
+  colors,
+  typography,
+  spacing,
+  borderRadius,
+  shadows,
+} from '../theme';
 
-// Icons from react-native-paper
+// Icons (using simple text for now - in production use react-native-vector-icons)
 import { IconButton } from 'react-native-paper';
 
 // Screens
@@ -23,6 +30,24 @@ import SettingsScreen from '../screens/main/SettingsScreen';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
+// Tab bar icon component
+interface TabIconProps {
+  icon: string;
+  focused: boolean;
+}
+
+const TabIcon: React.FC<TabIconProps> = ({ icon, focused }) => (
+  <View style={[styles.iconContainer, focused && styles.iconContainerFocused]}>
+    <IconButton
+      icon={icon}
+      iconColor={focused ? colors.primary.main : colors.text.tertiary}
+      size={22}
+      style={styles.iconButton}
+    />
+    {focused && <View style={styles.focusIndicator} />}
+  </View>
+);
+
 export default function MainNavigator() {
   const insets = useSafeAreaInsets();
 
@@ -30,37 +55,46 @@ export default function MainNavigator() {
     <Tab.Navigator
       screenOptions={{
         headerShown: true,
-        tabBarActiveTintColor: '#007AFF',
-        tabBarInactiveTintColor: '#8E8E93',
+        tabBarActiveTintColor: colors.primary.main,
+        tabBarInactiveTintColor: colors.text.tertiary,
         tabBarStyle: {
-          backgroundColor: '#FFFFFF',
-          borderTopColor: '#E5E5EA',
+          backgroundColor: colors.background.secondary,
+          borderTopColor: colors.border.subtle,
           borderTopWidth: 1,
           paddingBottom: Math.max(insets.bottom, 8),
           paddingTop: 8,
           height: 60 + Math.max(insets.bottom, 0),
+          ...shadows.sm,
+        },
+        tabBarLabelStyle: {
+          fontSize: typography.size.xs,
+          fontWeight: typography.weight.medium,
+          marginTop: -4,
         },
         headerStyle: {
-          backgroundColor: '#FFFFFF',
+          backgroundColor: colors.background.primary,
           elevation: 0,
           shadowOpacity: 0,
           borderBottomWidth: 1,
-          borderBottomColor: '#E5E5EA',
+          borderBottomColor: colors.border.subtle,
         },
         headerTitleStyle: {
-          fontSize: 20,
-          fontWeight: '600',
+          fontSize: typography.size.lg,
+          fontWeight: typography.weight.semibold,
+          color: colors.text.primary,
         },
+        headerTintColor: colors.text.primary,
       }}
     >
       <Tab.Screen
         name="Dashboard"
         component={DashboardScreen}
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <IconButton icon="view-dashboard" iconColor={color} size={size} />
+          tabBarIcon: ({ focused }) => (
+            <TabIcon icon="view-dashboard" focused={focused} />
           ),
           tabBarLabel: 'Home',
+          headerShown: false, // Dashboard has its own header
         }}
       />
 
@@ -68,8 +102,8 @@ export default function MainNavigator() {
         name="AIChat"
         component={AIChatScreen}
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <IconButton icon="robot" iconColor={color} size={size} />
+          tabBarIcon: ({ focused }) => (
+            <TabIcon icon="robot" focused={focused} />
           ),
           tabBarLabel: 'AI',
           title: 'AI Assistant',
@@ -80,10 +114,11 @@ export default function MainNavigator() {
         name="Tasks"
         component={TasksScreen}
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <IconButton icon="checkbox-marked-circle-outline" iconColor={color} size={size} />
+          tabBarIcon: ({ focused }) => (
+            <TabIcon icon="checkbox-marked-circle-outline" focused={focused} />
           ),
           tabBarLabel: 'Tasks',
+          headerShown: false, // Tasks has its own header
         }}
       />
 
@@ -91,10 +126,11 @@ export default function MainNavigator() {
         name="Habits"
         component={HabitsScreen}
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <IconButton icon="chart-line" iconColor={color} size={size} />
+          tabBarIcon: ({ focused }) => (
+            <TabIcon icon="chart-line" focused={focused} />
           ),
           tabBarLabel: 'Habits',
+          headerShown: false, // Habits has its own header
         }}
       />
 
@@ -102,10 +138,11 @@ export default function MainNavigator() {
         name="Calendar"
         component={CalendarScreen}
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <IconButton icon="calendar" iconColor={color} size={size} />
+          tabBarIcon: ({ focused }) => (
+            <TabIcon icon="calendar" focused={focused} />
           ),
           tabBarLabel: 'Calendar',
+          headerShown: false, // Calendar has its own header
         }}
       />
 
@@ -113,10 +150,11 @@ export default function MainNavigator() {
         name="Finance"
         component={FinanceScreen}
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <IconButton icon="wallet" iconColor={color} size={size} />
+          tabBarIcon: ({ focused }) => (
+            <TabIcon icon="wallet" focused={focused} />
           ),
           tabBarLabel: 'Finance',
+          headerShown: false, // Finance has its own header
         }}
       />
 
@@ -124,12 +162,36 @@ export default function MainNavigator() {
         name="Settings"
         component={SettingsScreen}
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <IconButton icon="cog" iconColor={color} size={size} />
+          tabBarIcon: ({ focused }) => (
+            <TabIcon icon="cog" focused={focused} />
           ),
           tabBarLabel: 'Settings',
+          title: 'Settings',
         }}
       />
     </Tab.Navigator>
   );
 }
+
+const styles = StyleSheet.create({
+  iconContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  iconContainerFocused: {
+    // Optional: add slight background when focused
+  },
+  iconButton: {
+    margin: 0,
+    padding: 0,
+  },
+  focusIndicator: {
+    position: 'absolute',
+    bottom: -8,
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.primary.main,
+  },
+});

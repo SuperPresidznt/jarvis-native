@@ -1,17 +1,34 @@
 /**
  * Dashboard Screen
- * Overview of daily metrics, start controls, and quick capture
+ * Beautiful, polished overview of daily metrics and quick actions
  */
 
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, RefreshControl, TextInput } from 'react-native';
-import { Card, Text, Button, ActivityIndicator } from 'react-native-paper';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  RefreshControl,
+  TextInput,
+  Text,
+  TouchableOpacity,
+  Animated,
+} from 'react-native';
+import { ActivityIndicator } from 'react-native-paper';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { dashboardApi } from '../../services/dashboard.api';
 import { MetricCard } from '../../components/MetricCard';
 import { StartControls } from '../../components/StartControls';
-import { colors, typography, spacing, borderRadius, textStyles, cardStyle, inputStyle } from '../../theme';
+import { AppCard, AppButton, EmptyState, LoadingState } from '../../components/ui';
+import {
+  colors,
+  typography,
+  spacing,
+  borderRadius,
+  shadows,
+  textStyles,
+} from '../../theme';
 
 export default function DashboardScreen() {
   const queryClient = useQueryClient();
@@ -22,7 +39,7 @@ export default function DashboardScreen() {
   const { data: metrics, isLoading: metricsLoading } = useQuery({
     queryKey: ['metrics', 'today'],
     queryFn: dashboardApi.getTodayMetrics,
-    refetchInterval: 60000, // Refresh every minute
+    refetchInterval: 60000,
   });
 
   // Fetch macro goals
@@ -41,119 +58,117 @@ export default function DashboardScreen() {
   };
 
   const formatCash = (value: number | null, currency: string) => {
-    if (value == null) return '—';
+    if (value == null) return '--';
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency || 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(value / 100);
   };
 
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Good Morning';
-    if (hour < 18) return 'Good Afternoon';
-    return 'Good Evening';
+    if (hour < 12) return 'Good morning';
+    if (hour < 18) return 'Good afternoon';
+    return 'Good evening';
   };
 
   const getFormattedDate = () => {
     const now = new Date();
     return now.toLocaleDateString('en-US', {
       weekday: 'long',
-      month: 'short',
+      month: 'long',
       day: 'numeric',
     });
   };
 
   if (metricsLoading && !metrics) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#10B981" />
-      </View>
-    );
+    return <LoadingState fullScreen message="Loading your dashboard..." />;
   }
 
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={[styles.contentContainer, { paddingBottom: insets.bottom + spacing.xl }]}
+      contentContainerStyle={[
+        styles.contentContainer,
+        { paddingBottom: insets.bottom + spacing['3xl'] },
+      ]}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          tintColor={colors.accent.primary}
+          tintColor={colors.primary.main}
+          colors={[colors.primary.main]}
         />
       }
+      showsVerticalScrollIndicator={false}
     >
-      <View style={[styles.content, { paddingTop: insets.top + spacing.sm }]}>
-        {/* Header */}
+      <View style={[styles.content, { paddingTop: insets.top + spacing.base }]}>
+        {/* Header Section */}
         <View style={styles.header}>
-          <Text variant="labelSmall" style={styles.todayLabel}>
-            TODAY
-          </Text>
-          <Text variant="headlineLarge" style={styles.dateText}>
-            {getFormattedDate()}
-          </Text>
-          <Text variant="titleMedium" style={styles.greeting}>
-            {getGreeting()}
-          </Text>
+          <Text style={styles.dateLabel}>TODAY</Text>
+          <Text style={styles.dateText}>{getFormattedDate()}</Text>
+          <Text style={styles.greeting}>{getGreeting()}</Text>
         </View>
 
-        {/* Today's Metrics */}
+        {/* Metrics Grid */}
         {metrics && (
-          <View style={styles.metricsGrid}>
-            <MetricCard
-              label="Starts today"
-              value={metrics.starts}
-              helper={
-                metrics.starts >= 3
-                  ? 'Great momentum!'
-                  : 'Micro-starts fuel progress'
-              }
-              variant={metrics.starts >= 3 ? 'success' : 'default'}
-            />
-            <MetricCard
-              label="Study minutes"
-              value={metrics.studyMinutes}
-              helper="Daily learning time"
-            />
-            <MetricCard
-              label="Cash on hand"
-              value={formatCash(metrics.cash, metrics.currency)}
-              helper={`Latest snapshot (${metrics.currency})`}
-            />
+          <View style={styles.metricsSection}>
+            <Text style={styles.sectionLabel}>YOUR PROGRESS</Text>
+            <View style={styles.metricsGrid}>
+              <MetricCard
+                label="Starts today"
+                value={metrics.starts}
+                helper={
+                  metrics.starts >= 3
+                    ? 'Great momentum!'
+                    : 'Micro-starts fuel progress'
+                }
+                variant={metrics.starts >= 3 ? 'success' : 'default'}
+              />
+              <MetricCard
+                label="Study minutes"
+                value={metrics.studyMinutes}
+                helper="Daily learning time"
+                variant="info"
+              />
+              <MetricCard
+                label="Cash on hand"
+                value={formatCash(metrics.cash, metrics.currency)}
+                helper={`Latest snapshot`}
+                variant="success"
+              />
+            </View>
           </View>
         )}
 
-        {/* Start Controls */}
-        <Card style={styles.controlsCard}>
-          <Card.Content>
-            <StartControls
-              macroGoals={macroGoals}
-              defaultDuration={10}
-            />
-          </Card.Content>
-        </Card>
+        {/* Start Controls Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>QUICK START</Text>
+          <AppCard variant="elevated">
+            <StartControls macroGoals={macroGoals} defaultDuration={10} />
+          </AppCard>
+        </View>
 
-        {/* Quick Capture */}
-        <View style={styles.quickCaptureSection}>
-          <Text variant="titleMedium" style={styles.sectionTitle}>
-            Quick capture
-          </Text>
+        {/* Quick Capture Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>QUICK CAPTURE</Text>
           <View style={styles.quickCaptureGrid}>
             <QuickCaptureCard
               title="Idea"
               placeholder="Capture an idea..."
-              icon="lightbulb-outline"
+              emoji="💡"
             />
             <QuickCaptureCard
               title="Study"
               placeholder="Log study session..."
-              icon="book-outline"
+              emoji="📚"
             />
             <QuickCaptureCard
               title="Cash"
               placeholder="Record cash snapshot..."
-              icon="cash"
+              emoji="💰"
             />
           </View>
         </View>
@@ -165,74 +180,87 @@ export default function DashboardScreen() {
 interface QuickCaptureCardProps {
   title: string;
   placeholder: string;
-  icon: string;
+  emoji: string;
 }
 
 const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
   title,
   placeholder,
-  icon,
+  emoji,
 }) => {
   const [value, setValue] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
 
   const handleSubmit = () => {
-    // TODO: Implement quick capture API calls
     console.log(`Quick capture ${title}:`, value);
     setValue('');
     setIsExpanded(false);
   };
 
   return (
-    <Card style={styles.quickCaptureCard}>
-      <Card.Content>
-        <Text variant="titleSmall" style={styles.quickCaptureTitle}>
-          {title}
-        </Text>
-        {isExpanded ? (
-          <>
-            <TextInput
-              value={value}
-              onChangeText={setValue}
-              placeholder={placeholder}
-              placeholderTextColor={colors.text.placeholder}
-              style={styles.quickCaptureInput}
-              multiline
-              numberOfLines={3}
-              autoFocus
-            />
-            <View style={styles.quickCaptureButtons}>
-              <Button
-                mode="text"
-                onPress={() => {
-                  setValue('');
-                  setIsExpanded(false);
-                }}
-                textColor={colors.text.tertiary}
-              >
-                Cancel
-              </Button>
-              <Button
-                mode="contained"
-                onPress={handleSubmit}
-                disabled={!value.trim()}
-                style={styles.submitButton}
+    <View style={[styles.quickCaptureCard, isExpanded && styles.quickCaptureCardExpanded]}>
+      <View style={styles.quickCaptureHeader}>
+        <Text style={styles.quickCaptureEmoji}>{emoji}</Text>
+        <Text style={styles.quickCaptureTitle}>{title}</Text>
+      </View>
+
+      {isExpanded ? (
+        <View style={styles.quickCaptureForm}>
+          <TextInput
+            value={value}
+            onChangeText={setValue}
+            placeholder={placeholder}
+            placeholderTextColor={colors.text.placeholder}
+            style={[
+              styles.quickCaptureInput,
+              isFocused && styles.quickCaptureInputFocused,
+            ]}
+            multiline
+            numberOfLines={3}
+            autoFocus
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+          />
+          <View style={styles.quickCaptureButtons}>
+            <TouchableOpacity
+              onPress={() => {
+                setValue('');
+                setIsExpanded(false);
+              }}
+              style={styles.cancelButton}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleSubmit}
+              disabled={!value.trim()}
+              style={[
+                styles.saveButton,
+                !value.trim() && styles.saveButtonDisabled,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.saveButtonText,
+                  !value.trim() && styles.saveButtonTextDisabled,
+                ]}
               >
                 Save
-              </Button>
-            </View>
-          </>
-        ) : (
-          <Button
-            mode="outlined"
-            onPress={() => setIsExpanded(true)}
-            style={styles.expandButton}
-          >
-            Add {title}
-          </Button>
-        )}
-      </Card.Content>
-    </Card>
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      ) : (
+        <TouchableOpacity
+          onPress={() => setIsExpanded(true)}
+          style={styles.expandButton}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.expandButtonText}>+ Add {title}</Text>
+        </TouchableOpacity>
+      )}
+    </View>
   );
 };
 
@@ -241,77 +269,144 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background.primary,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.background.primary,
-  },
   contentContainer: {
     flexGrow: 1,
   },
   content: {
-    padding: spacing.lg,
-    gap: spacing['2xl'],
+    paddingHorizontal: spacing.lg,
   },
+  // Header styles
   header: {
-    gap: spacing.xs,
+    marginBottom: spacing['2xl'],
   },
-  todayLabel: {
-    ...textStyles.label,
-    color: colors.text.disabled,
+  dateLabel: {
+    fontSize: typography.size.xs,
+    fontWeight: typography.weight.semibold,
+    color: colors.primary.main,
     letterSpacing: typography.letterSpacing.widest,
+    marginBottom: spacing.xs,
   },
   dateText: {
-    ...textStyles.h2,
-    marginTop: spacing.xs,
+    fontSize: typography.size['3xl'],
+    fontWeight: typography.weight.bold,
+    color: colors.text.primary,
+    letterSpacing: typography.letterSpacing.tight,
+    marginBottom: spacing.xs,
   },
   greeting: {
-    ...textStyles.bodySecondary,
-    fontSize: typography.size.md,
-    marginTop: spacing.xs,
+    fontSize: typography.size.lg,
+    fontWeight: typography.weight.regular,
+    color: colors.text.tertiary,
+  },
+  // Section styles
+  section: {
+    marginBottom: spacing.xl,
+  },
+  sectionLabel: {
+    fontSize: typography.size.xs,
+    fontWeight: typography.weight.semibold,
+    color: colors.text.tertiary,
+    letterSpacing: typography.letterSpacing.widest,
+    marginBottom: spacing.md,
+  },
+  // Metrics styles
+  metricsSection: {
+    marginBottom: spacing.xl,
   },
   metricsGrid: {
     gap: spacing.md,
   },
-  controlsCard: {
-    ...cardStyle,
-    borderRadius: borderRadius.xl,
-  },
-  quickCaptureSection: {
-    gap: spacing.md,
-  },
-  sectionTitle: {
-    ...textStyles.h4,
-  },
+  // Quick capture styles
   quickCaptureGrid: {
     gap: spacing.md,
   },
   quickCaptureCard: {
-    ...cardStyle,
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.lg,
+    padding: spacing.base,
+    borderWidth: 1,
+    borderColor: colors.border.subtle,
+    ...shadows.sm,
+  },
+  quickCaptureCardExpanded: {
+    borderColor: colors.primary.main,
+  },
+  quickCaptureHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  quickCaptureEmoji: {
+    fontSize: 24,
+    marginRight: spacing.sm,
   },
   quickCaptureTitle: {
-    ...textStyles.h4,
     fontSize: typography.size.md,
-    marginBottom: spacing.md,
+    fontWeight: typography.weight.semibold,
+    color: colors.text.primary,
+  },
+  quickCaptureForm: {
+    gap: spacing.md,
   },
   quickCaptureInput: {
-    ...inputStyle,
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.md,
+    borderWidth: 1.5,
+    borderColor: colors.border.default,
+    padding: spacing.md,
+    color: colors.text.primary,
+    fontSize: typography.size.base,
     textAlignVertical: 'top',
-    minHeight: 90,
-    marginBottom: spacing.md,
+    minHeight: 80,
     lineHeight: typography.size.base * typography.lineHeight.relaxed,
+  },
+  quickCaptureInputFocused: {
+    borderColor: colors.primary.main,
   },
   quickCaptureButtons: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     gap: spacing.sm,
   },
-  submitButton: {
-    backgroundColor: colors.accent.primary,
+  cancelButton: {
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.sm,
+  },
+  cancelButtonText: {
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.medium,
+    color: colors.text.tertiary,
+  },
+  saveButton: {
+    backgroundColor: colors.primary.main,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.sm,
+  },
+  saveButtonDisabled: {
+    backgroundColor: colors.background.tertiary,
+  },
+  saveButtonText: {
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.semibold,
+    color: '#FFFFFF',
+  },
+  saveButtonTextDisabled: {
+    color: colors.text.disabled,
   },
   expandButton: {
-    borderColor: colors.border.default,
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.md,
     borderWidth: 1.5,
+    borderColor: colors.border.default,
+    borderStyle: 'dashed',
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+  },
+  expandButtonText: {
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.medium,
+    color: colors.text.tertiary,
   },
 });

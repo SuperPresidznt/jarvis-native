@@ -199,7 +199,7 @@ export default function AIChatScreen() {
               icon="send"
               onPress={handleSend}
               disabled={!inputText.trim() || isLoading}
-              iconColor={inputText.trim() && !isLoading ? colors.accent.primary : colors.text.disabled}
+              iconColor={inputText.trim() && !isLoading ? colors.primary.main : colors.text.disabled}
               size={22}
               style={styles.iconButton}
             />
@@ -208,7 +208,7 @@ export default function AIChatScreen() {
 
         {isLoading && (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="small" color={colors.accent.primary} />
+            <ActivityIndicator size="small" color={colors.primary.main} />
             <Text variant="bodySmall" style={styles.loadingText}>
               Jarvis is thinking...
             </Text>
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     ...textStyles.h1,
-    color: colors.accent.primary,
+    color: colors.primary.main,
     marginBottom: spacing.md,
   },
   emptySubtitle: {
@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
     ...shadows.sm,
   },
   userMessageCard: {
-    backgroundColor: colors.accent.primary,
+    backgroundColor: colors.primary.main,
   },
   assistantMessageCard: {
     backgroundColor: colors.background.secondary,

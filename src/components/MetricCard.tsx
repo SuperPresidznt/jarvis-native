@@ -1,17 +1,22 @@
 /**
  * MetricCard Component
- * Displays a single metric with label and helper text
+ * Displays a single metric with label, value, and optional helper text
+ * Professional, polished design with proper theming
  */
 
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Card, Text } from 'react-native-paper';
+import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import { colors, typography, spacing, borderRadius, shadows } from '../theme';
+
+type MetricVariant = 'default' | 'success' | 'warning' | 'danger' | 'info';
 
 interface MetricCardProps {
   label: string;
   value: string | number;
   helper?: string;
-  variant?: 'default' | 'success' | 'warning' | 'danger';
+  variant?: MetricVariant;
+  style?: ViewStyle;
+  compact?: boolean;
 }
 
 export const MetricCard: React.FC<MetricCardProps> = ({
@@ -19,57 +24,145 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   value,
   helper,
   variant = 'default',
+  style,
+  compact = false,
 }) => {
-  const getValueColor = () => {
+  const getAccentColor = () => {
     switch (variant) {
       case 'success':
-        return '#10B981';
+        return colors.success;
       case 'warning':
-        return '#F59E0B';
+        return colors.warning;
       case 'danger':
-        return '#EF4444';
+        return colors.error;
+      case 'info':
+        return colors.info;
       default:
-        return '#FFFFFF';
+        return colors.text.primary;
+    }
+  };
+
+  const getAccentBackgroundColor = () => {
+    switch (variant) {
+      case 'success':
+        return `${colors.success}15`;
+      case 'warning':
+        return `${colors.warning}15`;
+      case 'danger':
+        return `${colors.error}15`;
+      case 'info':
+        return `${colors.info}15`;
+      default:
+        return 'transparent';
     }
   };
 
   return (
-    <Card style={styles.card}>
-      <Card.Content>
-        <Text variant="labelSmall" style={styles.label}>
-          {label.toUpperCase()}
-        </Text>
-        <Text
-          variant="headlineMedium"
-          style={[styles.value, { color: getValueColor() }]}
-        >
-          {value}
-        </Text>
+    <View style={[styles.card, compact && styles.cardCompact, style]}>
+      {/* Accent bar */}
+      <View
+        style={[
+          styles.accentBar,
+          { backgroundColor: getAccentColor() },
+        ]}
+      />
+
+      <View style={styles.content}>
+        <Text style={styles.label}>{label.toUpperCase()}</Text>
+
+        <View style={styles.valueContainer}>
+          <Text
+            style={[
+              styles.value,
+              compact && styles.valueCompact,
+              { color: getAccentColor() },
+            ]}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+          >
+            {value}
+          </Text>
+
+          {variant !== 'default' && (
+            <View
+              style={[
+                styles.badge,
+                { backgroundColor: getAccentBackgroundColor() },
+              ]}
+            >
+              <View
+                style={[
+                  styles.badgeDot,
+                  { backgroundColor: getAccentColor() },
+                ]}
+              />
+            </View>
+          )}
+        </View>
+
         {helper && (
-          <Text variant="bodySmall" style={styles.helper}>
+          <Text style={styles.helper} numberOfLines={2}>
             {helper}
           </Text>
         )}
-      </Card.Content>
-    </Card>
+      </View>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#1E293B',
-    borderRadius: 12,
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.lg,
+    overflow: 'hidden',
+    flexDirection: 'row',
+    ...shadows.sm,
+  },
+  cardCompact: {
+    borderRadius: borderRadius.md,
+  },
+  accentBar: {
+    width: 4,
+  },
+  content: {
+    flex: 1,
+    padding: spacing.base,
   },
   label: {
-    color: '#94A3B8',
-    marginBottom: 8,
-    letterSpacing: 1,
+    fontSize: typography.size.xs,
+    fontWeight: typography.weight.semibold,
+    color: colors.text.tertiary,
+    letterSpacing: typography.letterSpacing.widest,
+    marginBottom: spacing.sm,
+  },
+  valueContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.xs,
   },
   value: {
-    fontWeight: 'bold',
-    marginBottom: 4,
+    fontSize: typography.size['2xl'],
+    fontWeight: typography.weight.bold,
+    letterSpacing: typography.letterSpacing.tight,
+  },
+  valueCompact: {
+    fontSize: typography.size.xl,
+  },
+  badge: {
+    marginLeft: spacing.sm,
+    padding: spacing.xs,
+    borderRadius: borderRadius.full,
+  },
+  badgeDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   helper: {
-    color: '#64748B',
+    fontSize: typography.size.sm,
+    color: colors.text.tertiary,
+    lineHeight: typography.size.sm * typography.lineHeight.relaxed,
   },
 });
+
+export default MetricCard;

@@ -1,9 +1,9 @@
 /**
  * Tasks Screen
- * Task management with list, kanban, and priority matrix views
+ * Professional task management with list, kanban, and priority matrix views
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   StyleSheet,
@@ -14,21 +14,24 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-} from 'react-native';
-import {
-  Card,
   Text,
-  Button,
-  ActivityIndicator,
-  Chip,
-  IconButton,
-  SegmentedButtons,
-  Checkbox,
-} from 'react-native-paper';
+  TouchableOpacity,
+  Animated,
+  FlatList,
+} from 'react-native';
+import { IconButton, SegmentedButtons, Checkbox } from 'react-native-paper';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { tasksApi } from '../../services/tasks.api';
-import { colors, typography, spacing, borderRadius, textStyles, cardStyle, inputStyle, shadows } from '../../theme';
+import { AppButton, AppCard, AppChip, EmptyState, LoadingState } from '../../components/ui';
+import {
+  colors,
+  typography,
+  spacing,
+  borderRadius,
+  shadows,
+  animation,
+} from '../../theme';
 
 type ViewMode = 'list' | 'kanban' | 'matrix';
 type TaskStatus = 'todo' | 'in_progress' | 'blocked' | 'completed' | 'cancelled';
@@ -53,11 +56,11 @@ const STATUS_LABELS: Record<TaskStatus, string> = {
   cancelled: 'Cancelled',
 };
 
-const PRIORITY_COLORS: Record<TaskPriority, string> = {
-  low: '#64748B',
-  medium: '#F59E0B',
-  high: '#F97316',
-  urgent: '#EF4444',
+const PRIORITY_CONFIG: Record<TaskPriority, { color: string; label: string }> = {
+  low: { color: '#64748B', label: 'Low' },
+  medium: { color: '#F59E0B', label: 'Medium' },
+  high: { color: '#F97316', label: 'High' },
+  urgent: { color: '#EF4444', label: 'Urgent' },
 };
 
 export default function TasksScreen() {
@@ -69,7 +72,6 @@ export default function TasksScreen() {
   const [filterStatus, setFilterStatus] = useState<TaskStatus | 'all'>('all');
   const insets = useSafeAreaInsets();
 
-  // Fetch tasks
   const { data: tasks = [], isLoading } = useQuery({
     queryKey: ['tasks', filterStatus],
     queryFn: () =>
@@ -78,7 +80,6 @@ export default function TasksScreen() {
       ),
   });
 
-  // Update task mutation
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) =>
       tasksApi.updateTask(id, data),
@@ -87,7 +88,6 @@ export default function TasksScreen() {
     },
   });
 
-  // Delete task mutation
   const deleteMutation = useMutation({
     mutationFn: (id: string) => tasksApi.deleteTask(id),
     onSuccess: () => {
@@ -127,234 +127,130 @@ export default function TasksScreen() {
     setShowCreateModal(true);
   };
 
-  const renderListView = () => (
-    <View style={styles.listView}>
-      {tasks.map((task) => (
-        <TaskCard
-          key={task.id}
-          task={task}
-          onStatusChange={handleStatusChange}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
-      ))}
-    </View>
-  );
-
-  const renderKanbanView = () => {
-    const columns: TaskStatus[] = ['todo', 'in_progress', 'blocked', 'completed'];
-    return (
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View style={styles.kanbanView}>
-          {columns.map((status) => {
-            const columnTasks = tasks.filter((t) => t.status === status);
-            return (
-              <View key={status} style={styles.kanbanColumn}>
-                <View style={styles.kanbanHeader}>
-                  <Text variant="titleSmall" style={styles.kanbanHeaderText}>
-                    {STATUS_LABELS[status]}
-                  </Text>
-                  <Text variant="bodySmall" style={styles.kanbanCount}>
-                    {columnTasks.length}
-                  </Text>
-                </View>
-                <ScrollView style={styles.kanbanContent}>
-                  {columnTasks.map((task) => (
-                    <TaskCard
-                      key={task.id}
-                      task={task}
-                      onStatusChange={handleStatusChange}
-                      onEdit={handleEdit}
-                      onDelete={handleDelete}
-                      compact
-                    />
-                  ))}
-                </ScrollView>
-              </View>
-            );
-          })}
-        </View>
-      </ScrollView>
-    );
-  };
-
-  const renderPriorityMatrix = () => {
-    const matrix = {
-      urgent_important: tasks.filter(
-        (t) => t.priority === 'urgent' && t.status !== 'completed'
-      ),
-      high_important: tasks.filter(
-        (t) => t.priority === 'high' && t.status !== 'completed'
-      ),
-      medium: tasks.filter(
-        (t) => t.priority === 'medium' && t.status !== 'completed'
-      ),
-      low: tasks.filter(
-        (t) => t.priority === 'low' && t.status !== 'completed'
-      ),
-    };
-
-    return (
-      <View style={styles.matrixView}>
-        <View style={styles.matrixRow}>
-          <View style={[styles.matrixQuadrant, { backgroundColor: '#FEE2E2' }]}>
-            <Text variant="titleSmall" style={styles.matrixTitle}>
-              Urgent & Important
-            </Text>
-            {matrix.urgent_important.map((task) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                onStatusChange={handleStatusChange}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                compact
-              />
-            ))}
-          </View>
-          <View style={[styles.matrixQuadrant, { backgroundColor: '#FEF3C7' }]}>
-            <Text variant="titleSmall" style={styles.matrixTitle}>
-              High Priority
-            </Text>
-            {matrix.high_important.map((task) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                onStatusChange={handleStatusChange}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                compact
-              />
-            ))}
-          </View>
-        </View>
-        <View style={styles.matrixRow}>
-          <View style={[styles.matrixQuadrant, { backgroundColor: '#E0E7FF' }]}>
-            <Text variant="titleSmall" style={styles.matrixTitle}>
-              Medium Priority
-            </Text>
-            {matrix.medium.map((task) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                onStatusChange={handleStatusChange}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                compact
-              />
-            ))}
-          </View>
-          <View style={[styles.matrixQuadrant, { backgroundColor: '#F1F5F9' }]}>
-            <Text variant="titleSmall" style={styles.matrixTitle}>
-              Low Priority
-            </Text>
-            {matrix.low.map((task) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                onStatusChange={handleStatusChange}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                compact
-              />
-            ))}
-          </View>
-        </View>
-      </View>
-    );
-  };
-
   if (isLoading && tasks.length === 0) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#10B981" />
-      </View>
-    );
+    return <LoadingState fullScreen message="Loading tasks..." />;
   }
 
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text variant="headlineMedium" style={styles.title}>
-          Tasks
-        </Text>
-        <Button
-          mode="contained"
+        <View>
+          <Text style={styles.title}>Tasks</Text>
+          <Text style={styles.subtitle}>
+            {tasks.filter((t) => t.status !== 'completed').length} active
+          </Text>
+        </View>
+        <AppButton
+          title="New Task"
           onPress={() => {
             setSelectedTask(null);
             setShowCreateModal(true);
           }}
-          style={styles.createButton}
-        >
-          New Task
-        </Button>
+          size="small"
+        />
       </View>
 
       {/* View Mode Selector */}
-      <SegmentedButtons
-        value={viewMode}
-        onValueChange={(value) => setViewMode(value as ViewMode)}
-        buttons={[
-          { value: 'list', label: 'List' },
-          { value: 'kanban', label: 'Board' },
-          { value: 'matrix', label: 'Matrix' },
-        ]}
-        style={styles.viewSelector}
-      />
+      <View style={styles.viewSelectorContainer}>
+        <SegmentedButtons
+          value={viewMode}
+          onValueChange={(value) => setViewMode(value as ViewMode)}
+          buttons={[
+            { value: 'list', label: 'List' },
+            { value: 'kanban', label: 'Board' },
+            { value: 'matrix', label: 'Matrix' },
+          ]}
+          style={styles.viewSelector}
+          theme={{
+            colors: {
+              secondaryContainer: colors.primary.main,
+              onSecondaryContainer: '#FFFFFF',
+              onSurface: colors.text.secondary,
+            },
+          }}
+        />
+      </View>
 
-      {/* Filter */}
+      {/* Filters */}
       {viewMode === 'list' && (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View style={styles.filterRow}>
-            {(['all', 'todo', 'in_progress', 'completed'] as const).map((status) => (
-              <Chip
-                key={status}
-                selected={filterStatus === status}
-                onPress={() => setFilterStatus(status)}
-                style={styles.filterChip}
-              >
-                {status === 'all' ? 'All' : STATUS_LABELS[status]}
-              </Chip>
-            ))}
-          </View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.filterContainer}
+          contentContainerStyle={styles.filterContent}
+        >
+          {(['all', 'todo', 'in_progress', 'completed'] as const).map((status) => (
+            <AppChip
+              key={status}
+              label={status === 'all' ? 'All' : STATUS_LABELS[status]}
+              selected={filterStatus === status}
+              onPress={() => setFilterStatus(status)}
+              style={styles.filterChip}
+            />
+          ))}
         </ScrollView>
       )}
 
       {/* Content */}
       <ScrollView
         style={styles.content}
+        contentContainerStyle={styles.contentContainer}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.primary.main}
+          />
         }
+        showsVerticalScrollIndicator={false}
       >
         {tasks.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>📋</Text>
-            <Text variant="headlineSmall" style={styles.emptyText}>
-              No tasks yet
-            </Text>
-            <Text variant="bodyMedium" style={styles.emptySubtext}>
-              {viewMode === 'list' && filterStatus !== 'all'
-                ? `No ${filterStatus === 'todo' ? 'pending' : filterStatus.replace('_', ' ')} tasks`
-                : 'Create your first task to get started'}
-            </Text>
-            <Button
-              mode="contained"
-              onPress={() => {
-                setSelectedTask(null);
-                setShowCreateModal(true);
-              }}
-              style={styles.emptyButton}
-            >
-              Create Task
-            </Button>
-          </View>
+          <EmptyState
+            icon="📋"
+            title="No tasks yet"
+            description={
+              viewMode === 'list' && filterStatus !== 'all'
+                ? `No ${filterStatus.replace('_', ' ')} tasks`
+                : 'Create your first task to get started'
+            }
+            actionLabel="Create Task"
+            onAction={() => {
+              setSelectedTask(null);
+              setShowCreateModal(true);
+            }}
+          />
         ) : (
           <>
-            {viewMode === 'list' && renderListView()}
-            {viewMode === 'kanban' && renderKanbanView()}
-            {viewMode === 'matrix' && renderPriorityMatrix()}
+            {viewMode === 'list' && (
+              <View style={styles.listView}>
+                {tasks.map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    onStatusChange={handleStatusChange}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                  />
+                ))}
+              </View>
+            )}
+            {viewMode === 'kanban' && (
+              <KanbanView
+                tasks={tasks}
+                onStatusChange={handleStatusChange}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            )}
+            {viewMode === 'matrix' && (
+              <MatrixView
+                tasks={tasks}
+                onStatusChange={handleStatusChange}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            )}
           </>
         )}
       </ScrollView>
@@ -372,6 +268,7 @@ export default function TasksScreen() {
   );
 }
 
+// Task Card Component
 interface TaskCardProps {
   task: Task;
   onStatusChange: (id: string, status: TaskStatus) => void;
@@ -387,83 +284,250 @@ const TaskCard: React.FC<TaskCardProps> = ({
   onDelete,
   compact = false,
 }) => {
+  const [scaleValue] = useState(new Animated.Value(1));
+  const isCompleted = task.status === 'completed';
+
+  const handlePressIn = () => {
+    Animated.spring(scaleValue, {
+      toValue: 0.98,
+      useNativeDriver: true,
+      speed: 50,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scaleValue, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 50,
+    }).start();
+  };
+
   return (
-    <Card style={[styles.taskCard, compact && styles.taskCardCompact]}>
-      <Card.Content>
-        <View style={styles.taskHeader}>
-          <Checkbox
-            status={task.status === 'completed' ? 'checked' : 'unchecked'}
-            onPress={() =>
-              onStatusChange(
-                task.id,
-                task.status === 'completed' ? 'todo' : 'completed'
-              )
-            }
+    <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
+      <TouchableOpacity
+        onPress={() => onEdit(task)}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        activeOpacity={0.9}
+        style={[styles.taskCard, compact && styles.taskCardCompact]}
+      >
+        {/* Priority indicator */}
+        {task.priority && (
+          <View
+            style={[
+              styles.priorityIndicator,
+              { backgroundColor: PRIORITY_CONFIG[task.priority].color },
+            ]}
           />
-          <View style={styles.taskInfo}>
-            <Text
-              variant="titleSmall"
-              style={[
-                styles.taskTitle,
-                task.status === 'completed' && styles.taskTitleCompleted,
-              ]}
+        )}
+
+        <View style={styles.taskContent}>
+          <View style={styles.taskHeader}>
+            <TouchableOpacity
+              onPress={() =>
+                onStatusChange(
+                  task.id,
+                  isCompleted ? 'todo' : 'completed'
+                )
+              }
+              style={styles.checkbox}
             >
-              {task.title}
-            </Text>
-            {task.description && !compact && (
-              <Text variant="bodySmall" style={styles.taskDescription}>
-                {task.description}
-              </Text>
-            )}
-          </View>
-        </View>
-
-        {!compact && (
-          <>
-            {task.priority && (
-              <View style={styles.taskMeta}>
-                <Chip
-                  style={[
-                    styles.priorityChip,
-                    { backgroundColor: PRIORITY_COLORS[task.priority] },
-                  ]}
-                  textStyle={{ color: '#FFFFFF' }}
-                >
-                  {task.priority.toUpperCase()}
-                </Chip>
+              <View
+                style={[
+                  styles.checkboxInner,
+                  isCompleted && styles.checkboxChecked,
+                ]}
+              >
+                {isCompleted && (
+                  <Text style={styles.checkmark}>✓</Text>
+                )}
               </View>
-            )}
+            </TouchableOpacity>
 
-            {task.tags.length > 0 && (
-              <View style={styles.tagsContainer}>
-                {task.tags.map((tag) => (
-                  <Chip key={tag} compact style={styles.tagChip}>
-                    #{tag}
-                  </Chip>
+            <View style={styles.taskInfo}>
+              <Text
+                style={[
+                  styles.taskTitle,
+                  isCompleted && styles.taskTitleCompleted,
+                ]}
+                numberOfLines={compact ? 1 : 2}
+              >
+                {task.title}
+              </Text>
+              {task.description && !compact && (
+                <Text style={styles.taskDescription} numberOfLines={2}>
+                  {task.description}
+                </Text>
+              )}
+            </View>
+          </View>
+
+          {!compact && (
+            <>
+              {/* Meta info */}
+              <View style={styles.taskMeta}>
+                {task.priority && (
+                  <AppChip
+                    label={PRIORITY_CONFIG[task.priority].label}
+                    variant={
+                      task.priority === 'urgent'
+                        ? 'error'
+                        : task.priority === 'high'
+                        ? 'warning'
+                        : 'default'
+                    }
+                    compact
+                  />
+                )}
+                {task.tags.slice(0, 2).map((tag) => (
+                  <AppChip key={tag} label={`#${tag}`} compact />
                 ))}
               </View>
-            )}
 
-            <View style={styles.taskActions}>
-              <Button mode="text" onPress={() => onEdit(task)} compact>
-                Edit
-              </Button>
-              <Button
-                mode="text"
-                onPress={() => onDelete(task.id)}
-                textColor="#EF4444"
-                compact
-              >
-                Delete
-              </Button>
-            </View>
-          </>
-        )}
-      </Card.Content>
-    </Card>
+              {/* Actions */}
+              <View style={styles.taskActions}>
+                <TouchableOpacity
+                  onPress={() => onEdit(task)}
+                  style={styles.actionButton}
+                >
+                  <Text style={styles.actionButtonText}>Edit</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => onDelete(task.id)}
+                  style={styles.actionButton}
+                >
+                  <Text style={[styles.actionButtonText, styles.deleteText]}>
+                    Delete
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
+        </View>
+      </TouchableOpacity>
+    </Animated.View>
   );
 };
 
+// Kanban View Component
+interface KanbanViewProps {
+  tasks: Task[];
+  onStatusChange: (id: string, status: TaskStatus) => void;
+  onEdit: (task: Task) => void;
+  onDelete: (id: string) => void;
+}
+
+const KanbanView: React.FC<KanbanViewProps> = ({
+  tasks,
+  onStatusChange,
+  onEdit,
+  onDelete,
+}) => {
+  const columns: TaskStatus[] = ['todo', 'in_progress', 'blocked', 'completed'];
+
+  return (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+      <View style={styles.kanbanView}>
+        {columns.map((status) => {
+          const columnTasks = tasks.filter((t) => t.status === status);
+          return (
+            <View key={status} style={styles.kanbanColumn}>
+              <View style={styles.kanbanHeader}>
+                <Text style={styles.kanbanHeaderText}>
+                  {STATUS_LABELS[status]}
+                </Text>
+                <View style={styles.kanbanCount}>
+                  <Text style={styles.kanbanCountText}>{columnTasks.length}</Text>
+                </View>
+              </View>
+              <ScrollView
+                style={styles.kanbanContent}
+                showsVerticalScrollIndicator={false}
+              >
+                {columnTasks.map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    onStatusChange={onStatusChange}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                    compact
+                  />
+                ))}
+              </ScrollView>
+            </View>
+          );
+        })}
+      </View>
+    </ScrollView>
+  );
+};
+
+// Matrix View Component
+interface MatrixViewProps {
+  tasks: Task[];
+  onStatusChange: (id: string, status: TaskStatus) => void;
+  onEdit: (task: Task) => void;
+  onDelete: (id: string) => void;
+}
+
+const MatrixView: React.FC<MatrixViewProps> = ({
+  tasks,
+  onStatusChange,
+  onEdit,
+  onDelete,
+}) => {
+  const matrix = {
+    urgent: tasks.filter(
+      (t) => t.priority === 'urgent' && t.status !== 'completed'
+    ),
+    high: tasks.filter(
+      (t) => t.priority === 'high' && t.status !== 'completed'
+    ),
+    medium: tasks.filter(
+      (t) => t.priority === 'medium' && t.status !== 'completed'
+    ),
+    low: tasks.filter(
+      (t) => (t.priority === 'low' || !t.priority) && t.status !== 'completed'
+    ),
+  };
+
+  const quadrants = [
+    { key: 'urgent', label: 'Urgent', color: `${colors.error}20` },
+    { key: 'high', label: 'High Priority', color: `${colors.warning}20` },
+    { key: 'medium', label: 'Medium', color: `${colors.info}20` },
+    { key: 'low', label: 'Low Priority', color: `${colors.background.tertiary}` },
+  ];
+
+  return (
+    <View style={styles.matrixView}>
+      {quadrants.map((quadrant) => (
+        <View
+          key={quadrant.key}
+          style={[styles.matrixQuadrant, { backgroundColor: quadrant.color }]}
+        >
+          <Text style={styles.matrixTitle}>{quadrant.label}</Text>
+          <Text style={styles.matrixCount}>
+            {matrix[quadrant.key as keyof typeof matrix].length} tasks
+          </Text>
+          {matrix[quadrant.key as keyof typeof matrix].map((task) => (
+            <TaskCard
+              key={task.id}
+              task={task}
+              onStatusChange={onStatusChange}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              compact
+            />
+          ))}
+        </View>
+      ))}
+    </View>
+  );
+};
+
+// Task Form Modal
 interface TaskFormModalProps {
   visible: boolean;
   task: Task | null;
@@ -480,6 +544,16 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
   const [title, setTitle] = useState(task?.title || '');
   const [description, setDescription] = useState(task?.description || '');
   const [priority, setPriority] = useState<TaskPriority>(task?.priority || 'medium');
+  const [titleFocused, setTitleFocused] = useState(false);
+  const [descFocused, setDescFocused] = useState(false);
+
+  React.useEffect(() => {
+    if (visible) {
+      setTitle(task?.title || '');
+      setDescription(task?.description || '');
+      setPriority(task?.priority || 'medium');
+    }
+  }, [visible, task]);
 
   const createMutation = useMutation({
     mutationFn: (data: any) => tasksApi.createTask(data),
@@ -514,83 +588,102 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.modalOverlay}
       >
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { paddingBottom: Math.max(insets.bottom, spacing.base) }]}>
+          <View
+            style={[
+              styles.modalContent,
+              { paddingBottom: Math.max(insets.bottom, spacing.base) },
+            ]}
+          >
             <View style={styles.modalHeader}>
-              <Text variant="headlineSmall" style={styles.modalTitle}>
+              <Text style={styles.modalTitle}>
                 {task ? 'Edit Task' : 'New Task'}
               </Text>
-              <IconButton icon="close" onPress={onClose} iconColor={colors.text.secondary} />
+              <IconButton
+                icon="close"
+                onPress={onClose}
+                iconColor={colors.text.tertiary}
+              />
             </View>
 
-            <ScrollView style={styles.modalBody} keyboardShouldPersistTaps="handled">
+            <ScrollView
+              style={styles.modalBody}
+              keyboardShouldPersistTaps="handled"
+            >
               <View style={styles.formGroup}>
-                <Text variant="labelMedium" style={styles.label}>
-                  Title
-                </Text>
+                <Text style={styles.label}>Title</Text>
                 <TextInput
                   value={title}
                   onChangeText={setTitle}
                   placeholder="Task title..."
                   placeholderTextColor={colors.text.placeholder}
-                  style={styles.input}
+                  style={[styles.input, titleFocused && styles.inputFocused]}
+                  onFocus={() => setTitleFocused(true)}
+                  onBlur={() => setTitleFocused(false)}
                 />
               </View>
 
               <View style={styles.formGroup}>
-                <Text variant="labelMedium" style={styles.label}>
-                  Description
-                </Text>
+                <Text style={styles.label}>Description</Text>
                 <TextInput
                   value={description}
                   onChangeText={setDescription}
                   placeholder="Task description..."
                   placeholderTextColor={colors.text.placeholder}
-                  style={[styles.input, styles.textArea]}
+                  style={[
+                    styles.input,
+                    styles.textArea,
+                    descFocused && styles.inputFocused,
+                  ]}
                   multiline
                   numberOfLines={4}
+                  onFocus={() => setDescFocused(true)}
+                  onBlur={() => setDescFocused(false)}
                 />
               </View>
 
               <View style={styles.formGroup}>
-                <Text variant="labelMedium" style={styles.label}>
-                  Priority
-                </Text>
+                <Text style={styles.label}>Priority</Text>
                 <View style={styles.priorityButtons}>
-                  {(['low', 'medium', 'high', 'urgent'] as TaskPriority[]).map((p) => (
-                    <Chip
-                      key={p}
-                      selected={priority === p}
-                      onPress={() => setPriority(p)}
-                      style={styles.priorityOption}
-                      textStyle={{ fontWeight: typography.weight.semibold }}
-                    >
-                      {p.toUpperCase()}
-                    </Chip>
-                  ))}
+                  {(['low', 'medium', 'high', 'urgent'] as TaskPriority[]).map(
+                    (p) => (
+                      <AppChip
+                        key={p}
+                        label={PRIORITY_CONFIG[p].label}
+                        selected={priority === p}
+                        onPress={() => setPriority(p)}
+                        style={styles.priorityChip}
+                      />
+                    )
+                  )}
                 </View>
               </View>
             </ScrollView>
 
             <View style={styles.modalFooter}>
-              <Button mode="outlined" onPress={onClose} style={styles.modalButton} textColor={colors.text.secondary}>
-                Cancel
-              </Button>
-              <Button
-                mode="contained"
+              <AppButton
+                title="Cancel"
+                onPress={onClose}
+                variant="outline"
+                style={styles.modalButton}
+              />
+              <AppButton
+                title={task ? 'Update' : 'Create'}
                 onPress={handleSubmit}
                 loading={createMutation.isPending || updateMutation.isPending}
                 disabled={!title.trim()}
                 style={styles.modalButton}
-                buttonColor={colors.accent.primary}
-              >
-                {task ? 'Update' : 'Create'}
-              </Button>
+              />
             </View>
           </View>
         </View>
@@ -604,167 +697,200 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background.primary,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.background.primary,
-  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: spacing.lg,
+    paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
+    paddingBottom: spacing.base,
   },
   title: {
-    ...textStyles.h2,
+    fontSize: typography.size['2xl'],
+    fontWeight: typography.weight.bold,
+    color: colors.text.primary,
   },
-  createButton: {
-    backgroundColor: colors.accent.primary,
+  subtitle: {
+    fontSize: typography.size.sm,
+    color: colors.text.tertiary,
+    marginTop: spacing.xs,
   },
-  viewSelector: {
-    marginHorizontal: spacing.lg,
+  viewSelectorContainer: {
+    paddingHorizontal: spacing.lg,
     marginBottom: spacing.md,
   },
-  filterRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
+  viewSelector: {
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.md,
+  },
+  filterContainer: {
+    marginBottom: spacing.md,
+  },
+  filterContent: {
     paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
+    gap: spacing.sm,
+    flexDirection: 'row',
   },
   filterChip: {
-    backgroundColor: colors.background.secondary,
+    marginRight: spacing.sm,
   },
   content: {
     flex: 1,
   },
-  listView: {
+  contentContainer: {
     padding: spacing.lg,
+    paddingTop: 0,
+  },
+  listView: {
     gap: spacing.md,
   },
-  kanbanView: {
-    flexDirection: 'row',
-    gap: 12,
-    padding: 16,
-  },
-  kanbanColumn: {
-    width: 280,
-    backgroundColor: '#1E293B',
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  kanbanHeader: {
-    padding: 12,
-    backgroundColor: '#334155',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  kanbanHeaderText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-  },
-  kanbanCount: {
-    color: '#94A3B8',
-  },
-  kanbanContent: {
-    padding: 8,
-  },
-  matrixView: {
-    padding: 16,
-    gap: 12,
-  },
-  matrixRow: {
-    flexDirection: 'row',
-    gap: 12,
-    minHeight: 300,
-  },
-  matrixQuadrant: {
-    flex: 1,
-    padding: 12,
-    borderRadius: 12,
-    gap: 8,
-  },
-  matrixTitle: {
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
+  // Task Card styles
   taskCard: {
-    ...cardStyle,
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.lg,
+    overflow: 'hidden',
+    flexDirection: 'row',
     marginBottom: spacing.md,
+    ...shadows.sm,
   },
   taskCardCompact: {
     marginBottom: spacing.sm,
+  },
+  priorityIndicator: {
+    width: 4,
+  },
+  taskContent: {
+    flex: 1,
+    padding: spacing.base,
   },
   taskHeader: {
     flexDirection: 'row',
     alignItems: 'flex-start',
   },
+  checkbox: {
+    marginRight: spacing.md,
+    marginTop: spacing.xs,
+  },
+  checkboxInner: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: colors.border.default,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxChecked: {
+    backgroundColor: colors.primary.main,
+    borderColor: colors.primary.main,
+  },
+  checkmark: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: typography.weight.bold,
+  },
   taskInfo: {
     flex: 1,
-    marginLeft: spacing.sm,
   },
   taskTitle: {
-    ...textStyles.body,
-    fontWeight: typography.weight.semibold,
+    fontSize: typography.size.base,
+    fontWeight: typography.weight.medium,
+    color: colors.text.primary,
+    lineHeight: typography.size.base * typography.lineHeight.snug,
   },
   taskTitleCompleted: {
     textDecorationLine: 'line-through',
     color: colors.text.disabled,
   },
   taskDescription: {
-    ...textStyles.bodySecondary,
     fontSize: typography.size.sm,
+    color: colors.text.tertiary,
     marginTop: spacing.xs,
     lineHeight: typography.size.sm * typography.lineHeight.relaxed,
   },
   taskMeta: {
     flexDirection: 'row',
-    marginTop: 8,
-  },
-  priorityChip: {
-    alignSelf: 'flex-start',
-  },
-  tagsContainer: {
-    flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 4,
-    marginTop: 8,
-  },
-  tagChip: {
-    backgroundColor: '#334155',
+    gap: spacing.sm,
+    marginTop: spacing.md,
   },
   taskActions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    marginTop: 8,
-    gap: 8,
+    marginTop: spacing.md,
+    gap: spacing.md,
   },
-  emptyState: {
+  actionButton: {
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+  },
+  actionButtonText: {
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.medium,
+    color: colors.primary.main,
+  },
+  deleteText: {
+    color: colors.error,
+  },
+  // Kanban styles
+  kanbanView: {
+    flexDirection: 'row',
+    gap: spacing.md,
+    paddingRight: spacing.lg,
+  },
+  kanbanColumn: {
+    width: 280,
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.lg,
+    overflow: 'hidden',
+  },
+  kanbanHeader: {
+    padding: spacing.md,
+    backgroundColor: colors.background.tertiary,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing['5xl'],
-    marginTop: spacing['4xl'],
   },
-  emptyIcon: {
-    fontSize: 64,
-    marginBottom: spacing.lg,
+  kanbanHeaderText: {
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.semibold,
+    color: colors.text.primary,
   },
-  emptyText: {
-    ...textStyles.h3,
+  kanbanCount: {
+    backgroundColor: colors.background.primary,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.sm,
+  },
+  kanbanCountText: {
+    fontSize: typography.size.xs,
+    fontWeight: typography.weight.medium,
+    color: colors.text.tertiary,
+  },
+  kanbanContent: {
+    padding: spacing.sm,
+    maxHeight: 400,
+  },
+  // Matrix styles
+  matrixView: {
+    gap: spacing.md,
+  },
+  matrixQuadrant: {
+    padding: spacing.base,
+    borderRadius: borderRadius.lg,
+  },
+  matrixTitle: {
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.semibold,
+    color: colors.text.primary,
+    marginBottom: spacing.xs,
+  },
+  matrixCount: {
+    fontSize: typography.size.sm,
+    color: colors.text.tertiary,
     marginBottom: spacing.md,
   },
-  emptySubtext: {
-    ...textStyles.bodySecondary,
-    textAlign: 'center',
-    marginBottom: spacing.xl,
-    lineHeight: typography.size.base * typography.lineHeight.relaxed,
-  },
-  emptyButton: {
-    backgroundColor: colors.accent.primary,
-    paddingHorizontal: spacing.base,
-  },
+  // Modal styles
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.75)',
@@ -782,10 +908,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: spacing.base,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border.default,
+    borderBottomColor: colors.border.subtle,
   },
   modalTitle: {
-    ...textStyles.h3,
+    fontSize: typography.size.xl,
+    fontWeight: typography.weight.semibold,
+    color: colors.text.primary,
   },
   modalBody: {
     padding: spacing.base,
@@ -794,14 +922,22 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   label: {
-    ...textStyles.label,
     fontSize: typography.size.sm,
+    fontWeight: typography.weight.medium,
+    color: colors.text.secondary,
     marginBottom: spacing.sm,
   },
   input: {
-    ...inputStyle,
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.md,
+    borderWidth: 1.5,
+    borderColor: colors.border.default,
+    padding: spacing.md,
+    color: colors.text.primary,
     fontSize: typography.size.base,
-    lineHeight: typography.size.base * typography.lineHeight.normal,
+  },
+  inputFocused: {
+    borderColor: colors.primary.main,
   },
   textArea: {
     textAlignVertical: 'top',
@@ -813,15 +949,15 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: spacing.sm,
   },
-  priorityOption: {
-    backgroundColor: colors.background.tertiary,
+  priorityChip: {
+    marginBottom: spacing.xs,
   },
   modalFooter: {
     flexDirection: 'row',
     gap: spacing.md,
     padding: spacing.base,
     borderTopWidth: 1,
-    borderTopColor: colors.border.default,
+    borderTopColor: colors.border.subtle,
   },
   modalButton: {
     flex: 1,

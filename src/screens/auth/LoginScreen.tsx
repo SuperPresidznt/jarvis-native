@@ -1,6 +1,6 @@
 /**
  * Login Screen
- * User authentication with email and password
+ * Professional, polished login with dark theme
  */
 
 import React, { useState } from 'react';
@@ -11,11 +11,22 @@ import {
   Platform,
   ScrollView,
   Alert,
+  Text,
+  TextInput,
+  TouchableOpacity,
 } from 'react-native';
-import { TextInput, Button, Text, HelperText } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types';
 import { useAuthStore } from '../../store/authStore';
+import { AppButton } from '../../components/ui';
+import {
+  colors,
+  typography,
+  spacing,
+  borderRadius,
+  shadows,
+} from '../../theme';
 
 type LoginScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Login'>;
@@ -26,6 +37,9 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const { login, isLoading, error, clearError } = useAuthStore();
 
@@ -54,7 +68,6 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
 
     try {
       await login({ email: email.trim(), password });
-      // Navigation handled automatically by RootNavigator
     } catch (err: any) {
       Alert.alert('Login Failed', err.message || 'Invalid credentials');
     }
@@ -65,83 +78,108 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: insets.top + spacing['4xl'] },
+        ]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Logo & Header */}
         <View style={styles.header}>
-          <Text variant="displaySmall" style={styles.title}>
-            Jarvis
-          </Text>
-          <Text variant="bodyLarge" style={styles.subtitle}>
-            Your Personal AI Assistant
-          </Text>
+          <View style={styles.logoContainer}>
+            <Text style={styles.logo}>J</Text>
+          </View>
+          <Text style={styles.title}>Jarvis</Text>
+          <Text style={styles.subtitle}>Your Personal AI Assistant</Text>
         </View>
 
+        {/* Form */}
         <View style={styles.form}>
-          <TextInput
-            label="Email"
-            value={email}
-            onChangeText={setEmail}
-            mode="outlined"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoComplete="email"
-            error={!!errors.email}
-            disabled={isLoading}
-            style={styles.input}
-          />
-          <HelperText type="error" visible={!!errors.email}>
-            {errors.email}
-          </HelperText>
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Email</Text>
+            <TextInput
+              value={email}
+              onChangeText={setEmail}
+              placeholder="Enter your email"
+              placeholderTextColor={colors.text.placeholder}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoComplete="email"
+              editable={!isLoading}
+              style={[
+                styles.input,
+                emailFocused && styles.inputFocused,
+                errors.email && styles.inputError,
+              ]}
+              onFocus={() => setEmailFocused(true)}
+              onBlur={() => setEmailFocused(false)}
+            />
+            {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
+          </View>
 
-          <TextInput
-            label="Password"
-            value={password}
-            onChangeText={setPassword}
-            mode="outlined"
-            secureTextEntry={!showPassword}
-            autoCapitalize="none"
-            autoComplete="password"
-            error={!!errors.password}
-            disabled={isLoading}
-            right={
-              <TextInput.Icon
-                icon={showPassword ? 'eye-off' : 'eye'}
-                onPress={() => setShowPassword(!showPassword)}
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Password</Text>
+            <View
+              style={[
+                styles.passwordContainer,
+                passwordFocused && styles.inputFocused,
+                errors.password && styles.inputError,
+              ]}
+            >
+              <TextInput
+                value={password}
+                onChangeText={setPassword}
+                placeholder="Enter your password"
+                placeholderTextColor={colors.text.placeholder}
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+                autoComplete="password"
+                editable={!isLoading}
+                style={styles.passwordInput}
+                onFocus={() => setPasswordFocused(true)}
+                onBlur={() => setPasswordFocused(false)}
               />
-            }
-            style={styles.input}
-          />
-          <HelperText type="error" visible={!!errors.password}>
-            {errors.password}
-          </HelperText>
+              <TouchableOpacity
+                onPress={() => setShowPassword(!showPassword)}
+                style={styles.eyeButton}
+              >
+                <Text style={styles.eyeIcon}>{showPassword ? '👁️' : '👁️‍🗨️'}</Text>
+              </TouchableOpacity>
+            </View>
+            {errors.password && (
+              <Text style={styles.errorText}>{errors.password}</Text>
+            )}
+          </View>
 
-          {error && (
-            <HelperText type="error" visible={!!error}>
-              {error}
-            </HelperText>
-          )}
+          {error && <Text style={styles.errorText}>{error}</Text>}
 
-          <Button
-            mode="contained"
+          <AppButton
+            title="Login"
             onPress={handleLogin}
             loading={isLoading}
             disabled={isLoading}
-            style={styles.button}
-          >
-            Login
-          </Button>
+            fullWidth
+            size="large"
+            style={styles.loginButton}
+          />
 
-          <Button
-            mode="text"
+          <TouchableOpacity
             onPress={() => navigation.navigate('Register')}
             disabled={isLoading}
             style={styles.linkButton}
           >
-            Don't have an account? Sign up
-          </Button>
+            <Text style={styles.linkText}>
+              Don't have an account?{' '}
+              <Text style={styles.linkTextBold}>Sign up</Text>
+            </Text>
+          </TouchableOpacity>
         </View>
 
+        {/* Footer */}
         <View style={styles.footer}>
-          <Text variant="bodySmall" style={styles.footerText}>
+          <Text style={styles.footerText}>
             By logging in, you agree to our Terms of Service and Privacy Policy
           </Text>
         </View>
@@ -153,44 +191,121 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background.primary,
   },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'center',
-    padding: 24,
+    paddingHorizontal: spacing.xl,
+    paddingBottom: spacing['3xl'],
   },
   header: {
     alignItems: 'center',
-    marginBottom: 48,
+    marginBottom: spacing['4xl'],
+  },
+  logoContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 20,
+    backgroundColor: colors.primary.main,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.lg,
+    ...shadows.md,
+  },
+  logo: {
+    fontSize: typography.size['4xl'],
+    fontWeight: typography.weight.bold,
+    color: '#FFFFFF',
   },
   title: {
-    fontWeight: 'bold',
-    color: '#007AFF',
-    marginBottom: 8,
+    fontSize: typography.size['3xl'],
+    fontWeight: typography.weight.bold,
+    color: colors.text.primary,
+    marginBottom: spacing.xs,
   },
   subtitle: {
-    color: '#8E8E93',
+    fontSize: typography.size.md,
+    color: colors.text.tertiary,
   },
   form: {
-    marginBottom: 24,
+    marginBottom: spacing['2xl'],
+  },
+  formGroup: {
+    marginBottom: spacing.lg,
+  },
+  label: {
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.medium,
+    color: colors.text.secondary,
+    marginBottom: spacing.sm,
   },
   input: {
-    marginBottom: 8,
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.md,
+    borderWidth: 1.5,
+    borderColor: colors.border.default,
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.md,
+    fontSize: typography.size.base,
+    color: colors.text.primary,
   },
-  button: {
-    marginTop: 16,
-    paddingVertical: 8,
+  inputFocused: {
+    borderColor: colors.primary.main,
+  },
+  inputError: {
+    borderColor: colors.error,
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.md,
+    borderWidth: 1.5,
+    borderColor: colors.border.default,
+  },
+  passwordInput: {
+    flex: 1,
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.md,
+    fontSize: typography.size.base,
+    color: colors.text.primary,
+  },
+  eyeButton: {
+    padding: spacing.md,
+  },
+  eyeIcon: {
+    fontSize: 20,
+  },
+  errorText: {
+    fontSize: typography.size.sm,
+    color: colors.error,
+    marginTop: spacing.xs,
+  },
+  loginButton: {
+    marginTop: spacing.lg,
+    marginBottom: spacing.lg,
   },
   linkButton: {
-    marginTop: 8,
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+  },
+  linkText: {
+    fontSize: typography.size.base,
+    color: colors.text.tertiary,
+  },
+  linkTextBold: {
+    color: colors.primary.main,
+    fontWeight: typography.weight.semibold,
   },
   footer: {
     alignItems: 'center',
-    marginTop: 24,
+    marginTop: 'auto',
+    paddingTop: spacing.xl,
   },
   footerText: {
-    color: '#8E8E93',
+    fontSize: typography.size.sm,
+    color: colors.text.disabled,
     textAlign: 'center',
+    lineHeight: typography.size.sm * typography.lineHeight.relaxed,
   },
 });

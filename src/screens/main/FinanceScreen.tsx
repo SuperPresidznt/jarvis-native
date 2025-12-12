@@ -1,23 +1,45 @@
 /**
  * Finance Screen
- * Financial tracking with KPIs, assets, liabilities, and cashflow
+ * Professional financial dashboard with assets, liabilities, and net worth tracking
  */
 
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, RefreshControl } from 'react-native';
-import { Text, Card, Button, ActivityIndicator, SegmentedButtons } from 'react-native-paper';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  RefreshControl,
+  Modal,
+  TextInput,
+  Text,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
+import { IconButton, SegmentedButtons } from 'react-native-paper';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { financeApi } from '../../services/finance.api';
+import { AppButton, AppChip, EmptyState, LoadingState, AppCard } from '../../components/ui';
 import { MetricCard } from '../../components/MetricCard';
+import {
+  colors,
+  typography,
+  spacing,
+  borderRadius,
+  shadows,
+} from '../../theme';
 
-type ViewMode = 'overview' | 'assets' | 'liabilities' | 'cashflow';
+type ViewMode = 'overview' | 'assets' | 'liabilities';
 
 export default function FinanceScreen() {
   const queryClient = useQueryClient();
   const [viewMode, setViewMode] = useState<ViewMode>('overview');
   const [refreshing, setRefreshing] = useState(false);
+  const [showAssetModal, setShowAssetModal] = useState(false);
+  const [showLiabilityModal, setShowLiabilityModal] = useState(false);
+  const insets = useSafeAreaInsets();
 
-  const { data: summary, isLoading } = useQuery({
+  const { data: summary, isLoading: summaryLoading } = useQuery({
     queryKey: ['finance', 'summary'],
     queryFn: financeApi.getSummary,
   });
@@ -45,152 +67,179 @@ export default function FinanceScreen() {
   };
 
   const formatCurrency = (cents: number | undefined | null) => {
-    if (cents == null) return '$0.00';
+    if (cents == null) return '$0';
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(cents / 100);
   };
 
-  if (isLoading && !summary) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#10B981" />
-      </View>
-    );
+  if (summaryLoading && !summary) {
+    return <LoadingState fullScreen message="Loading finances..." />;
   }
 
   return (
     <View style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
-        <Text variant="headlineMedium" style={styles.title}>
-          Finance
-        </Text>
+        <View>
+          <Text style={styles.title}>Finance</Text>
+          <Text style={styles.subtitle}>Track your wealth</Text>
+        </View>
       </View>
 
-      <SegmentedButtons
-        value={viewMode}
-        onValueChange={(value) => setViewMode(value as ViewMode)}
-        buttons={[
-          { value: 'overview', label: 'Overview' },
-          { value: 'assets', label: 'Assets' },
-          { value: 'liabilities', label: 'Debts' },
-        ]}
-        style={styles.viewSelector}
-      />
+      {/* View Selector */}
+      <View style={styles.viewSelectorContainer}>
+        <SegmentedButtons
+          value={viewMode}
+          onValueChange={(value) => setViewMode(value as ViewMode)}
+          buttons={[
+            { value: 'overview', label: 'Overview' },
+            { value: 'assets', label: 'Assets' },
+            { value: 'liabilities', label: 'Debts' },
+          ]}
+          style={styles.viewSelector}
+          theme={{
+            colors: {
+              secondaryContainer: colors.primary.main,
+              onSecondaryContainer: '#FFFFFF',
+              onSurface: colors.text.secondary,
+            },
+          }}
+        />
+      </View>
 
+      {/* Content */}
       <ScrollView
         style={styles.content}
+        contentContainerStyle={styles.contentContainer}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.primary.main}
+          />
         }
+        showsVerticalScrollIndicator={false}
       >
         {viewMode === 'overview' && summary && (
           <>
+            {/* Summary KPIs */}
+            <View style={styles.section}>
+              <Text style={styles.sectionLabel}>NET WORTH</Text>
+              <View style={styles.netWorthCard}>
+                <Text
+                  style={[
+                    styles.netWorthValue,
+                    { color: (summary.netWorth || 0) >= 0 ? colors.success : colors.error },
+                  ]}
+                >
+                  {formatCurrency(summary.netWorth)}
+                </Text>
+                <Text style={styles.netWorthLabel}>
+                  Assets: {formatCurrency(summary.totalAssets)} | Debts:{' '}
+                  {formatCurrency(summary.totalLiabilities)}
+                </Text>
+              </View>
+            </View>
+
             <View style={styles.kpiGrid}>
-              <MetricCard
-                label="Net Worth"
-                value={formatCurrency(summary.netWorth)}
-                variant={summary.netWorth >= 0 ? 'success' : 'danger'}
-              />
               <MetricCard
                 label="Total Assets"
                 value={formatCurrency(summary.totalAssets)}
+                variant="success"
               />
               <MetricCard
                 label="Total Liabilities"
                 value={formatCurrency(summary.totalLiabilities)}
-                variant="warning"
+                variant="danger"
               />
               {summary.runway != null && (
                 <MetricCard
                   label="Runway"
-                  value={`${Math.round(summary.runway)} months`}
+                  value={`${Math.round(summary.runway)} mo`}
                   helper="Months of expenses covered"
+                  variant="info"
                 />
               )}
             </View>
 
-            <Text variant="titleMedium" style={styles.sectionTitle}>
-              Recent Assets ({assets.length})
-            </Text>
-            {assets.slice(0, 3).map((asset: any) => (
-              <Card key={asset.id} style={styles.itemCard}>
-                <Card.Content>
-                  <View style={styles.itemHeader}>
-                    <Text variant="titleSmall">{asset.name}</Text>
-                    <Text variant="titleMedium" style={styles.assetValue}>
-                      {formatCurrency(asset.valueCents)}
-                    </Text>
-                  </View>
-                  <Text variant="bodySmall" style={styles.itemType}>
-                    {asset.category}
-                  </Text>
-                </Card.Content>
-              </Card>
-            ))}
+            {/* Recent Assets */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionLabel}>RECENT ASSETS</Text>
+                <TouchableOpacity onPress={() => setViewMode('assets')}>
+                  <Text style={styles.viewAllText}>View All</Text>
+                </TouchableOpacity>
+              </View>
+              {assets.slice(0, 3).map((asset: any) => (
+                <FinanceItemCard
+                  key={asset.id}
+                  name={asset.name}
+                  value={formatCurrency(asset.valueCents)}
+                  category={asset.category}
+                  type="asset"
+                />
+              ))}
+              {assets.length === 0 && (
+                <Text style={styles.emptyText}>No assets tracked yet</Text>
+              )}
+            </View>
 
-            <Text variant="titleMedium" style={styles.sectionTitle}>
-              Recent Liabilities ({liabilities.length})
-            </Text>
-            {liabilities.slice(0, 3).map((liability: any) => (
-              <Card key={liability.id} style={styles.itemCard}>
-                <Card.Content>
-                  <View style={styles.itemHeader}>
-                    <Text variant="titleSmall">{liability.name}</Text>
-                    <Text variant="titleMedium" style={styles.liabilityValue}>
-                      {formatCurrency(liability.balanceCents)}
-                    </Text>
-                  </View>
-                  <Text variant="bodySmall" style={styles.itemType}>
-                    {liability.type}
-                  </Text>
-                </Card.Content>
-              </Card>
-            ))}
+            {/* Recent Liabilities */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionLabel}>RECENT LIABILITIES</Text>
+                <TouchableOpacity onPress={() => setViewMode('liabilities')}>
+                  <Text style={styles.viewAllText}>View All</Text>
+                </TouchableOpacity>
+              </View>
+              {liabilities.slice(0, 3).map((liability: any) => (
+                <FinanceItemCard
+                  key={liability.id}
+                  name={liability.name}
+                  value={formatCurrency(liability.balanceCents)}
+                  category={`${liability.type} - ${liability.apr}% APR`}
+                  type="liability"
+                />
+              ))}
+              {liabilities.length === 0 && (
+                <Text style={styles.emptyText}>No liabilities tracked yet</Text>
+              )}
+            </View>
           </>
         )}
 
         {viewMode === 'assets' && (
           <>
-            <Button
-              mode="contained"
-              onPress={() => {
-                /* TODO: Open add asset modal */
-              }}
+            <AppButton
+              title="Add Asset"
+              onPress={() => setShowAssetModal(true)}
+              fullWidth
               style={styles.addButton}
-            >
-              Add Asset
-            </Button>
-            {assets.map((asset: any) => (
-              <Card key={asset.id} style={styles.itemCard}>
-                <Card.Content>
-                  <View style={styles.itemHeader}>
-                    <Text variant="titleSmall">{asset.name}</Text>
-                    <Text variant="titleMedium" style={styles.assetValue}>
-                      {formatCurrency(asset.valueCents)}
-                    </Text>
-                  </View>
-                  {asset.description && (
-                    <Text variant="bodySmall" style={styles.itemDescription}>
-                      {asset.description}
-                    </Text>
-                  )}
-                  <Text variant="bodySmall" style={styles.itemType}>
-                    {asset.category}
-                  </Text>
-                </Card.Content>
-              </Card>
-            ))}
-            {assets.length === 0 && (
-              <View style={styles.emptyState}>
-                <Text style={styles.emptyIcon}>💰</Text>
-                <Text variant="titleMedium" style={styles.emptyText}>
-                  No assets yet
-                </Text>
-                <Text variant="bodySmall" style={styles.emptySubtext}>
-                  Track your assets to monitor your financial health
-                </Text>
+            />
+            {assets.length === 0 ? (
+              <EmptyState
+                icon="💰"
+                title="No assets yet"
+                description="Track your assets to monitor your financial health"
+                actionLabel="Add Asset"
+                onAction={() => setShowAssetModal(true)}
+              />
+            ) : (
+              <View style={styles.itemsList}>
+                {assets.map((asset: any) => (
+                  <FinanceItemCard
+                    key={asset.id}
+                    name={asset.name}
+                    value={formatCurrency(asset.valueCents)}
+                    category={asset.category}
+                    description={asset.description}
+                    type="asset"
+                  />
+                ))}
               </View>
             )}
           </>
@@ -198,145 +247,208 @@ export default function FinanceScreen() {
 
         {viewMode === 'liabilities' && (
           <>
-            <Button
-              mode="contained"
-              onPress={() => {
-                /* TODO: Open add liability modal */
-              }}
+            <AppButton
+              title="Add Liability"
+              onPress={() => setShowLiabilityModal(true)}
+              fullWidth
               style={styles.addButton}
-            >
-              Add Liability
-            </Button>
-            {liabilities.map((liability: any) => (
-              <Card key={liability.id} style={styles.itemCard}>
-                <Card.Content>
-                  <View style={styles.itemHeader}>
-                    <Text variant="titleSmall">{liability.name}</Text>
-                    <Text variant="titleMedium" style={styles.liabilityValue}>
-                      {formatCurrency(liability.balanceCents)}
-                    </Text>
-                  </View>
-                  {liability.description && (
-                    <Text variant="bodySmall" style={styles.itemDescription}>
-                      {liability.description}
-                    </Text>
-                  )}
-                  <Text variant="bodySmall" style={styles.itemType}>
-                    {liability.type} • {liability.apr}% APR
-                  </Text>
-                </Card.Content>
-              </Card>
-            ))}
-            {liabilities.length === 0 && (
-              <View style={styles.emptyState}>
-                <Text style={styles.emptyIcon}>📊</Text>
-                <Text variant="titleMedium" style={styles.emptyText}>
-                  No liabilities yet
-                </Text>
-                <Text variant="bodySmall" style={styles.emptySubtext}>
-                  Track debts and liabilities for complete financial picture
-                </Text>
+            />
+            {liabilities.length === 0 ? (
+              <EmptyState
+                icon="📊"
+                title="No liabilities yet"
+                description="Track debts and liabilities for complete financial picture"
+                actionLabel="Add Liability"
+                onAction={() => setShowLiabilityModal(true)}
+              />
+            ) : (
+              <View style={styles.itemsList}>
+                {liabilities.map((liability: any) => (
+                  <FinanceItemCard
+                    key={liability.id}
+                    name={liability.name}
+                    value={formatCurrency(liability.balanceCents)}
+                    category={`${liability.type} - ${liability.apr}% APR`}
+                    description={liability.description}
+                    type="liability"
+                  />
+                ))}
               </View>
             )}
           </>
         )}
       </ScrollView>
+
+      {/* TODO: Add modals for creating assets and liabilities */}
     </View>
   );
 }
 
+// Finance Item Card Component
+interface FinanceItemCardProps {
+  name: string;
+  value: string;
+  category?: string;
+  description?: string;
+  type: 'asset' | 'liability';
+}
+
+const FinanceItemCard: React.FC<FinanceItemCardProps> = ({
+  name,
+  value,
+  category,
+  description,
+  type,
+}) => {
+  return (
+    <View style={styles.itemCard}>
+      <View style={styles.itemContent}>
+        <View style={styles.itemInfo}>
+          <Text style={styles.itemName}>{name}</Text>
+          {description && (
+            <Text style={styles.itemDescription} numberOfLines={2}>
+              {description}
+            </Text>
+          )}
+          {category && <Text style={styles.itemCategory}>{category}</Text>}
+        </View>
+        <Text
+          style={[
+            styles.itemValue,
+            { color: type === 'asset' ? colors.success : colors.error },
+          ]}
+        >
+          {value}
+        </Text>
+      </View>
+    </View>
+  );
+};
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#0F172A',
+    backgroundColor: colors.background.primary,
   },
   header: {
-    padding: 20,
-    paddingTop: 12,
-  },
-  title: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-  },
-  viewSelector: {
-    marginHorizontal: 20,
-    marginBottom: 12,
-  },
-  content: {
-    flex: 1,
-    padding: 20,
-  },
-  kpiGrid: {
-    gap: 14,
-    marginBottom: 28,
-  },
-  sectionTitle: {
-    color: '#FFFFFF',
-    marginTop: 20,
-    marginBottom: 14,
-    fontWeight: '600',
-    fontSize: 17,
-  },
-  itemCard: {
-    backgroundColor: '#1E293B',
-    marginBottom: 14,
-    borderRadius: 14,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-  },
-  itemHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.base,
   },
-  assetValue: {
-    color: '#10B981',
-    fontWeight: '700',
+  title: {
+    fontSize: typography.size['2xl'],
+    fontWeight: typography.weight.bold,
+    color: colors.text.primary,
   },
-  liabilityValue: {
-    color: '#EF4444',
-    fontWeight: '700',
+  subtitle: {
+    fontSize: typography.size.sm,
+    color: colors.text.tertiary,
+    marginTop: spacing.xs,
   },
-  itemType: {
-    color: '#94A3B8',
-    fontSize: 13,
+  viewSelectorContainer: {
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.md,
   },
-  itemDescription: {
-    color: '#94A3B8',
-    marginBottom: 6,
-    lineHeight: 20,
+  viewSelector: {
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.md,
+  },
+  content: {
+    flex: 1,
+  },
+  contentContainer: {
+    padding: spacing.lg,
+    paddingTop: 0,
+  },
+  section: {
+    marginBottom: spacing.xl,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  sectionLabel: {
+    fontSize: typography.size.xs,
+    fontWeight: typography.weight.semibold,
+    color: colors.text.tertiary,
+    letterSpacing: typography.letterSpacing.widest,
+  },
+  viewAllText: {
+    fontSize: typography.size.sm,
+    color: colors.primary.main,
+    fontWeight: typography.weight.medium,
+  },
+  netWorthCard: {
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.xl,
+    padding: spacing.xl,
+    alignItems: 'center',
+    ...shadows.md,
+  },
+  netWorthValue: {
+    fontSize: typography.size['4xl'],
+    fontWeight: typography.weight.bold,
+    marginBottom: spacing.sm,
+  },
+  netWorthLabel: {
+    fontSize: typography.size.sm,
+    color: colors.text.tertiary,
+  },
+  kpiGrid: {
+    gap: spacing.md,
+    marginBottom: spacing.xl,
   },
   addButton: {
-    backgroundColor: '#10B981',
-    marginBottom: 20,
+    marginBottom: spacing.lg,
   },
-  emptyState: {
+  itemsList: {
+    gap: spacing.md,
+  },
+  itemCard: {
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.lg,
+    marginBottom: spacing.md,
+    ...shadows.sm,
+  },
+  itemContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 48,
-    marginTop: 20,
+    padding: spacing.base,
   },
-  emptyIcon: {
-    fontSize: 56,
-    marginBottom: 16,
+  itemInfo: {
+    flex: 1,
+    marginRight: spacing.md,
+  },
+  itemName: {
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.semibold,
+    color: colors.text.primary,
+    marginBottom: spacing.xs,
+  },
+  itemDescription: {
+    fontSize: typography.size.sm,
+    color: colors.text.tertiary,
+    lineHeight: typography.size.sm * typography.lineHeight.relaxed,
+    marginBottom: spacing.xs,
+  },
+  itemCategory: {
+    fontSize: typography.size.sm,
+    color: colors.text.tertiary,
+  },
+  itemValue: {
+    fontSize: typography.size.lg,
+    fontWeight: typography.weight.bold,
   },
   emptyText: {
-    color: '#FFFFFF',
-    marginBottom: 8,
-    fontWeight: '600',
-  },
-  emptySubtext: {
-    color: '#94A3B8',
+    fontSize: typography.size.sm,
+    color: colors.text.tertiary,
     textAlign: 'center',
-    lineHeight: 20,
+    paddingVertical: spacing.lg,
   },
 });

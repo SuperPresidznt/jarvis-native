@@ -1,17 +1,79 @@
 /**
  * Settings Screen
- * User preferences and app configuration
+ * Professional dark-themed settings and preferences
  */
 
 import React from 'react';
-import { View, StyleSheet, ScrollView, Alert } from 'react-native';
-import { List, Divider, Switch, Text } from 'react-native-paper';
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  Alert,
+  Text,
+  TouchableOpacity,
+} from 'react-native';
+import { Switch } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../store/authStore';
+import {
+  colors,
+  typography,
+  spacing,
+  borderRadius,
+  shadows,
+} from '../../theme';
+
+interface SettingItemProps {
+  icon: string;
+  title: string;
+  subtitle?: string;
+  onPress?: () => void;
+  rightElement?: React.ReactNode;
+  danger?: boolean;
+}
+
+const SettingItem: React.FC<SettingItemProps> = ({
+  icon,
+  title,
+  subtitle,
+  onPress,
+  rightElement,
+  danger = false,
+}) => {
+  const content = (
+    <View style={styles.settingItem}>
+      <View style={styles.settingIcon}>
+        <Text style={styles.settingIconText}>{icon}</Text>
+      </View>
+      <View style={styles.settingContent}>
+        <Text style={[styles.settingTitle, danger && styles.dangerText]}>
+          {title}
+        </Text>
+        {subtitle && <Text style={styles.settingSubtitle}>{subtitle}</Text>}
+      </View>
+      {rightElement}
+      {onPress && !rightElement && (
+        <Text style={styles.chevron}>›</Text>
+      )}
+    </View>
+  );
+
+  if (onPress) {
+    return (
+      <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
+        {content}
+      </TouchableOpacity>
+    );
+  }
+
+  return content;
+};
 
 export default function SettingsScreen() {
   const { user, logout } = useAuthStore();
   const [notificationsEnabled, setNotificationsEnabled] = React.useState(true);
   const [biometricEnabled, setBiometricEnabled] = React.useState(false);
+  const insets = useSafeAreaInsets();
 
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
@@ -27,116 +89,133 @@ export default function SettingsScreen() {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 32 }}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={[
+        styles.contentContainer,
+        { paddingBottom: insets.bottom + spacing['3xl'] },
+      ]}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Account Section */}
       <View style={styles.section}>
-        <Text variant="titleMedium" style={styles.sectionTitle}>
-          Account
-        </Text>
-        <List.Item
-          title={user?.email || 'demo@jarvis.app'}
-          titleStyle={{ fontWeight: '500' }}
-          description="Email address"
-          descriptionStyle={{ fontSize: 13 }}
-          left={(props) => <List.Icon {...props} icon="account" color="#007AFF" />}
-        />
-        <Divider />
-        <List.Item
-          title={user?.timezone || 'America/Chicago'}
-          titleStyle={{ fontWeight: '500' }}
-          description="Timezone"
-          descriptionStyle={{ fontSize: 13 }}
-          left={(props) => <List.Icon {...props} icon="clock-outline" color="#007AFF" />}
-        />
-        <Divider />
-        <List.Item
-          title={user?.currency || 'USD'}
-          titleStyle={{ fontWeight: '500' }}
-          description="Currency"
-          descriptionStyle={{ fontSize: 13 }}
-          left={(props) => <List.Icon {...props} icon="currency-usd" color="#007AFF" />}
-        />
+        <Text style={styles.sectionLabel}>ACCOUNT</Text>
+        <View style={styles.sectionContent}>
+          <SettingItem
+            icon="👤"
+            title={user?.email || 'demo@jarvis.app'}
+            subtitle="Email address"
+          />
+          <View style={styles.divider} />
+          <SettingItem
+            icon="🌐"
+            title={user?.timezone || 'America/Chicago'}
+            subtitle="Timezone"
+            onPress={() => {/* TODO: Open timezone picker */}}
+          />
+          <View style={styles.divider} />
+          <SettingItem
+            icon="💵"
+            title={user?.currency || 'USD'}
+            subtitle="Currency"
+            onPress={() => {/* TODO: Open currency picker */}}
+          />
+        </View>
       </View>
 
+      {/* Notifications Section */}
       <View style={styles.section}>
-        <Text variant="titleMedium" style={styles.sectionTitle}>
-          Notifications
-        </Text>
-        <List.Item
-          title="Push Notifications"
-          titleStyle={{ fontWeight: '500' }}
-          description="Receive notifications for tasks and events"
-          descriptionStyle={{ fontSize: 13 }}
-          left={(props) => <List.Icon {...props} icon="bell-outline" color="#007AFF" />}
-          right={() => (
-            <Switch
-              value={notificationsEnabled}
-              onValueChange={setNotificationsEnabled}
-              color="#007AFF"
-            />
-          )}
-        />
+        <Text style={styles.sectionLabel}>NOTIFICATIONS</Text>
+        <View style={styles.sectionContent}>
+          <SettingItem
+            icon="🔔"
+            title="Push Notifications"
+            subtitle="Receive notifications for tasks and events"
+            rightElement={
+              <Switch
+                value={notificationsEnabled}
+                onValueChange={setNotificationsEnabled}
+                trackColor={{
+                  false: colors.background.tertiary,
+                  true: `${colors.primary.main}80`,
+                }}
+                thumbColor={notificationsEnabled ? colors.primary.main : colors.text.disabled}
+              />
+            }
+          />
+        </View>
       </View>
 
+      {/* Security Section */}
       <View style={styles.section}>
-        <Text variant="titleMedium" style={styles.sectionTitle}>
-          Security
-        </Text>
-        <List.Item
-          title="Biometric Authentication"
-          titleStyle={{ fontWeight: '500' }}
-          description="Use fingerprint or face ID"
-          descriptionStyle={{ fontSize: 13 }}
-          left={(props) => <List.Icon {...props} icon="fingerprint" color="#007AFF" />}
-          right={() => (
-            <Switch
-              value={biometricEnabled}
-              onValueChange={setBiometricEnabled}
-              color="#007AFF"
-            />
-          )}
-        />
+        <Text style={styles.sectionLabel}>SECURITY</Text>
+        <View style={styles.sectionContent}>
+          <SettingItem
+            icon="🔐"
+            title="Biometric Authentication"
+            subtitle="Use fingerprint or face ID"
+            rightElement={
+              <Switch
+                value={biometricEnabled}
+                onValueChange={setBiometricEnabled}
+                trackColor={{
+                  false: colors.background.tertiary,
+                  true: `${colors.primary.main}80`,
+                }}
+                thumbColor={biometricEnabled ? colors.primary.main : colors.text.disabled}
+              />
+            }
+          />
+          <View style={styles.divider} />
+          <SettingItem
+            icon="🔑"
+            title="Change Password"
+            onPress={() => {/* TODO: Open change password modal */}}
+          />
+        </View>
       </View>
 
+      {/* About Section */}
       <View style={styles.section}>
-        <Text variant="titleMedium" style={styles.sectionTitle}>
-          About
-        </Text>
-        <List.Item
-          title="Version"
-          titleStyle={{ fontWeight: '500' }}
-          description="1.0.0"
-          descriptionStyle={{ fontSize: 13 }}
-          left={(props) => <List.Icon {...props} icon="information-outline" color="#8E8E93" />}
-        />
-        <Divider />
-        <List.Item
-          title="Privacy Policy"
-          titleStyle={{ fontWeight: '500' }}
-          left={(props) => <List.Icon {...props} icon="shield-check-outline" color="#8E8E93" />}
-          right={(props) => <List.Icon {...props} icon="chevron-right" color="#C7C7CC" />}
-          onPress={() => {
-            // TODO: Open privacy policy
-          }}
-        />
-        <Divider />
-        <List.Item
-          title="Terms of Service"
-          titleStyle={{ fontWeight: '500' }}
-          left={(props) => <List.Icon {...props} icon="file-document-outline" color="#8E8E93" />}
-          right={(props) => <List.Icon {...props} icon="chevron-right" color="#C7C7CC" />}
-          onPress={() => {
-            // TODO: Open terms of service
-          }}
-        />
+        <Text style={styles.sectionLabel}>ABOUT</Text>
+        <View style={styles.sectionContent}>
+          <SettingItem
+            icon="ℹ️"
+            title="Version"
+            subtitle="1.0.0"
+          />
+          <View style={styles.divider} />
+          <SettingItem
+            icon="🛡️"
+            title="Privacy Policy"
+            onPress={() => {/* TODO: Open privacy policy */}}
+          />
+          <View style={styles.divider} />
+          <SettingItem
+            icon="📄"
+            title="Terms of Service"
+            onPress={() => {/* TODO: Open terms of service */}}
+          />
+        </View>
       </View>
 
+      {/* Logout Section */}
       <View style={styles.section}>
-        <List.Item
-          title="Logout"
-          titleStyle={styles.logoutText}
-          left={(props) => <List.Icon {...props} icon="logout" color="#FF3B30" />}
-          onPress={handleLogout}
-        />
+        <View style={styles.sectionContent}>
+          <SettingItem
+            icon="🚪"
+            title="Logout"
+            onPress={handleLogout}
+            danger
+          />
+        </View>
+      </View>
+
+      {/* App Info */}
+      <View style={styles.appInfo}>
+        <Text style={styles.appName}>Jarvis</Text>
+        <Text style={styles.appVersion}>Your Personal AI Assistant</Text>
+        <Text style={styles.appCopyright}>Made with care</Text>
       </View>
     </ScrollView>
   );
@@ -145,31 +224,89 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.background.primary,
+  },
+  contentContainer: {
+    paddingTop: spacing.base,
   },
   section: {
-    backgroundColor: '#FFFFFF',
-    marginTop: 20,
-    paddingVertical: 8,
-    borderRadius: 12,
-    marginHorizontal: 16,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    marginBottom: spacing.lg,
   },
-  sectionTitle: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    color: '#8E8E93',
-    fontWeight: '600',
-    fontSize: 13,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+  sectionLabel: {
+    fontSize: typography.size.xs,
+    fontWeight: typography.weight.semibold,
+    color: colors.text.tertiary,
+    letterSpacing: typography.letterSpacing.widest,
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.sm,
   },
-  logoutText: {
-    color: '#FF3B30',
-    fontWeight: '600',
+  sectionContent: {
+    backgroundColor: colors.background.secondary,
+    marginHorizontal: spacing.lg,
+    borderRadius: borderRadius.lg,
+    ...shadows.sm,
+  },
+  settingItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: spacing.base,
+  },
+  settingIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.background.tertiary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.md,
+  },
+  settingIconText: {
+    fontSize: 18,
+  },
+  settingContent: {
+    flex: 1,
+  },
+  settingTitle: {
+    fontSize: typography.size.base,
+    fontWeight: typography.weight.medium,
+    color: colors.text.primary,
+  },
+  settingSubtitle: {
+    fontSize: typography.size.sm,
+    color: colors.text.tertiary,
+    marginTop: spacing.xs,
+  },
+  chevron: {
+    fontSize: 24,
+    color: colors.text.tertiary,
+    marginLeft: spacing.sm,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: colors.border.subtle,
+    marginLeft: spacing.base + 40 + spacing.md,
+  },
+  dangerText: {
+    color: colors.error,
+  },
+  appInfo: {
+    alignItems: 'center',
+    paddingVertical: spacing['3xl'],
+    paddingHorizontal: spacing.lg,
+  },
+  appName: {
+    fontSize: typography.size.xl,
+    fontWeight: typography.weight.bold,
+    color: colors.primary.main,
+    marginBottom: spacing.xs,
+  },
+  appVersion: {
+    fontSize: typography.size.sm,
+    color: colors.text.tertiary,
+    marginBottom: spacing.sm,
+  },
+  appCopyright: {
+    fontSize: typography.size.xs,
+    color: colors.text.disabled,
   },
 });

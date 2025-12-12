@@ -1,13 +1,28 @@
 /**
  * Calendar Screen
- * Calendar events with Google Calendar sync
+ * Professional calendar events view with Google Calendar sync
  */
 
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, RefreshControl } from 'react-native';
-import { Text, Card, Button, ActivityIndicator, Chip, IconButton } from 'react-native-paper';
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  RefreshControl,
+  Text,
+  TouchableOpacity,
+} from 'react-native';
+import { IconButton } from 'react-native-paper';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { calendarApi } from '../../services/calendar.api';
+import { AppButton, AppChip, EmptyState, LoadingState } from '../../components/ui';
+import {
+  colors,
+  typography,
+  spacing,
+  borderRadius,
+  shadows,
+} from '../../theme';
 
 export default function CalendarScreen() {
   const queryClient = useQueryClient();
@@ -16,7 +31,9 @@ export default function CalendarScreen() {
 
   const now = new Date();
   const today = now.toISOString().split('T')[0];
-  const weekLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const weekLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split('T')[0];
 
   const { data: events = [], isLoading } = useQuery({
     queryKey: ['calendar', 'events', viewMode],
@@ -36,8 +53,7 @@ export default function CalendarScreen() {
     queryFn: calendarApi.getSyncSettings,
   });
 
-  // Get the first Google Calendar sync (if any)
-  const googleSync = syncSettings.find(s => s.provider === 'google');
+  const googleSync = syncSettings.find((s) => s.provider === 'google');
 
   const triggerSyncMutation = useMutation({
     mutationFn: calendarApi.triggerSync,
@@ -73,135 +89,162 @@ export default function CalendarScreen() {
   };
 
   if (isLoading && events.length === 0) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#10B981" />
-      </View>
-    );
+    return <LoadingState fullScreen message="Loading calendar..." />;
   }
 
   return (
     <View style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
-        <Text variant="headlineMedium" style={styles.title}>
-          Calendar
-        </Text>
-        <IconButton
-          icon="sync"
-          iconColor="#10B981"
+        <View>
+          <Text style={styles.title}>Calendar</Text>
+          <Text style={styles.subtitle}>
+            {events.length} event{events.length !== 1 ? 's' : ''}
+          </Text>
+        </View>
+        <TouchableOpacity
           onPress={() => triggerSyncMutation.mutate()}
           disabled={triggerSyncMutation.isPending}
-        />
+          style={styles.syncButton}
+        >
+          <Text style={styles.syncButtonText}>
+            {triggerSyncMutation.isPending ? 'Syncing...' : 'Sync'}
+          </Text>
+        </TouchableOpacity>
       </View>
 
+      {/* Sync Status */}
       {googleSync && (
-        <Card style={styles.syncCard}>
-          <Card.Content>
-            <View style={styles.syncInfo}>
-              <Text variant="bodySmall" style={styles.syncText}>
-                Google Calendar: {googleSync.syncEnabled ? 'Connected' : 'Not Connected'}
+        <View style={styles.syncCard}>
+          <View style={styles.syncInfo}>
+            <View style={styles.syncStatus}>
+              <View
+                style={[
+                  styles.statusDot,
+                  {
+                    backgroundColor: googleSync.syncEnabled
+                      ? colors.success
+                      : colors.text.disabled,
+                  },
+                ]}
+              />
+              <Text style={styles.syncText}>
+                Google Calendar:{' '}
+                {googleSync.syncEnabled ? 'Connected' : 'Not Connected'}
               </Text>
-              {googleSync.lastSyncAt && (
-                <Text variant="bodySmall" style={styles.syncText}>
-                  Last sync: {new Date(googleSync.lastSyncAt).toLocaleString()}
-                </Text>
-              )}
             </View>
-          </Card.Content>
-        </Card>
+            {googleSync.lastSyncAt && (
+              <Text style={styles.lastSyncText}>
+                Last sync: {new Date(googleSync.lastSyncAt).toLocaleString()}
+              </Text>
+            )}
+          </View>
+        </View>
       )}
 
-      <View style={styles.filterRow}>
+      {/* View Filters */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.filterContainer}
+        contentContainerStyle={styles.filterContent}
+      >
         {(['today', 'week', 'all'] as const).map((mode) => (
-          <Chip
+          <AppChip
             key={mode}
+            label={mode === 'today' ? 'Today' : mode === 'week' ? 'This Week' : 'All'}
             selected={viewMode === mode}
             onPress={() => setViewMode(mode)}
-            style={styles.filterChip}
-          >
-            {mode === 'today' ? 'Today' : mode === 'week' ? 'This Week' : 'All'}
-          </Chip>
+          />
         ))}
-      </View>
+      </ScrollView>
 
+      {/* Content */}
       <ScrollView
         style={styles.content}
+        contentContainerStyle={styles.contentContainer}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.primary.main}
+          />
         }
+        showsVerticalScrollIndicator={false}
       >
-        <Button
-          mode="contained"
+        <AppButton
+          title="New Event"
           onPress={() => {
             /* TODO: Open create event modal */
           }}
+          fullWidth
           style={styles.createButton}
-        >
-          New Event
-        </Button>
+        />
 
         {events.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>📅</Text>
-            <Text variant="headlineSmall" style={styles.emptyText}>
-              No events
-            </Text>
-            <Text variant="bodyMedium" style={styles.emptySubtext}>
-              {viewMode === 'today'
+          <EmptyState
+            icon="📅"
+            title="No events"
+            description={
+              viewMode === 'today'
                 ? 'Your schedule is clear for today'
                 : viewMode === 'week'
                 ? 'No events scheduled this week'
-                : 'Create events to keep track of your schedule'}
-            </Text>
-            <Button
-              mode="contained"
-              onPress={() => {
-                /* TODO: Open create event modal */
-              }}
-              style={styles.emptyButton}
-            >
-              Create Event
-            </Button>
-          </View>
+                : 'Create events to keep track of your schedule'
+            }
+            actionLabel="Create Event"
+            onAction={() => {
+              /* TODO: Open create event modal */
+            }}
+          />
         ) : (
-          events.map((event: any) => (
-            <Card key={event.id} style={styles.eventCard}>
-              <Card.Content>
-                <View style={styles.eventHeader}>
-                  <Text variant="titleMedium" style={styles.eventTitle}>
-                    {event.title}
+          <View style={styles.eventsList}>
+            {events.map((event: any) => (
+              <TouchableOpacity
+                key={event.id}
+                style={styles.eventCard}
+                activeOpacity={0.9}
+              >
+                <View style={styles.eventTimeColumn}>
+                  <Text style={styles.eventTimeText}>
+                    {formatTime(event.startAt)}
                   </Text>
-                  <Text variant="bodySmall" style={styles.eventDate}>
-                    {formatDate(event.startAt)}
+                  <View style={styles.eventTimeLine} />
+                  <Text style={styles.eventTimeText}>
+                    {formatTime(event.endAt)}
                   </Text>
                 </View>
 
-                <View style={styles.eventTime}>
-                  <Text variant="bodySmall" style={styles.timeText}>
-                    {formatTime(event.startAt)} - {formatTime(event.endAt)}
-                  </Text>
+                <View style={styles.eventContent}>
+                  <View style={styles.eventHeader}>
+                    <Text style={styles.eventTitle}>{event.title}</Text>
+                    <AppChip
+                      label={formatDate(event.startAt)}
+                      variant="info"
+                      compact
+                    />
+                  </View>
+
+                  {event.description && (
+                    <Text style={styles.eventDescription} numberOfLines={2}>
+                      {event.description}
+                    </Text>
+                  )}
+
+                  {event.location && (
+                    <View style={styles.eventLocation}>
+                      <Text style={styles.locationIcon}>📍</Text>
+                      <Text style={styles.locationText}>{event.location}</Text>
+                    </View>
+                  )}
+
+                  {event.isRecurring && (
+                    <AppChip label="Recurring" compact style={styles.recurringChip} />
+                  )}
                 </View>
-
-                {event.description && (
-                  <Text variant="bodySmall" style={styles.eventDescription}>
-                    {event.description}
-                  </Text>
-                )}
-
-                {event.location && (
-                  <Text variant="bodySmall" style={styles.eventLocation}>
-                    📍 {event.location}
-                  </Text>
-                )}
-
-                {event.isRecurring && (
-                  <Chip compact style={styles.recurringChip}>
-                    Recurring
-                  </Chip>
-                )}
-              </Card.Content>
-            </Card>
-          ))
+              </TouchableOpacity>
+            ))}
+          </View>
         )}
       </ScrollView>
     </View>
@@ -211,123 +254,150 @@ export default function CalendarScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#0F172A',
+    backgroundColor: colors.background.primary,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
-    paddingTop: 12,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.base,
   },
   title: {
-    color: '#FFFFFF',
-    fontWeight: '700',
+    fontSize: typography.size['2xl'],
+    fontWeight: typography.weight.bold,
+    color: colors.text.primary,
+  },
+  subtitle: {
+    fontSize: typography.size.sm,
+    color: colors.text.tertiary,
+    marginTop: spacing.xs,
+  },
+  syncButton: {
+    backgroundColor: colors.background.tertiary,
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.sm,
+  },
+  syncButtonText: {
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.medium,
+    color: colors.text.secondary,
   },
   syncCard: {
-    backgroundColor: '#1E293B',
-    marginHorizontal: 20,
-    marginBottom: 12,
-    borderRadius: 12,
-    elevation: 1,
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.md,
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    ...shadows.xs,
   },
   syncInfo: {
-    gap: 6,
+    gap: spacing.xs,
+  },
+  syncStatus: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   syncText: {
-    color: '#94A3B8',
-    fontSize: 13,
+    fontSize: typography.size.sm,
+    color: colors.text.secondary,
   },
-  filterRow: {
+  lastSyncText: {
+    fontSize: typography.size.xs,
+    color: colors.text.tertiary,
+    marginLeft: spacing.base + spacing.sm,
+  },
+  filterContainer: {
+    marginBottom: spacing.md,
+  },
+  filterContent: {
+    paddingHorizontal: spacing.lg,
+    gap: spacing.sm,
     flexDirection: 'row',
-    gap: 10,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-  },
-  filterChip: {
-    backgroundColor: '#1E293B',
   },
   content: {
     flex: 1,
-    padding: 20,
+  },
+  contentContainer: {
+    padding: spacing.lg,
+    paddingTop: 0,
   },
   createButton: {
-    backgroundColor: '#10B981',
-    marginBottom: 20,
+    marginBottom: spacing.lg,
+  },
+  eventsList: {
+    gap: spacing.md,
   },
   eventCard: {
-    backgroundColor: '#1E293B',
-    marginBottom: 14,
-    borderRadius: 14,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.lg,
+    flexDirection: 'row',
+    overflow: 'hidden',
+    ...shadows.sm,
+  },
+  eventTimeColumn: {
+    width: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: spacing.md,
+    backgroundColor: colors.background.tertiary,
+  },
+  eventTimeText: {
+    fontSize: typography.size.xs,
+    fontWeight: typography.weight.medium,
+    color: colors.text.tertiary,
+  },
+  eventTimeLine: {
+    width: 1,
+    flex: 1,
+    backgroundColor: colors.border.default,
+    marginVertical: spacing.xs,
+  },
+  eventContent: {
+    flex: 1,
+    padding: spacing.base,
   },
   eventHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   eventTitle: {
-    color: '#FFFFFF',
-    fontWeight: '700',
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.semibold,
+    color: colors.text.primary,
     flex: 1,
-  },
-  eventDate: {
-    color: '#10B981',
-    fontWeight: '600',
-  },
-  eventTime: {
-    marginBottom: 10,
-  },
-  timeText: {
-    color: '#94A3B8',
-    fontSize: 14,
+    marginRight: spacing.sm,
   },
   eventDescription: {
-    color: '#94A3B8',
-    marginBottom: 10,
-    lineHeight: 20,
+    fontSize: typography.size.sm,
+    color: colors.text.tertiary,
+    lineHeight: typography.size.sm * typography.lineHeight.relaxed,
+    marginBottom: spacing.sm,
   },
   eventLocation: {
-    color: '#94A3B8',
-    marginBottom: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginBottom: spacing.sm,
+  },
+  locationIcon: {
+    fontSize: 14,
+  },
+  locationText: {
+    fontSize: typography.size.sm,
+    color: colors.text.tertiary,
   },
   recurringChip: {
-    backgroundColor: '#334155',
-    alignSelf: 'flex-start',
-  },
-  emptyState: {
-    alignItems: 'center',
-    padding: 48,
-    marginTop: 40,
-  },
-  emptyIcon: {
-    fontSize: 64,
-    marginBottom: 20,
-  },
-  emptyText: {
-    color: '#FFFFFF',
-    marginBottom: 12,
-    fontWeight: '600',
-  },
-  emptySubtext: {
-    color: '#94A3B8',
-    textAlign: 'center',
-    marginBottom: 24,
-    lineHeight: 22,
-  },
-  emptyButton: {
-    backgroundColor: '#10B981',
-    paddingHorizontal: 16,
+    marginTop: spacing.xs,
   },
 });

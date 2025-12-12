@@ -1,0 +1,261 @@
+/**
+ * AppButton - Professional button component with proper states
+ * Supports: primary, secondary, outline, ghost, danger variants
+ * Features: loading state, disabled state, pressed animation
+ */
+
+import React, { useCallback, useState } from 'react';
+import {
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  ActivityIndicator,
+  View,
+  Animated,
+  ViewStyle,
+  TextStyle,
+} from 'react-native';
+import { colors, typography, spacing, borderRadius, shadows, animation } from '../../theme';
+
+type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
+type ButtonSize = 'small' | 'medium' | 'large';
+
+interface AppButtonProps {
+  title: string;
+  onPress: () => void;
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  loading?: boolean;
+  disabled?: boolean;
+  icon?: React.ReactNode;
+  iconPosition?: 'left' | 'right';
+  fullWidth?: boolean;
+  style?: ViewStyle;
+  textStyle?: TextStyle;
+}
+
+export const AppButton: React.FC<AppButtonProps> = ({
+  title,
+  onPress,
+  variant = 'primary',
+  size = 'medium',
+  loading = false,
+  disabled = false,
+  icon,
+  iconPosition = 'left',
+  fullWidth = false,
+  style,
+  textStyle,
+}) => {
+  const [scaleValue] = useState(new Animated.Value(1));
+
+  const handlePressIn = useCallback(() => {
+    Animated.spring(scaleValue, {
+      toValue: animation.pressedScale,
+      useNativeDriver: true,
+      speed: 50,
+      bounciness: 4,
+    }).start();
+  }, [scaleValue]);
+
+  const handlePressOut = useCallback(() => {
+    Animated.spring(scaleValue, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 50,
+      bounciness: 4,
+    }).start();
+  }, [scaleValue]);
+
+  const getButtonStyles = (): ViewStyle[] => {
+    const baseStyles: ViewStyle[] = [styles.button, styles[size]];
+
+    switch (variant) {
+      case 'primary':
+        baseStyles.push(styles.primaryButton);
+        break;
+      case 'secondary':
+        baseStyles.push(styles.secondaryButton);
+        break;
+      case 'outline':
+        baseStyles.push(styles.outlineButton);
+        break;
+      case 'ghost':
+        baseStyles.push(styles.ghostButton);
+        break;
+      case 'danger':
+        baseStyles.push(styles.dangerButton);
+        break;
+    }
+
+    if (disabled || loading) {
+      baseStyles.push(styles.disabled);
+    }
+
+    if (fullWidth) {
+      baseStyles.push(styles.fullWidth);
+    }
+
+    return baseStyles;
+  };
+
+  const getTextStyles = (): TextStyle[] => {
+    const baseStyles: TextStyle[] = [styles.text, styles[`${size}Text`]];
+
+    switch (variant) {
+      case 'primary':
+        baseStyles.push(styles.primaryText);
+        break;
+      case 'secondary':
+        baseStyles.push(styles.secondaryText);
+        break;
+      case 'outline':
+        baseStyles.push(styles.outlineText);
+        break;
+      case 'ghost':
+        baseStyles.push(styles.ghostText);
+        break;
+      case 'danger':
+        baseStyles.push(styles.dangerText);
+        break;
+    }
+
+    if (disabled || loading) {
+      baseStyles.push(styles.disabledText);
+    }
+
+    return baseStyles;
+  };
+
+  const getLoaderColor = (): string => {
+    if (variant === 'primary' || variant === 'danger') {
+      return '#FFFFFF';
+    }
+    return colors.primary.main;
+  };
+
+  return (
+    <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
+      <TouchableOpacity
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        disabled={disabled || loading}
+        activeOpacity={0.8}
+        style={[...getButtonStyles(), style]}
+      >
+        {loading ? (
+          <ActivityIndicator size="small" color={getLoaderColor()} />
+        ) : (
+          <View style={styles.content}>
+            {icon && iconPosition === 'left' && (
+              <View style={styles.iconLeft}>{icon}</View>
+            )}
+            <Text style={[...getTextStyles(), textStyle]}>{title}</Text>
+            {icon && iconPosition === 'right' && (
+              <View style={styles.iconRight}>{icon}</View>
+            )}
+          </View>
+        )}
+      </TouchableOpacity>
+    </Animated.View>
+  );
+};
+
+const styles = StyleSheet.create({
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: borderRadius.md,
+  },
+  // Size variants
+  small: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    minHeight: 36,
+  },
+  medium: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    minHeight: 48,
+  },
+  large: {
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.base,
+    minHeight: 56,
+  },
+  // Variant styles
+  primaryButton: {
+    backgroundColor: colors.primary.main,
+    ...shadows.sm,
+  },
+  secondaryButton: {
+    backgroundColor: colors.background.tertiary,
+  },
+  outlineButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 1.5,
+    borderColor: colors.border.default,
+  },
+  ghostButton: {
+    backgroundColor: 'transparent',
+  },
+  dangerButton: {
+    backgroundColor: colors.error,
+    ...shadows.sm,
+  },
+  // Disabled state
+  disabled: {
+    opacity: 0.5,
+  },
+  fullWidth: {
+    width: '100%',
+  },
+  // Content layout
+  content: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconLeft: {
+    marginRight: spacing.sm,
+  },
+  iconRight: {
+    marginLeft: spacing.sm,
+  },
+  // Text styles
+  text: {
+    fontWeight: typography.weight.semibold,
+    letterSpacing: typography.letterSpacing.wide,
+  },
+  smallText: {
+    fontSize: typography.size.sm,
+  },
+  mediumText: {
+    fontSize: typography.size.base,
+  },
+  largeText: {
+    fontSize: typography.size.md,
+  },
+  primaryText: {
+    color: '#FFFFFF',
+  },
+  secondaryText: {
+    color: colors.text.primary,
+  },
+  outlineText: {
+    color: colors.text.primary,
+  },
+  ghostText: {
+    color: colors.primary.main,
+  },
+  dangerText: {
+    color: '#FFFFFF',
+  },
+  disabledText: {
+    color: colors.text.disabled,
+  },
+});
+
+export default AppButton;

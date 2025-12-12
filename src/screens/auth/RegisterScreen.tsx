@@ -1,6 +1,6 @@
 /**
  * Register Screen
- * New user registration
+ * Professional, polished registration with dark theme
  */
 
 import React, { useState } from 'react';
@@ -11,11 +11,22 @@ import {
   Platform,
   ScrollView,
   Alert,
+  Text,
+  TextInput,
+  TouchableOpacity,
 } from 'react-native';
-import { TextInput, Button, Text, HelperText } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types';
 import { useAuthStore } from '../../store/authStore';
+import { AppButton } from '../../components/ui';
+import {
+  colors,
+  typography,
+  spacing,
+  borderRadius,
+  shadows,
+} from '../../theme';
 
 type RegisterScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Register'>;
@@ -34,16 +45,13 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
     password?: string;
     confirmPassword?: string;
   }>({});
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+  const insets = useSafeAreaInsets();
 
   const { register, isLoading, error, clearError } = useAuthStore();
 
   const validateForm = (): boolean => {
-    const newErrors: {
-      name?: string;
-      email?: string;
-      password?: string;
-      confirmPassword?: string;
-    } = {};
+    const newErrors: typeof errors = {};
 
     if (!name.trim()) {
       newErrors.name = 'Name is required';
@@ -81,7 +89,6 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
         email: email.trim(),
         password,
       });
-      // Navigation handled automatically by RootNavigator
     } catch (err: any) {
       Alert.alert('Registration Failed', err.message || 'Could not create account');
     }
@@ -92,120 +99,166 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: insets.top + spacing['2xl'] },
+        ]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
         <View style={styles.header}>
-          <Text variant="displaySmall" style={styles.title}>
-            Create Account
-          </Text>
-          <Text variant="bodyLarge" style={styles.subtitle}>
-            Join Jarvis to boost your productivity
-          </Text>
+          <View style={styles.logoContainer}>
+            <Text style={styles.logo}>J</Text>
+          </View>
+          <Text style={styles.title}>Create Account</Text>
+          <Text style={styles.subtitle}>Join Jarvis to boost your productivity</Text>
         </View>
 
+        {/* Form */}
         <View style={styles.form}>
-          <TextInput
-            label="Full Name"
-            value={name}
-            onChangeText={setName}
-            mode="outlined"
-            autoCapitalize="words"
-            autoComplete="name"
-            error={!!errors.name}
-            disabled={isLoading}
-            style={styles.input}
-          />
-          <HelperText type="error" visible={!!errors.name}>
-            {errors.name}
-          </HelperText>
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Full Name</Text>
+            <TextInput
+              value={name}
+              onChangeText={setName}
+              placeholder="Enter your full name"
+              placeholderTextColor={colors.text.placeholder}
+              autoCapitalize="words"
+              autoComplete="name"
+              editable={!isLoading}
+              style={[
+                styles.input,
+                focusedField === 'name' && styles.inputFocused,
+                errors.name && styles.inputError,
+              ]}
+              onFocus={() => setFocusedField('name')}
+              onBlur={() => setFocusedField(null)}
+            />
+            {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
+          </View>
 
-          <TextInput
-            label="Email"
-            value={email}
-            onChangeText={setEmail}
-            mode="outlined"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoComplete="email"
-            error={!!errors.email}
-            disabled={isLoading}
-            style={styles.input}
-          />
-          <HelperText type="error" visible={!!errors.email}>
-            {errors.email}
-          </HelperText>
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Email</Text>
+            <TextInput
+              value={email}
+              onChangeText={setEmail}
+              placeholder="Enter your email"
+              placeholderTextColor={colors.text.placeholder}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoComplete="email"
+              editable={!isLoading}
+              style={[
+                styles.input,
+                focusedField === 'email' && styles.inputFocused,
+                errors.email && styles.inputError,
+              ]}
+              onFocus={() => setFocusedField('email')}
+              onBlur={() => setFocusedField(null)}
+            />
+            {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
+          </View>
 
-          <TextInput
-            label="Password"
-            value={password}
-            onChangeText={setPassword}
-            mode="outlined"
-            secureTextEntry={!showPassword}
-            autoCapitalize="none"
-            autoComplete="password-new"
-            error={!!errors.password}
-            disabled={isLoading}
-            right={
-              <TextInput.Icon
-                icon={showPassword ? 'eye-off' : 'eye'}
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Password</Text>
+            <View
+              style={[
+                styles.passwordContainer,
+                focusedField === 'password' && styles.inputFocused,
+                errors.password && styles.inputError,
+              ]}
+            >
+              <TextInput
+                value={password}
+                onChangeText={setPassword}
+                placeholder="Create a password"
+                placeholderTextColor={colors.text.placeholder}
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+                autoComplete="password-new"
+                editable={!isLoading}
+                style={styles.passwordInput}
+                onFocus={() => setFocusedField('password')}
+                onBlur={() => setFocusedField(null)}
+              />
+              <TouchableOpacity
                 onPress={() => setShowPassword(!showPassword)}
-              />
-            }
-            style={styles.input}
-          />
-          <HelperText type="error" visible={!!errors.password}>
-            {errors.password}
-          </HelperText>
+                style={styles.eyeButton}
+              >
+                <Text style={styles.eyeIcon}>{showPassword ? '👁️' : '👁️‍🗨️'}</Text>
+              </TouchableOpacity>
+            </View>
+            {errors.password && (
+              <Text style={styles.errorText}>{errors.password}</Text>
+            )}
+          </View>
 
-          <TextInput
-            label="Confirm Password"
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            mode="outlined"
-            secureTextEntry={!showConfirmPassword}
-            autoCapitalize="none"
-            error={!!errors.confirmPassword}
-            disabled={isLoading}
-            right={
-              <TextInput.Icon
-                icon={showConfirmPassword ? 'eye-off' : 'eye'}
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Confirm Password</Text>
+            <View
+              style={[
+                styles.passwordContainer,
+                focusedField === 'confirmPassword' && styles.inputFocused,
+                errors.confirmPassword && styles.inputError,
+              ]}
+            >
+              <TextInput
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                placeholder="Confirm your password"
+                placeholderTextColor={colors.text.placeholder}
+                secureTextEntry={!showConfirmPassword}
+                autoCapitalize="none"
+                editable={!isLoading}
+                style={styles.passwordInput}
+                onFocus={() => setFocusedField('confirmPassword')}
+                onBlur={() => setFocusedField(null)}
+              />
+              <TouchableOpacity
                 onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-              />
-            }
-            style={styles.input}
-          />
-          <HelperText type="error" visible={!!errors.confirmPassword}>
-            {errors.confirmPassword}
-          </HelperText>
+                style={styles.eyeButton}
+              >
+                <Text style={styles.eyeIcon}>
+                  {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            {errors.confirmPassword && (
+              <Text style={styles.errorText}>{errors.confirmPassword}</Text>
+            )}
+          </View>
 
-          {error && (
-            <HelperText type="error" visible={!!error}>
-              {error}
-            </HelperText>
-          )}
+          {error && <Text style={styles.errorText}>{error}</Text>}
 
-          <Button
-            mode="contained"
+          <AppButton
+            title="Create Account"
             onPress={handleRegister}
             loading={isLoading}
             disabled={isLoading}
-            style={styles.button}
-          >
-            Create Account
-          </Button>
+            fullWidth
+            size="large"
+            style={styles.registerButton}
+          />
 
-          <Button
-            mode="text"
+          <TouchableOpacity
             onPress={() => navigation.navigate('Login')}
             disabled={isLoading}
             style={styles.linkButton}
           >
-            Already have an account? Login
-          </Button>
+            <Text style={styles.linkText}>
+              Already have an account?{' '}
+              <Text style={styles.linkTextBold}>Login</Text>
+            </Text>
+          </TouchableOpacity>
         </View>
 
+        {/* Footer */}
         <View style={styles.footer}>
-          <Text variant="bodySmall" style={styles.footerText}>
-            By creating an account, you agree to our Terms of Service and Privacy Policy
+          <Text style={styles.footerText}>
+            By creating an account, you agree to our Terms of Service and
+            Privacy Policy
           </Text>
         </View>
       </ScrollView>
@@ -216,45 +269,122 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background.primary,
   },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'center',
-    padding: 24,
+    paddingHorizontal: spacing.xl,
+    paddingBottom: spacing['3xl'],
   },
   header: {
     alignItems: 'center',
-    marginBottom: 48,
+    marginBottom: spacing['3xl'],
+  },
+  logoContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 16,
+    backgroundColor: colors.primary.main,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.lg,
+    ...shadows.md,
+  },
+  logo: {
+    fontSize: typography.size['3xl'],
+    fontWeight: typography.weight.bold,
+    color: '#FFFFFF',
   },
   title: {
-    fontWeight: 'bold',
-    color: '#007AFF',
-    marginBottom: 8,
+    fontSize: typography.size['2xl'],
+    fontWeight: typography.weight.bold,
+    color: colors.text.primary,
+    marginBottom: spacing.xs,
   },
   subtitle: {
-    color: '#8E8E93',
+    fontSize: typography.size.base,
+    color: colors.text.tertiary,
     textAlign: 'center',
   },
   form: {
-    marginBottom: 24,
+    marginBottom: spacing.xl,
+  },
+  formGroup: {
+    marginBottom: spacing.md,
+  },
+  label: {
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.medium,
+    color: colors.text.secondary,
+    marginBottom: spacing.sm,
   },
   input: {
-    marginBottom: 8,
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.md,
+    borderWidth: 1.5,
+    borderColor: colors.border.default,
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.md,
+    fontSize: typography.size.base,
+    color: colors.text.primary,
   },
-  button: {
-    marginTop: 16,
-    paddingVertical: 8,
+  inputFocused: {
+    borderColor: colors.primary.main,
+  },
+  inputError: {
+    borderColor: colors.error,
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.md,
+    borderWidth: 1.5,
+    borderColor: colors.border.default,
+  },
+  passwordInput: {
+    flex: 1,
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.md,
+    fontSize: typography.size.base,
+    color: colors.text.primary,
+  },
+  eyeButton: {
+    padding: spacing.md,
+  },
+  eyeIcon: {
+    fontSize: 20,
+  },
+  errorText: {
+    fontSize: typography.size.sm,
+    color: colors.error,
+    marginTop: spacing.xs,
+  },
+  registerButton: {
+    marginTop: spacing.lg,
+    marginBottom: spacing.lg,
   },
   linkButton: {
-    marginTop: 8,
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+  },
+  linkText: {
+    fontSize: typography.size.base,
+    color: colors.text.tertiary,
+  },
+  linkTextBold: {
+    color: colors.primary.main,
+    fontWeight: typography.weight.semibold,
   },
   footer: {
     alignItems: 'center',
-    marginTop: 24,
+    marginTop: 'auto',
+    paddingTop: spacing.lg,
   },
   footerText: {
-    color: '#8E8E93',
+    fontSize: typography.size.sm,
+    color: colors.text.disabled,
     textAlign: 'center',
+    lineHeight: typography.size.sm * typography.lineHeight.relaxed,
   },
 });
