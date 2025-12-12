@@ -53,15 +53,16 @@ export default function App() {
         await initDatabase();
         console.log('[App] Database initialized');
 
-        // Check if we need to seed data
-        const shouldSeed = await needsSeeding();
-        if (shouldSeed) {
-          console.log('[App] Seeding database with sample data...');
-          await seedDatabase();
-          console.log('[App] Database seeded successfully');
-        } else {
-          console.log('[App] Database already has data, skipping seed');
-        }
+        // NOTE: Sample data seeding is DISABLED for production use
+        // Users start with a clean, empty database
+        // To enable demo data, uncomment the lines below:
+        //
+        // const shouldSeed = await needsSeeding();
+        // if (shouldSeed) {
+        //   console.log('[App] Seeding database with sample data...');
+        //   await seedDatabase();
+        //   console.log('[App] Database seeded successfully');
+        // }
 
         setIsReady(true);
       } catch (error) {

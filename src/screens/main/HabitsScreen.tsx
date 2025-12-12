@@ -3,7 +3,7 @@
  * Professional habit tracking with streaks and heatmap visualization
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -17,9 +17,8 @@ import {
   Animated,
 } from 'react-native';
 import { IconButton, Switch } from 'react-native-paper';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { habitsApi, Habit, HabitCadence } from '../../services/habits.api';
+import * as habitsDB from '../../database/habits';
 import { HabitHeatmap } from '../../components/HabitHeatmap';
 import { AppButton, AppChip, EmptyState, LoadingState } from '../../components/ui';
 import {
@@ -30,52 +29,84 @@ import {
   shadows,
 } from '../../theme';
 
+type HabitCadence = 'daily' | 'weekly' | 'monthly';
+
+interface Habit extends habitsDB.Habit {
+  isActive: boolean;
+  completionsToday?: number;
+}
+
 export default function HabitsScreen() {
-  const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
   const [showHeatmap, setShowHeatmap] = useState(false);
   const [heatmapHabit, setHeatmapHabit] = useState<Habit | null>(null);
+  const [habits, setHabits] = useState<Habit[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const insets = useSafeAreaInsets();
 
-  const { data: habits = [], isLoading } = useQuery({
-    queryKey: ['habits'],
-    queryFn: habitsApi.getHabits,
-  });
+  // Load habits from local database
+  const loadHabits = useCallback(async () => {
+    try {
+      const loadedHabits = await habitsDB.getHabits();
 
-  const logCompletionMutation = useMutation({
-    mutationFn: ({ habitId, date }: { habitId: string; date: string }) =>
-      habitsApi.logCompletion(habitId, { date }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['habits'] });
-    },
-  });
+      // Check completion status for today
+      const today = new Date().toISOString().split('T')[0];
+      const habitsWithStatus = await Promise.all(
+        loadedHabits.map(async (habit) => {
+          const isCompleted = await habitsDB.isHabitCompletedToday(habit.id);
+          return {
+            ...habit,
+            isActive: true, // All habits are active by default
+            completionsToday: isCompleted ? 1 : 0,
+          };
+        })
+      );
 
-  const deleteMutation = useMutation({
-    mutationFn: (id: string) => habitsApi.deleteHabit(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['habits'] });
-    },
-  });
+      setHabits(habitsWithStatus);
+    } catch (error) {
+      console.error('Error loading habits:', error);
+      Alert.alert('Error', 'Failed to load habits');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-  const toggleActiveMutation = useMutation({
-    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) =>
-      habitsApi.updateHabit(id, { isActive: !isActive }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['habits'] });
-    },
-  });
+  useEffect(() => {
+    loadHabits();
+  }, [loadHabits]);
+
+  // Listen for habit updates from modal
+  useEffect(() => {
+    const handleHabitsUpdated = () => {
+      loadHabits();
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('habitsUpdated', handleHabitsUpdated);
+      return () => window.removeEventListener('habitsUpdated', handleHabitsUpdated);
+    }
+  }, [loadHabits]);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await queryClient.invalidateQueries({ queryKey: ['habits'] });
+    await loadHabits();
     setRefreshing(false);
   };
 
-  const handleLogToday = (habitId: string) => {
-    const today = new Date().toISOString().split('T')[0];
-    logCompletionMutation.mutate({ habitId, date: today });
+  const handleLogToday = async (habitId: string) => {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const isCompleted = await habitsDB.isHabitCompletedToday(habitId);
+
+      // Toggle completion
+      await habitsDB.logHabitCompletion(habitId, today, !isCompleted);
+      await loadHabits();
+    } catch (error) {
+      console.error('Error logging habit:', error);
+      Alert.alert('Error', 'Failed to log habit completion');
+    }
   };
 
   const handleDelete = (habitId: string) => {
@@ -87,9 +118,25 @@ export default function HabitsScreen() {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => deleteMutation.mutate(habitId),
+          onPress: async () => {
+            try {
+              await habitsDB.deleteHabit(habitId);
+              await loadHabits();
+            } catch (error) {
+              console.error('Error deleting habit:', error);
+              Alert.alert('Error', 'Failed to delete habit');
+            }
+          },
         },
       ]
+    );
+  };
+
+  const handleToggleActive = async (habitId: string, isActive: boolean) => {
+    // For now, we'll just use the isActive flag in memory
+    // In a full implementation, you'd add an is_active column to the habits table
+    setHabits((prev) =>
+      prev.map((h) => (h.id === habitId ? { ...h, isActive: !isActive } : h))
     );
   };
 
@@ -167,10 +214,7 @@ export default function HabitsScreen() {
                     }}
                     onDelete={handleDelete}
                     onToggleActive={() =>
-                      toggleActiveMutation.mutate({
-                        id: habit.id,
-                        isActive: habit.isActive,
-                      })
+                      handleToggleActive(habit.id, habit.isActive)
                     }
                   />
                 ))}
@@ -193,10 +237,7 @@ export default function HabitsScreen() {
                     }}
                     onDelete={handleDelete}
                     onToggleActive={() =>
-                      toggleActiveMutation.mutate({
-                        id: habit.id,
-                        isActive: habit.isActive,
-                      })
+                      handleToggleActive(habit.id, habit.isActive)
                     }
                   />
                 ))}
@@ -399,13 +440,13 @@ const HabitFormModal: React.FC<HabitFormModalProps> = ({
   habit,
   onClose,
 }) => {
-  const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
   const [name, setName] = useState(habit?.name || '');
   const [description, setDescription] = useState(habit?.description || '');
   const [cadence, setCadence] = useState<HabitCadence>(habit?.cadence || 'daily');
   const [nameFocused, setNameFocused] = useState(false);
   const [descFocused, setDescFocused] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   React.useEffect(() => {
     if (visible) {
@@ -415,29 +456,33 @@ const HabitFormModal: React.FC<HabitFormModalProps> = ({
     }
   }, [visible, habit]);
 
-  const createMutation = useMutation({
-    mutationFn: (data: any) => habitsApi.createHabit(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['habits'] });
-      onClose();
-    },
-  });
+  const handleSubmit = async () => {
+    if (isSubmitting) return;
 
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) =>
-      habitsApi.updateHabit(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['habits'] });
-      onClose();
-    },
-  });
+    setIsSubmitting(true);
+    try {
+      const data = {
+        name,
+        description: description || undefined,
+        cadence,
+      };
 
-  const handleSubmit = () => {
-    const data = { name, description: description || undefined, cadence };
-    if (habit) {
-      updateMutation.mutate({ id: habit.id, data });
-    } else {
-      createMutation.mutate(data);
+      if (habit) {
+        await habitsDB.updateHabit(habit.id, data);
+      } else {
+        await habitsDB.createHabit(data);
+      }
+
+      onClose();
+      // Trigger parent refresh
+      setTimeout(() => {
+        window.dispatchEvent(new Event('habitsUpdated'));
+      }, 100);
+    } catch (error) {
+      console.error('Error saving habit:', error);
+      Alert.alert('Error', 'Failed to save habit');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -524,7 +569,7 @@ const HabitFormModal: React.FC<HabitFormModalProps> = ({
             <AppButton
               title={habit ? 'Update' : 'Create'}
               onPress={handleSubmit}
-              loading={createMutation.isPending || updateMutation.isPending}
+              loading={isSubmitting}
               disabled={!name.trim()}
               style={styles.modalButton}
             />
