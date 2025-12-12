@@ -142,12 +142,23 @@ export default function HabitsScreen() {
       >
         {activeHabits.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text variant="bodyLarge" style={styles.emptyText}>
-              No active habits
+            <Text style={styles.emptyIcon}>🎯</Text>
+            <Text variant="headlineSmall" style={styles.emptyText}>
+              No habits yet
             </Text>
-            <Text variant="bodySmall" style={styles.emptySubtext}>
-              Create your first habit to start tracking
+            <Text variant="bodyMedium" style={styles.emptySubtext}>
+              Start building consistent habits to track your progress and build momentum
             </Text>
+            <Button
+              mode="contained"
+              onPress={() => {
+                setSelectedHabit(null);
+                setShowCreateModal(true);
+              }}
+              style={styles.emptyButton}
+            >
+              Create Habit
+            </Button>
           </View>
         ) : (
           <>
@@ -459,35 +470,43 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    paddingTop: 8,
+    padding: 20,
+    paddingTop: 12,
   },
   title: {
     color: '#FFFFFF',
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   subtitle: {
     color: '#94A3B8',
-    marginTop: 4,
+    marginTop: 6,
+    fontSize: 14,
   },
   createButton: {
     backgroundColor: '#10B981',
   },
   content: {
     flex: 1,
-    padding: 16,
+    padding: 20,
   },
   sectionTitle: {
     color: '#FFFFFF',
-    marginTop: 24,
-    marginBottom: 12,
+    marginTop: 28,
+    marginBottom: 16,
+    fontWeight: '600',
   },
   habitCard: {
     backgroundColor: '#1E293B',
-    marginBottom: 12,
+    marginBottom: 16,
+    borderRadius: 14,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
   },
   habitCardInactive: {
-    opacity: 0.7,
+    opacity: 0.6,
   },
   habitHeader: {
     flexDirection: 'row',
@@ -501,16 +520,17 @@ const styles = StyleSheet.create({
   },
   habitName: {
     color: '#FFFFFF',
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   habitDescription: {
     color: '#94A3B8',
-    marginTop: 4,
+    marginTop: 6,
+    lineHeight: 20,
   },
   habitMeta: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 12,
     gap: 12,
   },
   frequencyChip: {
@@ -522,9 +542,10 @@ const styles = StyleSheet.create({
   },
   streakLabel: {
     color: '#10B981',
+    fontWeight: '600',
   },
   logButton: {
-    minWidth: 80,
+    minWidth: 90,
   },
   habitActions: {
     flexDirection: 'row',
@@ -547,14 +568,28 @@ const styles = StyleSheet.create({
   emptyState: {
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 32,
+    padding: 48,
+    marginTop: 40,
+  },
+  emptyIcon: {
+    fontSize: 64,
+    marginBottom: 20,
   },
   emptyText: {
-    color: '#94A3B8',
-    marginBottom: 8,
+    color: '#FFFFFF',
+    marginBottom: 12,
+    fontWeight: '600',
   },
   emptySubtext: {
-    color: '#64748B',
+    color: '#94A3B8',
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 24,
+    paddingHorizontal: 20,
+  },
+  emptyButton: {
+    backgroundColor: '#10B981',
+    paddingHorizontal: 16,
   },
   modalOverlay: {
     flex: 1,

@@ -73,7 +73,11 @@ export default function DashboardScreen() {
     <ScrollView
       style={styles.container}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor="#10B981"
+        />
       }
     >
       <View style={styles.content}>
@@ -82,10 +86,10 @@ export default function DashboardScreen() {
           <Text variant="labelSmall" style={styles.todayLabel}>
             TODAY
           </Text>
-          <Text variant="headlineMedium" style={styles.dateText}>
+          <Text variant="headlineLarge" style={styles.dateText}>
             {getFormattedDate()}
           </Text>
-          <Text variant="titleLarge" style={styles.greeting}>
+          <Text variant="titleMedium" style={styles.greeting}>
             {getGreeting()}
           </Text>
         </View>
@@ -98,15 +102,15 @@ export default function DashboardScreen() {
               value={metrics.starts}
               helper={
                 metrics.starts >= 3
-                  ? 'Momentum on.'
-                  : 'Micro-starts fuel the day.'
+                  ? 'Great momentum!'
+                  : 'Micro-starts fuel progress'
               }
               variant={metrics.starts >= 3 ? 'success' : 'default'}
             />
             <MetricCard
               label="Study minutes"
               value={metrics.studyMinutes}
-              helper="Daily learning logged"
+              helper="Daily learning time"
             />
             <MetricCard
               label="Cash on hand"
@@ -240,68 +244,87 @@ const styles = StyleSheet.create({
     backgroundColor: '#0F172A',
   },
   content: {
-    padding: 16,
-    gap: 24,
+    padding: 20,
+    gap: 28,
+    paddingBottom: 40,
   },
   header: {
-    gap: 4,
+    gap: 6,
+    paddingTop: 8,
   },
   todayLabel: {
     color: '#64748B',
-    letterSpacing: 2,
+    letterSpacing: 3,
+    fontWeight: '600',
   },
   dateText: {
     color: '#FFFFFF',
-    fontWeight: 'bold',
+    fontWeight: '700',
+    marginTop: 4,
   },
   greeting: {
     color: '#94A3B8',
+    marginTop: 2,
   },
   metricsGrid: {
-    gap: 12,
+    gap: 14,
   },
   controlsCard: {
     backgroundColor: '#1E293B',
     borderRadius: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
   },
   quickCaptureSection: {
-    gap: 12,
+    gap: 14,
   },
   sectionTitle: {
     color: '#FFFFFF',
-    fontWeight: 'bold',
+    fontWeight: '700',
+    fontSize: 18,
   },
   quickCaptureGrid: {
-    gap: 12,
+    gap: 14,
   },
   quickCaptureCard: {
     backgroundColor: '#1E293B',
-    borderRadius: 12,
+    borderRadius: 14,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
   },
   quickCaptureTitle: {
     color: '#FFFFFF',
     marginBottom: 12,
+    fontWeight: '600',
   },
   quickCaptureInput: {
     backgroundColor: '#0F172A',
-    borderRadius: 8,
-    borderWidth: 1,
+    borderRadius: 10,
+    borderWidth: 1.5,
     borderColor: '#334155',
-    padding: 12,
+    padding: 14,
     color: '#FFFFFF',
-    fontSize: 14,
+    fontSize: 15,
     marginBottom: 12,
     textAlignVertical: 'top',
+    minHeight: 90,
   },
   quickCaptureButtons: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    gap: 8,
+    gap: 10,
   },
   submitButton: {
     backgroundColor: '#10B981',
   },
   expandButton: {
-    borderColor: '#334155',
+    borderColor: '#475569',
+    borderWidth: 1.5,
   },
 });

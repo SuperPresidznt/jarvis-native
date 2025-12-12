@@ -325,12 +325,25 @@ export default function TasksScreen() {
       >
         {tasks.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text variant="bodyLarge" style={styles.emptyText}>
-              No tasks found
+            <Text style={styles.emptyIcon}>📋</Text>
+            <Text variant="headlineSmall" style={styles.emptyText}>
+              No tasks yet
             </Text>
-            <Text variant="bodySmall" style={styles.emptySubtext}>
-              Create your first task to get started
+            <Text variant="bodyMedium" style={styles.emptySubtext}>
+              {viewMode === 'list' && filterStatus !== 'all'
+                ? `No ${filterStatus === 'todo' ? 'pending' : filterStatus.replace('_', ' ')} tasks`
+                : 'Create your first task to get started'}
             </Text>
+            <Button
+              mode="contained"
+              onPress={() => {
+                setSelectedTask(null);
+                setShowCreateModal(true);
+              }}
+              style={styles.emptyButton}
+            >
+              Create Task
+            </Button>
           </View>
         ) : (
           <>
@@ -588,25 +601,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    paddingTop: 8,
+    padding: 20,
+    paddingTop: 12,
   },
   title: {
     color: '#FFFFFF',
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   createButton: {
     backgroundColor: '#10B981',
   },
   viewSelector: {
-    marginHorizontal: 16,
-    marginBottom: 8,
+    marginHorizontal: 20,
+    marginBottom: 12,
   },
   filterRow: {
     flexDirection: 'row',
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    gap: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
   },
   filterChip: {
     backgroundColor: '#1E293B',
@@ -615,8 +628,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listView: {
-    padding: 16,
-    gap: 12,
+    padding: 20,
+    gap: 14,
   },
   kanbanView: {
     flexDirection: 'row',
@@ -667,10 +680,16 @@ const styles = StyleSheet.create({
   },
   taskCard: {
     backgroundColor: '#1E293B',
-    marginBottom: 12,
+    marginBottom: 14,
+    borderRadius: 14,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
   },
   taskCardCompact: {
-    marginBottom: 8,
+    marginBottom: 10,
   },
   taskHeader: {
     flexDirection: 'row',
@@ -716,14 +735,27 @@ const styles = StyleSheet.create({
   emptyState: {
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 32,
+    padding: 48,
+    marginTop: 40,
+  },
+  emptyIcon: {
+    fontSize: 64,
+    marginBottom: 20,
   },
   emptyText: {
-    color: '#94A3B8',
-    marginBottom: 8,
+    color: '#FFFFFF',
+    marginBottom: 12,
+    fontWeight: '600',
   },
   emptySubtext: {
-    color: '#64748B',
+    color: '#94A3B8',
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 22,
+  },
+  emptyButton: {
+    backgroundColor: '#10B981',
+    paddingHorizontal: 16,
   },
   modalOverlay: {
     flex: 1,

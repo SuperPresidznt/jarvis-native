@@ -27,27 +27,33 @@ export default function SettingsScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 32 }}>
       <View style={styles.section}>
         <Text variant="titleMedium" style={styles.sectionTitle}>
           Account
         </Text>
         <List.Item
-          title={user?.email || 'No email'}
+          title={user?.email || 'demo@jarvis.app'}
+          titleStyle={{ fontWeight: '500' }}
           description="Email address"
-          left={(props) => <List.Icon {...props} icon="account" />}
+          descriptionStyle={{ fontSize: 13 }}
+          left={(props) => <List.Icon {...props} icon="account" color="#007AFF" />}
         />
         <Divider />
         <List.Item
           title={user?.timezone || 'America/Chicago'}
+          titleStyle={{ fontWeight: '500' }}
           description="Timezone"
-          left={(props) => <List.Icon {...props} icon="clock-outline" />}
+          descriptionStyle={{ fontSize: 13 }}
+          left={(props) => <List.Icon {...props} icon="clock-outline" color="#007AFF" />}
         />
         <Divider />
         <List.Item
           title={user?.currency || 'USD'}
+          titleStyle={{ fontWeight: '500' }}
           description="Currency"
-          left={(props) => <List.Icon {...props} icon="currency-usd" />}
+          descriptionStyle={{ fontSize: 13 }}
+          left={(props) => <List.Icon {...props} icon="currency-usd" color="#007AFF" />}
         />
       </View>
 
@@ -57,12 +63,15 @@ export default function SettingsScreen() {
         </Text>
         <List.Item
           title="Push Notifications"
+          titleStyle={{ fontWeight: '500' }}
           description="Receive notifications for tasks and events"
-          left={(props) => <List.Icon {...props} icon="bell-outline" />}
+          descriptionStyle={{ fontSize: 13 }}
+          left={(props) => <List.Icon {...props} icon="bell-outline" color="#007AFF" />}
           right={() => (
             <Switch
               value={notificationsEnabled}
               onValueChange={setNotificationsEnabled}
+              color="#007AFF"
             />
           )}
         />
@@ -74,10 +83,16 @@ export default function SettingsScreen() {
         </Text>
         <List.Item
           title="Biometric Authentication"
+          titleStyle={{ fontWeight: '500' }}
           description="Use fingerprint or face ID"
-          left={(props) => <List.Icon {...props} icon="fingerprint" />}
+          descriptionStyle={{ fontSize: 13 }}
+          left={(props) => <List.Icon {...props} icon="fingerprint" color="#007AFF" />}
           right={() => (
-            <Switch value={biometricEnabled} onValueChange={setBiometricEnabled} />
+            <Switch
+              value={biometricEnabled}
+              onValueChange={setBiometricEnabled}
+              color="#007AFF"
+            />
           )}
         />
       </View>
@@ -88,14 +103,17 @@ export default function SettingsScreen() {
         </Text>
         <List.Item
           title="Version"
+          titleStyle={{ fontWeight: '500' }}
           description="1.0.0"
-          left={(props) => <List.Icon {...props} icon="information-outline" />}
+          descriptionStyle={{ fontSize: 13 }}
+          left={(props) => <List.Icon {...props} icon="information-outline" color="#8E8E93" />}
         />
         <Divider />
         <List.Item
           title="Privacy Policy"
-          left={(props) => <List.Icon {...props} icon="shield-check-outline" />}
-          right={(props) => <List.Icon {...props} icon="chevron-right" />}
+          titleStyle={{ fontWeight: '500' }}
+          left={(props) => <List.Icon {...props} icon="shield-check-outline" color="#8E8E93" />}
+          right={(props) => <List.Icon {...props} icon="chevron-right" color="#C7C7CC" />}
           onPress={() => {
             // TODO: Open privacy policy
           }}
@@ -103,8 +121,9 @@ export default function SettingsScreen() {
         <Divider />
         <List.Item
           title="Terms of Service"
-          left={(props) => <List.Icon {...props} icon="file-document-outline" />}
-          right={(props) => <List.Icon {...props} icon="chevron-right" />}
+          titleStyle={{ fontWeight: '500' }}
+          left={(props) => <List.Icon {...props} icon="file-document-outline" color="#8E8E93" />}
+          right={(props) => <List.Icon {...props} icon="chevron-right" color="#C7C7CC" />}
           onPress={() => {
             // TODO: Open terms of service
           }}
@@ -130,15 +149,27 @@ const styles = StyleSheet.create({
   },
   section: {
     backgroundColor: '#FFFFFF',
-    marginTop: 16,
+    marginTop: 20,
     paddingVertical: 8,
+    borderRadius: 12,
+    marginHorizontal: 16,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   sectionTitle: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
     color: '#8E8E93',
+    fontWeight: '600',
+    fontSize: 13,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   logoutText: {
     color: '#FF3B30',
+    fontWeight: '600',
   },
 });

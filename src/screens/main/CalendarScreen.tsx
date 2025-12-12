@@ -142,16 +142,26 @@ export default function CalendarScreen() {
 
         {events.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text variant="bodyLarge" style={styles.emptyText}>
-              No events found
+            <Text style={styles.emptyIcon}>📅</Text>
+            <Text variant="headlineSmall" style={styles.emptyText}>
+              No events
             </Text>
-            <Text variant="bodySmall" style={styles.emptySubtext}>
+            <Text variant="bodyMedium" style={styles.emptySubtext}>
               {viewMode === 'today'
-                ? 'No events scheduled for today'
+                ? 'Your schedule is clear for today'
                 : viewMode === 'week'
-                ? 'No events this week'
-                : 'Create your first event'}
+                ? 'No events scheduled this week'
+                : 'Create events to keep track of your schedule'}
             </Text>
+            <Button
+              mode="contained"
+              onPress={() => {
+                /* TODO: Open create event modal */
+              }}
+              style={styles.emptyButton}
+            >
+              Create Event
+            </Button>
           </View>
         ) : (
           events.map((event: any) => (
@@ -213,44 +223,53 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    paddingTop: 8,
+    padding: 20,
+    paddingTop: 12,
   },
   title: {
     color: '#FFFFFF',
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   syncCard: {
     backgroundColor: '#1E293B',
-    marginHorizontal: 16,
-    marginBottom: 8,
+    marginHorizontal: 20,
+    marginBottom: 12,
+    borderRadius: 12,
+    elevation: 1,
   },
   syncInfo: {
-    gap: 4,
+    gap: 6,
   },
   syncText: {
     color: '#94A3B8',
+    fontSize: 13,
   },
   filterRow: {
     flexDirection: 'row',
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    gap: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
   },
   filterChip: {
     backgroundColor: '#1E293B',
   },
   content: {
     flex: 1,
-    padding: 16,
+    padding: 20,
   },
   createButton: {
     backgroundColor: '#10B981',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   eventCard: {
     backgroundColor: '#1E293B',
-    marginBottom: 12,
+    marginBottom: 14,
+    borderRadius: 14,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
   },
   eventHeader: {
     flexDirection: 'row',
@@ -260,25 +279,28 @@ const styles = StyleSheet.create({
   },
   eventTitle: {
     color: '#FFFFFF',
-    fontWeight: 'bold',
+    fontWeight: '700',
     flex: 1,
   },
   eventDate: {
     color: '#10B981',
+    fontWeight: '600',
   },
   eventTime: {
-    marginBottom: 8,
+    marginBottom: 10,
   },
   timeText: {
     color: '#94A3B8',
+    fontSize: 14,
   },
   eventDescription: {
     color: '#94A3B8',
-    marginBottom: 8,
+    marginBottom: 10,
+    lineHeight: 20,
   },
   eventLocation: {
     color: '#94A3B8',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   recurringChip: {
     backgroundColor: '#334155',
@@ -286,13 +308,26 @@ const styles = StyleSheet.create({
   },
   emptyState: {
     alignItems: 'center',
-    padding: 32,
+    padding: 48,
+    marginTop: 40,
+  },
+  emptyIcon: {
+    fontSize: 64,
+    marginBottom: 20,
   },
   emptyText: {
-    color: '#94A3B8',
-    marginBottom: 8,
+    color: '#FFFFFF',
+    marginBottom: 12,
+    fontWeight: '600',
   },
   emptySubtext: {
-    color: '#64748B',
+    color: '#94A3B8',
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 22,
+  },
+  emptyButton: {
+    backgroundColor: '#10B981',
+    paddingHorizontal: 16,
   },
 });

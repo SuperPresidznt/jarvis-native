@@ -184,7 +184,13 @@ export default function FinanceScreen() {
             ))}
             {assets.length === 0 && (
               <View style={styles.emptyState}>
-                <Text style={styles.emptyText}>No assets yet</Text>
+                <Text style={styles.emptyIcon}>💰</Text>
+                <Text variant="titleMedium" style={styles.emptyText}>
+                  No assets yet
+                </Text>
+                <Text variant="bodySmall" style={styles.emptySubtext}>
+                  Track your assets to monitor your financial health
+                </Text>
               </View>
             )}
           </>
@@ -223,7 +229,13 @@ export default function FinanceScreen() {
             ))}
             {liabilities.length === 0 && (
               <View style={styles.emptyState}>
-                <Text style={styles.emptyText}>No liabilities yet</Text>
+                <Text style={styles.emptyIcon}>📊</Text>
+                <Text variant="titleMedium" style={styles.emptyText}>
+                  No liabilities yet
+                </Text>
+                <Text variant="bodySmall" style={styles.emptySubtext}>
+                  Track debts and liabilities for complete financial picture
+                </Text>
               </View>
             )}
           </>
@@ -245,64 +257,86 @@ const styles = StyleSheet.create({
     backgroundColor: '#0F172A',
   },
   header: {
-    padding: 16,
-    paddingTop: 8,
+    padding: 20,
+    paddingTop: 12,
   },
   title: {
     color: '#FFFFFF',
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   viewSelector: {
-    marginHorizontal: 16,
-    marginBottom: 8,
+    marginHorizontal: 20,
+    marginBottom: 12,
   },
   content: {
     flex: 1,
-    padding: 16,
+    padding: 20,
   },
   kpiGrid: {
-    gap: 12,
-    marginBottom: 24,
+    gap: 14,
+    marginBottom: 28,
   },
   sectionTitle: {
     color: '#FFFFFF',
-    marginTop: 16,
-    marginBottom: 12,
+    marginTop: 20,
+    marginBottom: 14,
+    fontWeight: '600',
+    fontSize: 17,
   },
   itemCard: {
     backgroundColor: '#1E293B',
-    marginBottom: 12,
+    marginBottom: 14,
+    borderRadius: 14,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
   },
   itemHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   assetValue: {
     color: '#10B981',
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   liabilityValue: {
     color: '#EF4444',
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   itemType: {
     color: '#94A3B8',
+    fontSize: 13,
   },
   itemDescription: {
     color: '#94A3B8',
-    marginBottom: 4,
+    marginBottom: 6,
+    lineHeight: 20,
   },
   addButton: {
     backgroundColor: '#10B981',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   emptyState: {
     alignItems: 'center',
-    padding: 32,
+    padding: 48,
+    marginTop: 20,
+  },
+  emptyIcon: {
+    fontSize: 56,
+    marginBottom: 16,
   },
   emptyText: {
-    color: '#64748B',
+    color: '#FFFFFF',
+    marginBottom: 8,
+    fontWeight: '600',
+  },
+  emptySubtext: {
+    color: '#94A3B8',
+    textAlign: 'center',
+    lineHeight: 20,
   },
 });

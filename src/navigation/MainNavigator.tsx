@@ -5,6 +5,8 @@
 
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MainTabParamList } from '../types';
 
 // Icons from react-native-paper
@@ -22,6 +24,8 @@ import SettingsScreen from '../screens/main/SettingsScreen';
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 export default function MainNavigator() {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -32,9 +36,9 @@ export default function MainNavigator() {
           backgroundColor: '#FFFFFF',
           borderTopColor: '#E5E5EA',
           borderTopWidth: 1,
-          paddingBottom: 5,
-          paddingTop: 5,
-          height: 60,
+          paddingBottom: Math.max(insets.bottom, 8),
+          paddingTop: 8,
+          height: 60 + Math.max(insets.bottom, 0),
         },
         headerStyle: {
           backgroundColor: '#FFFFFF',
