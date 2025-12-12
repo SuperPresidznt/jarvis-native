@@ -10,6 +10,7 @@ import { ActivityIndicator, View, StyleSheet } from 'react-native';
 
 import { useAuthStore } from '../store/authStore';
 import { RootStackParamList } from '../types';
+import { FEATURES } from '../constants/config';
 
 // Screens
 import LoginScreen from '../screens/auth/LoginScreen';
@@ -22,11 +23,14 @@ export default function RootNavigator() {
   const { isAuthenticated, isLoading, restoreSession } = useAuthStore();
 
   useEffect(() => {
-    // Restore session on app start
-    restoreSession();
+    // Skip session restore in demo mode
+    if (!FEATURES.DEMO_MODE) {
+      restoreSession();
+    }
   }, []);
 
-  if (isLoading) {
+  // Skip loading in demo mode
+  if (isLoading && !FEATURES.DEMO_MODE) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#007AFF" />
@@ -37,7 +41,7 @@ export default function RootNavigator() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {isAuthenticated ? (
+        {(isAuthenticated || FEATURES.DEMO_MODE) ? (
           <Stack.Screen name="Main" component={MainNavigator} />
         ) : (
           <>

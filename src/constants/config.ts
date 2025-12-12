@@ -35,6 +35,7 @@ export const FEATURES = {
   PUSH_NOTIFICATIONS: true,
   OFFLINE_MODE: true,
   BIOMETRIC_AUTH: false, // TODO: Implement in Phase 4
+  DEMO_MODE: true, // Skip login and use mock data for testing
 };
 
 // API Endpoints
