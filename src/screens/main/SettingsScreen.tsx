@@ -3,7 +3,7 @@
  * Professional settings with navigation to sub-screens
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -11,12 +11,14 @@ import {
   Alert,
   Text,
   TouchableOpacity,
+  Platform,
 } from 'react-native';
 import { Switch } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Clipboard from '@react-native-clipboard/clipboard';
+import * as Notifications from 'expo-notifications';
 import { useAuthStore } from '../../store/authStore';
 import type { SettingsStackParamList } from '../../types';
 import {
@@ -90,10 +92,20 @@ const SettingItem: React.FC<SettingItemProps> = ({
 export default function SettingsScreen() {
   const { user, logout } = useAuthStore();
   const navigation = useNavigation<NativeStackNavigationProp<SettingsStackParamList>>();
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [notificationsPermissionStatus, setNotificationsPermissionStatus] = useState<string>('undetermined');
   const [exporting, setExporting] = useState(false);
   const [totalRecords, setTotalRecords] = useState(0);
   const insets = useSafeAreaInsets();
+
+  // Check notification permission on mount
+  useEffect(() => {
+    (async () => {
+      const { status } = await Notifications.getPermissionsAsync();
+      setNotificationsPermissionStatus(status);
+      setNotificationsEnabled(status === 'granted');
+    })();
+  }, []);
 
   const loadTotalRecords = useCallback(async () => {
     try {
@@ -181,6 +193,38 @@ export default function SettingsScreen() {
     }
   };
 
+  const handleNotificationToggle = async (value: boolean) => {
+    if (value) {
+      // Request permission when turning on
+      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+
+      if (existingStatus !== 'granted') {
+        const { status } = await Notifications.requestPermissionsAsync();
+        setNotificationsPermissionStatus(status);
+        setNotificationsEnabled(status === 'granted');
+
+        if (status !== 'granted') {
+          Alert.alert(
+            'Permission Denied',
+            'Please enable notifications in your device settings to receive alerts for tasks and events.',
+            [{ text: 'OK' }]
+          );
+        }
+      } else {
+        setNotificationsEnabled(true);
+      }
+    } else {
+      // Just update local state when turning off
+      // Note: Can't revoke permissions programmatically on iOS/Android
+      setNotificationsEnabled(false);
+      Alert.alert(
+        'Notifications Disabled',
+        'You won\'t receive notifications for tasks and events. To fully disable, go to device settings.',
+        [{ text: 'OK' }]
+      );
+    }
+  };
+
   const handleLogout = () => {
     Alert.alert('Logout?', 'Are you sure you want to logout?', [
       { text: 'Cancel', style: 'cancel' },
@@ -234,11 +278,17 @@ export default function SettingsScreen() {
           <SettingItem
             icon="🔔"
             title="Push Notifications"
-            subtitle="Receive notifications for tasks and events"
+            subtitle={
+              notificationsPermissionStatus === 'denied'
+                ? 'Permission denied - Enable in device settings'
+                : notificationsEnabled
+                ? 'Enabled'
+                : 'Disabled'
+            }
             rightElement={
               <Switch
                 value={notificationsEnabled}
-                onValueChange={setNotificationsEnabled}
+                onValueChange={handleNotificationToggle}
                 trackColor={{
                   false: colors.background.tertiary,
                   true: `${colors.primary.main}80`,
