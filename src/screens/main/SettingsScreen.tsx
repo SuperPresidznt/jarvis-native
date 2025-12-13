@@ -50,45 +50,8 @@ interface SettingItemProps {
   rightElement?: React.ReactNode;
   danger?: boolean;
   showChevron?: boolean;
+  styles: any;
 }
-
-const SettingItem: React.FC<SettingItemProps> = ({
-  icon,
-  title,
-  subtitle,
-  onPress,
-  rightElement,
-  danger = false,
-  showChevron = false,
-}) => {
-  const content = (
-    <View style={styles.settingItem}>
-      <View style={styles.settingIcon}>
-        <Text style={styles.settingIconText}>{icon}</Text>
-      </View>
-      <View style={styles.settingContent}>
-        <Text style={[styles.settingTitle, danger && styles.dangerText]}>
-          {title}
-        </Text>
-        {subtitle && <Text style={styles.settingSubtitle}>{subtitle}</Text>}
-      </View>
-      {rightElement}
-      {showChevron && !rightElement && (
-        <Text style={styles.chevron}>›</Text>
-      )}
-    </View>
-  );
-
-  if (onPress) {
-    return (
-      <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
-        {content}
-      </TouchableOpacity>
-    );
-  }
-
-  return content;
-};
 
 export default function SettingsScreen() {
   const { user, logout } = useAuthStore();
@@ -243,6 +206,45 @@ export default function SettingsScreen() {
 
   const styles = createStyles(colors);
 
+  const SettingItem: React.FC<SettingItemProps> = ({
+    icon,
+    title,
+    subtitle,
+    onPress,
+    rightElement,
+    danger = false,
+    showChevron = false,
+    styles,
+  }) => {
+    const content = (
+      <View style={styles.settingItem}>
+        <View style={styles.settingIcon}>
+          <Text style={styles.settingIconText}>{icon}</Text>
+        </View>
+        <View style={styles.settingContent}>
+          <Text style={[styles.settingTitle, danger && styles.dangerText]}>
+            {title}
+          </Text>
+          {subtitle && <Text style={styles.settingSubtitle}>{subtitle}</Text>}
+        </View>
+        {rightElement}
+        {showChevron && !rightElement && (
+          <Text style={styles.chevron}>›</Text>
+        )}
+      </View>
+    );
+
+    if (onPress) {
+      return (
+        <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
+          {content}
+        </TouchableOpacity>
+      );
+    }
+
+    return content;
+  };
+
   return (
     <ScrollView
       style={styles.container}
@@ -257,18 +259,21 @@ export default function SettingsScreen() {
         <Text style={styles.sectionLabel}>ACCOUNT</Text>
         <View style={styles.sectionContent}>
           <SettingItem
+            styles={styles}
             icon="👤"
             title={user?.email || 'demo@jarvis.app'}
             subtitle="Email address"
           />
           <View style={styles.divider} />
           <SettingItem
+            styles={styles}
             icon="🌐"
             title={user?.timezone || 'America/Chicago'}
             subtitle="Timezone"
           />
           <View style={styles.divider} />
           <SettingItem
+            styles={styles}
             icon="💵"
             title={user?.currency || 'USD'}
             subtitle="Currency"
@@ -328,7 +333,7 @@ export default function SettingsScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>NOTIFICATIONS</Text>
         <View style={styles.sectionContent}>
-          <SettingItem
+          <SettingItem styles={styles}
             icon="🔔"
             title="Push Notifications"
             subtitle={
@@ -357,7 +362,7 @@ export default function SettingsScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>DATA & STORAGE</Text>
         <View style={styles.sectionContent}>
-          <SettingItem
+          <SettingItem styles={styles}
             icon="💾"
             title="Storage Overview"
             subtitle={`${totalRecords} total records`}
@@ -365,7 +370,7 @@ export default function SettingsScreen() {
             showChevron
           />
           <View style={styles.divider} />
-          <SettingItem
+          <SettingItem styles={styles}
             icon="📤"
             title={exporting ? 'Exporting...' : 'Export Data'}
             subtitle="Copy all data as JSON to clipboard"
@@ -392,7 +397,7 @@ export default function SettingsScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>ADVANCED</Text>
         <View style={styles.sectionContent}>
-          <SettingItem
+          <SettingItem styles={styles}
             icon="⚙️"
             title="Data Management"
             subtitle="Advanced database options"
@@ -406,19 +411,19 @@ export default function SettingsScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>ABOUT</Text>
         <View style={styles.sectionContent}>
-          <SettingItem
+          <SettingItem styles={styles}
             icon="ℹ️"
             title="Version"
             subtitle={packageJson.version}
           />
           <View style={styles.divider} />
-          <SettingItem
+          <SettingItem styles={styles}
             icon="💾"
             title="Storage"
             subtitle="Local SQLite Database"
           />
           <View style={styles.divider} />
-          <SettingItem
+          <SettingItem styles={styles}
             icon="📴"
             title="Mode"
             subtitle="Offline-First Architecture"
@@ -429,7 +434,7 @@ export default function SettingsScreen() {
       {/* Logout Section */}
       <View style={styles.section}>
         <View style={styles.sectionContent}>
-          <SettingItem
+          <SettingItem styles={styles}
             icon="🚪"
             title="Logout"
             onPress={handleLogout}
