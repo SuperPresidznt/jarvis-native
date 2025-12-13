@@ -13,6 +13,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import RootNavigator from './src/navigation/RootNavigator';
 import { initDatabase } from './src/database';
 import { needsSeeding, seedDatabase } from './src/database/seed';
+import { useThemeStore } from './src/store/themeStore';
 
 // Create React Query client
 const queryClient = new QueryClient({
@@ -43,11 +44,17 @@ const theme = {
 export default function App() {
   const [isReady, setIsReady] = useState(false);
   const [initError, setInitError] = useState<string | null>(null);
+  const loadTheme = useThemeStore((state) => state.loadTheme);
+  const themeMode = useThemeStore((state) => state.mode);
 
   useEffect(() => {
     async function prepare() {
       try {
-        console.log('[App] Initializing database...');
+        console.log('[App] Initializing...');
+
+        // Load theme preference
+        await loadTheme();
+        console.log('[App] Theme loaded');
 
         // Initialize database
         await initDatabase();
@@ -73,7 +80,7 @@ export default function App() {
     }
 
     prepare();
-  }, []);
+  }, [loadTheme]);
 
   if (!isReady) {
     return (
@@ -97,7 +104,7 @@ export default function App() {
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <PaperProvider theme={theme}>
-          <StatusBar style="auto" />
+          <StatusBar style={themeMode === 'dark' ? 'light' : 'dark'} />
           <RootNavigator />
         </PaperProvider>
       </QueryClientProvider>

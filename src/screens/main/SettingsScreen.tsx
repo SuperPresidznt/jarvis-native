@@ -21,9 +21,9 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import * as Notifications from 'expo-notifications';
 import { useAuthStore } from '../../store/authStore';
 import { useThemeStore } from '../../store/themeStore';
+import { useTheme } from '../../hooks/useTheme';
 import type { SettingsStackParamList } from '../../types';
 import {
-  colors,
   typography,
   spacing,
   borderRadius,
@@ -93,6 +93,7 @@ const SettingItem: React.FC<SettingItemProps> = ({
 export default function SettingsScreen() {
   const { user, logout } = useAuthStore();
   const { mode: themeMode, setMode: setThemeMode } = useThemeStore();
+  const { colors } = useTheme();
   const navigation = useNavigation<NativeStackNavigationProp<SettingsStackParamList>>();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [notificationsPermissionStatus, setNotificationsPermissionStatus] = useState<string>('undetermined');
@@ -239,6 +240,8 @@ export default function SettingsScreen() {
       },
     ]);
   };
+
+  const styles = createStyles(colors);
 
   return (
     <ScrollView
@@ -448,7 +451,7 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof import('../../theme').getColors>) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.primary,

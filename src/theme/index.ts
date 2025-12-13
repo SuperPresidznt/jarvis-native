@@ -6,10 +6,9 @@
 // ============================================================================
 // COLOR PALETTE
 // ============================================================================
-// Using a cohesive dark theme with emerald green (#10B981) as primary accent
-// All colors carefully selected for visual harmony and readability
 
-export const colors = {
+// Dark Theme Colors
+const darkColors = {
   // Primary Brand Color - Emerald Green
   primary: {
     main: '#10B981',
@@ -18,7 +17,7 @@ export const colors = {
     contrast: '#FFFFFF',
   },
 
-  // Dark Mode Backgrounds (Primary UI surfaces)
+  // Dark Mode Backgrounds
   background: {
     primary: '#0F172A',    // Deepest - main app background
     secondary: '#1E293B',  // Cards, elevated surfaces
@@ -26,7 +25,7 @@ export const colors = {
     elevated: '#475569',   // Modals, dropdowns
   },
 
-  // Text Colors (all meet contrast requirements on dark backgrounds)
+  // Text Colors (optimized for dark backgrounds)
   text: {
     primary: '#F8FAFC',    // Primary text - bright white
     secondary: '#E2E8F0',  // Secondary text - soft white
@@ -50,26 +49,71 @@ export const colors = {
     error: '#EF4444',
   },
 
-  // Gradient definitions for premium feel
+  // Gradient definitions
   gradient: {
     primary: ['#10B981', '#059669'],
     card: ['#1E293B', '#334155'],
     overlay: ['rgba(15, 23, 42, 0)', 'rgba(15, 23, 42, 0.9)'],
   },
+};
 
-  // Light mode colors (for auth screens)
-  light: {
-    background: '#FFFFFF',
-    surface: '#F8FAFC',
-    surfaceHover: '#F1F5F9',
-    text: {
-      primary: '#0F172A',
-      secondary: '#475569',
-      tertiary: '#64748B',
-    },
-    border: '#E2E8F0',
+// Light Theme Colors
+const lightColors = {
+  // Primary Brand Color - Emerald Green (same across themes)
+  primary: {
+    main: '#10B981',
+    light: '#34D399',
+    dark: '#059669',
+    contrast: '#FFFFFF',
+  },
+
+  // Light Mode Backgrounds
+  background: {
+    primary: '#FFFFFF',    // White - main app background
+    secondary: '#F8FAFC',  // Cards, elevated surfaces
+    tertiary: '#F1F5F9',   // Subtle highlights, borders
+    elevated: '#E2E8F0',   // Modals, dropdowns
+  },
+
+  // Text Colors (optimized for light backgrounds)
+  text: {
+    primary: '#0F172A',    // Primary text - dark slate
+    secondary: '#475569',  // Secondary text - medium slate
+    tertiary: '#64748B',   // Muted text - light slate
+    disabled: '#94A3B8',   // Disabled state
+    placeholder: '#94A3B8', // Input placeholders
+    inverse: '#F8FAFC',    // Text on dark backgrounds
+  },
+
+  // Semantic Colors
+  success: '#10B981',      // Green - matches primary
+  warning: '#F59E0B',      // Amber
+  error: '#EF4444',        // Red
+  info: '#3B82F6',         // Blue
+
+  // Border Colors
+  border: {
+    default: '#E2E8F0',
+    subtle: '#F1F5F9',
+    focus: '#10B981',
+    error: '#EF4444',
+  },
+
+  // Gradient definitions
+  gradient: {
+    primary: ['#10B981', '#059669'],
+    card: ['#F8FAFC', '#F1F5F9'],
+    overlay: ['rgba(255, 255, 255, 0)', 'rgba(255, 255, 255, 0.9)'],
   },
 };
+
+// Export color getter function
+export const getColors = (mode: 'dark' | 'light' = 'dark') => {
+  return mode === 'dark' ? darkColors : lightColors;
+};
+
+// Export default colors (dark mode for backwards compatibility)
+export const colors = darkColors;
 
 // ============================================================================
 // TYPOGRAPHY
