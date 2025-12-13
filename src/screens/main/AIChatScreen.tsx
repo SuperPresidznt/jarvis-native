@@ -26,6 +26,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Speech from 'expo-speech';
 import { ChatMessage } from '../../types';
 import { aiApi } from '../../services/ai.api';
+import { EmptyState } from '../../components/ui';
 import { colors, typography, spacing, borderRadius, textStyles, shadows } from '../../theme';
 
 export default function AIChatScreen() {
@@ -133,35 +134,11 @@ export default function AIChatScreen() {
       <View style={styles.container}>
         {messages.length === 0 ? (
           <View style={[styles.emptyContainer, { paddingTop: insets.top + spacing['4xl'] }]}>
-            <Text variant="displaySmall" style={styles.emptyTitle}>
-              Hi, I'm Jarvis
-            </Text>
-            <Text variant="bodyLarge" style={styles.emptySubtitle}>
-              Your AI-powered personal assistant
-            </Text>
-            <Text variant="bodyMedium" style={styles.emptyText}>
-              I can help you with:
-            </Text>
-            <View style={styles.featureList}>
-              <Text variant="bodyMedium" style={styles.featureItem}>
-                • Managing tasks and projects
-              </Text>
-              <Text variant="bodyMedium" style={styles.featureItem}>
-                • Tracking habits and goals
-              </Text>
-              <Text variant="bodyMedium" style={styles.featureItem}>
-                • Scheduling and calendar management
-              </Text>
-              <Text variant="bodyMedium" style={styles.featureItem}>
-                • Financial planning and budgeting
-              </Text>
-              <Text variant="bodyMedium" style={styles.featureItem}>
-                • Quick note capture and organization
-              </Text>
-            </View>
-            <Text variant="bodyMedium" style={styles.emptyPrompt}>
-              Ask me anything to get started!
-            </Text>
+            <EmptyState
+              icon="💬"
+              title="Hi, I'm Jarvis"
+              description="Your AI-powered personal assistant. I can help you manage tasks, track habits, schedule events, plan finances, and organize your life. Ask me anything to get started!"
+            />
           </View>
         ) : (
           <FlatList
@@ -228,37 +205,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: spacing['3xl'],
-  },
-  emptyTitle: {
-    ...textStyles.h1,
-    color: colors.primary.main,
-    marginBottom: spacing.md,
-  },
-  emptySubtitle: {
-    ...textStyles.bodySecondary,
-    fontSize: typography.size.md,
-    marginBottom: spacing['3xl'],
-  },
-  emptyText: {
-    ...textStyles.body,
-    fontWeight: typography.weight.semibold,
-    marginBottom: spacing.lg,
-  },
-  featureList: {
-    alignSelf: 'stretch',
-    marginBottom: spacing['3xl'],
-    paddingHorizontal: spacing.sm,
-  },
-  featureItem: {
-    ...textStyles.bodySecondary,
-    fontSize: typography.size.base,
-    marginBottom: spacing.md,
-    lineHeight: typography.size.base * typography.lineHeight.relaxed,
-  },
-  emptyPrompt: {
-    ...textStyles.bodySecondary,
-    fontStyle: 'italic',
+    padding: spacing.lg,
   },
   messageList: {
     padding: spacing.lg,
