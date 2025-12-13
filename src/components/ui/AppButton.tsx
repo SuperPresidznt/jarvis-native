@@ -21,7 +21,8 @@ type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
 type ButtonSize = 'small' | 'medium' | 'large';
 
 interface AppButtonProps {
-  title: string;
+  title?: string;
+  children?: React.ReactNode;
   onPress: () => void;
   variant?: ButtonVariant;
   size?: ButtonSize;
@@ -36,6 +37,7 @@ interface AppButtonProps {
 
 export const AppButton: React.FC<AppButtonProps> = ({
   title,
+  children,
   onPress,
   variant = 'primary',
   size = 'medium',
@@ -47,6 +49,8 @@ export const AppButton: React.FC<AppButtonProps> = ({
   style,
   textStyle,
 }) => {
+  // Support both title prop and children
+  const buttonText = title || children;
   const [scaleValue] = useState(new Animated.Value(1));
 
   const handlePressIn = useCallback(() => {
@@ -151,7 +155,7 @@ export const AppButton: React.FC<AppButtonProps> = ({
             {icon && iconPosition === 'left' && (
               <View style={styles.iconLeft}>{icon}</View>
             )}
-            <Text style={[...getTextStyles(), textStyle]}>{title}</Text>
+            <Text style={[...getTextStyles(), textStyle]}>{buttonText}</Text>
             {icon && iconPosition === 'right' && (
               <View style={styles.iconRight}>{icon}</View>
             )}
