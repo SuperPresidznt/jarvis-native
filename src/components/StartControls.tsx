@@ -4,10 +4,9 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, TextInput, Modal, Animated } from 'react-native';
+import { View, StyleSheet, TextInput, Modal, Animated, Alert } from 'react-native';
 import { Button, Text, Card, IconButton } from 'react-native-paper';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { dashboardApi, MacroGoal, CreateStartEventData } from '../services/dashboard.api';
+import { MacroGoal } from '../database/dashboard';
 
 interface StartControlsProps {
   macroGoals: MacroGoal[];
@@ -20,7 +19,6 @@ export const StartControls: React.FC<StartControlsProps> = ({
   defaultDuration = 10,
   onStarted,
 }) => {
-  const queryClient = useQueryClient();
   const [microWhy, setMicroWhy] = useState('');
   const [selectedMacroId, setSelectedMacroId] = useState('');
   const [activeStart, setActiveStart] = useState<{ id: string; durationSec: number } | null>(null);
@@ -28,43 +26,21 @@ export const StartControls: React.FC<StartControlsProps> = ({
   const [completionModalVisible, setCompletionModalVisible] = useState(false);
   const [completionNote, setCompletionNote] = useState('');
   const [progress] = useState(new Animated.Value(0));
-
-  const createMutation = useMutation({
-    mutationFn: (data: CreateStartEventData) => dashboardApi.createStartEvent(data),
-    onSuccess: (data, variables) => {
-      setActiveStart({ id: data.id, durationSec: variables.durationSec });
-      setElapsed(0);
-      setMicroWhy('');
-      setSelectedMacroId('');
-      queryClient.invalidateQueries({ queryKey: ['metrics', 'today'] });
-      onStarted?.();
-    },
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: ({ id, note }: { id: string; note: string }) =>
-      dashboardApi.updateStartEvent(id, { context: note }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['metrics', 'today'] });
-      setCompletionModalVisible(false);
-      setCompletionNote('');
-    },
-  });
+  const [isStarting, setIsStarting] = useState(false);
 
   const handleStart = useCallback(
     (durationSec: number) => {
-      if (createMutation.isPending || activeStart) return;
+      if (isStarting || activeStart) return;
 
-      const data: CreateStartEventData = {
-        durationSec,
-        context: microWhy || undefined,
-        linkedEntityType: selectedMacroId ? 'Other' : undefined,
-        linkedEntityId: selectedMacroId || undefined,
-      };
-
-      createMutation.mutate(data);
+      // Offline mode - just start the timer locally
+      const id = `start-${Date.now()}`;
+      setActiveStart({ id, durationSec });
+      setElapsed(0);
+      setMicroWhy('');
+      setSelectedMacroId('');
+      onStarted?.();
     },
-    [createMutation, microWhy, selectedMacroId, activeStart]
+    [isStarting, activeStart, onStarted]
   );
 
   useEffect(() => {
@@ -98,12 +74,12 @@ export const StartControls: React.FC<StartControlsProps> = ({
   }, [elapsed, activeStart, progress]);
 
   const handleCompletionSubmit = () => {
-    if (activeStart && completionNote) {
-      updateMutation.mutate({ id: activeStart.id, note: completionNote });
-    } else {
-      setCompletionModalVisible(false);
-      setCompletionNote('');
+    // In offline mode, just log and close
+    if (completionNote) {
+      console.log('[StartControls] Completion note:', completionNote);
     }
+    setCompletionModalVisible(false);
+    setCompletionNote('');
   };
 
   const progressPercent = activeStart ? (elapsed / activeStart.durationSec) * 100 : 0;
@@ -130,7 +106,7 @@ export const StartControls: React.FC<StartControlsProps> = ({
         <Button
           mode="contained"
           onPress={() => handleStart(10)}
-          disabled={!!activeStart || createMutation.isPending}
+          disabled={!!activeStart || isStarting}
           style={styles.primaryButton}
           labelStyle={styles.buttonLabel}
         >
@@ -139,7 +115,7 @@ export const StartControls: React.FC<StartControlsProps> = ({
         <Button
           mode="outlined"
           onPress={() => handleStart(60)}
-          disabled={!!activeStart || createMutation.isPending}
+          disabled={!!activeStart || isStarting}
           style={styles.secondaryButton}
           labelStyle={styles.buttonLabel}
         >
@@ -148,7 +124,7 @@ export const StartControls: React.FC<StartControlsProps> = ({
         <Button
           mode="outlined"
           onPress={() => handleStart(1800)}
-          disabled={!!activeStart || createMutation.isPending}
+          disabled={!!activeStart || isStarting}
           style={styles.secondaryButton}
           labelStyle={styles.buttonLabel}
         >
@@ -210,7 +186,6 @@ export const StartControls: React.FC<StartControlsProps> = ({
               <Button
                 mode="contained"
                 onPress={handleCompletionSubmit}
-                loading={updateMutation.isPending}
                 style={styles.modalButton}
               >
                 Save

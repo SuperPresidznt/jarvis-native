@@ -3,7 +3,7 @@
  * Beautiful, polished overview of daily metrics and quick actions
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -13,11 +13,11 @@ import {
   Text,
   TouchableOpacity,
   Animated,
+  Alert,
 } from 'react-native';
 import { ActivityIndicator } from 'react-native-paper';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { dashboardApi } from '../../services/dashboard.api';
+import * as dashboardDB from '../../database/dashboard';
 import { MetricCard } from '../../components/MetricCard';
 import { StartControls } from '../../components/StartControls';
 import { AppCard, AppButton, EmptyState, LoadingState } from '../../components/ui';
@@ -31,29 +31,36 @@ import {
 } from '../../theme';
 
 export default function DashboardScreen() {
-  const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
+  const [metrics, setMetrics] = useState<dashboardDB.TodayMetrics | null>(null);
+  const [macroGoals, setMacroGoals] = useState<dashboardDB.MacroGoal[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const insets = useSafeAreaInsets();
 
-  // Fetch today's metrics
-  const { data: metrics, isLoading: metricsLoading } = useQuery({
-    queryKey: ['metrics', 'today'],
-    queryFn: dashboardApi.getTodayMetrics,
-    refetchInterval: 60000,
-  });
+  // Load dashboard data
+  const loadData = useCallback(async () => {
+    try {
+      const [metricsData, goalsData] = await Promise.all([
+        dashboardDB.getTodayMetrics(),
+        dashboardDB.getMacroGoals(),
+      ]);
+      setMetrics(metricsData);
+      setMacroGoals(goalsData);
+    } catch (error) {
+      console.error('[Dashboard] Error loading data:', error);
+      Alert.alert('Error', 'Failed to load dashboard data');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-  // Fetch macro goals
-  const { data: macroGoals = [] } = useQuery({
-    queryKey: ['macro-goals'],
-    queryFn: dashboardApi.getMacroGoals,
-  });
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ['metrics', 'today'] }),
-      queryClient.invalidateQueries({ queryKey: ['macro-goals'] }),
-    ]);
+    await loadData();
     setRefreshing(false);
   };
 
@@ -83,7 +90,7 @@ export default function DashboardScreen() {
     });
   };
 
-  if (metricsLoading && !metrics) {
+  if (isLoading && !metrics) {
     return <LoadingState fullScreen message="Loading your dashboard..." />;
   }
 

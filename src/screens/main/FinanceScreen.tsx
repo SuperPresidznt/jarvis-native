@@ -3,7 +3,7 @@
  * Professional financial dashboard with assets, liabilities, and net worth tracking
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -16,9 +16,8 @@ import {
   Alert,
 } from 'react-native';
 import { IconButton, SegmentedButtons } from 'react-native-paper';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { financeApi } from '../../services/finance.api';
+import * as financeDB from '../../database/finance';
 import { AppButton, AppChip, EmptyState, LoadingState, AppCard } from '../../components/ui';
 import { MetricCard } from '../../components/MetricCard';
 import {
@@ -32,51 +31,56 @@ import {
 type ViewMode = 'overview' | 'assets' | 'liabilities';
 
 export default function FinanceScreen() {
-  const queryClient = useQueryClient();
   const [viewMode, setViewMode] = useState<ViewMode>('overview');
   const [refreshing, setRefreshing] = useState(false);
   const [showAssetModal, setShowAssetModal] = useState(false);
   const [showLiabilityModal, setShowLiabilityModal] = useState(false);
+  const [summary, setSummary] = useState<financeDB.FinanceSummary | null>(null);
+  const [assets, setAssets] = useState<financeDB.Asset[]>([]);
+  const [liabilities, setLiabilities] = useState<financeDB.Liability[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const insets = useSafeAreaInsets();
 
-  const { data: summary, isLoading: summaryLoading } = useQuery({
-    queryKey: ['finance', 'summary'],
-    queryFn: financeApi.getSummary,
-  });
+  // Load finance data
+  const loadData = useCallback(async () => {
+    try {
+      const [summaryData, assetsData, liabilitiesData] = await Promise.all([
+        financeDB.getFinanceSummary(),
+        financeDB.getAssets(),
+        financeDB.getLiabilities(),
+      ]);
+      setSummary(summaryData);
+      setAssets(assetsData);
+      setLiabilities(liabilitiesData);
+    } catch (error) {
+      console.error('[Finance] Error loading data:', error);
+      Alert.alert('Error', 'Failed to load finance data');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-  const { data: assets = [] } = useQuery({
-    queryKey: ['finance', 'assets'],
-    queryFn: financeApi.getAssets,
-    enabled: viewMode === 'assets' || viewMode === 'overview',
-  });
-
-  const { data: liabilities = [] } = useQuery({
-    queryKey: ['finance', 'liabilities'],
-    queryFn: financeApi.getLiabilities,
-    enabled: viewMode === 'liabilities' || viewMode === 'overview',
-  });
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ['finance', 'summary'] }),
-      queryClient.invalidateQueries({ queryKey: ['finance', 'assets'] }),
-      queryClient.invalidateQueries({ queryKey: ['finance', 'liabilities'] }),
-    ]);
+    await loadData();
     setRefreshing(false);
   };
 
-  const formatCurrency = (cents: number | undefined | null) => {
-    if (cents == null) return '$0';
+  const formatCurrency = (value: number | undefined | null) => {
+    if (value == null) return '$0';
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
-    }).format(cents / 100);
+    }).format(value);
   };
 
-  if (summaryLoading && !summary) {
+  if (isLoading && !summary) {
     return <LoadingState fullScreen message="Loading finances..." />;
   }
 
@@ -156,14 +160,12 @@ export default function FinanceScreen() {
                 value={formatCurrency(summary.totalLiabilities)}
                 variant="danger"
               />
-              {summary.runway != null && (
-                <MetricCard
-                  label="Runway"
-                  value={`${Math.round(summary.runway)} mo`}
-                  helper="Months of expenses covered"
-                  variant="info"
-                />
-              )}
+              <MetricCard
+                label="Savings Rate"
+                value={`${Math.round(summary.savingsRate)}%`}
+                helper="Monthly savings rate"
+                variant="info"
+              />
             </View>
 
             {/* Recent Assets */}
@@ -174,12 +176,12 @@ export default function FinanceScreen() {
                   <Text style={styles.viewAllText}>View All</Text>
                 </TouchableOpacity>
               </View>
-              {assets.slice(0, 3).map((asset: any) => (
+              {assets.slice(0, 3).map((asset) => (
                 <FinanceItemCard
                   key={asset.id}
                   name={asset.name}
-                  value={formatCurrency(asset.valueCents)}
-                  category={asset.category}
+                  value={formatCurrency(asset.value)}
+                  category={asset.type}
                   type="asset"
                 />
               ))}
@@ -196,12 +198,12 @@ export default function FinanceScreen() {
                   <Text style={styles.viewAllText}>View All</Text>
                 </TouchableOpacity>
               </View>
-              {liabilities.slice(0, 3).map((liability: any) => (
+              {liabilities.slice(0, 3).map((liability) => (
                 <FinanceItemCard
                   key={liability.id}
                   name={liability.name}
-                  value={formatCurrency(liability.balanceCents)}
-                  category={`${liability.type} - ${liability.apr}% APR`}
+                  value={formatCurrency(liability.amount)}
+                  category={liability.interestRate ? `${liability.type} - ${liability.interestRate}% APR` : liability.type}
                   type="liability"
                 />
               ))}
@@ -230,13 +232,12 @@ export default function FinanceScreen() {
               />
             ) : (
               <View style={styles.itemsList}>
-                {assets.map((asset: any) => (
+                {assets.map((asset) => (
                   <FinanceItemCard
                     key={asset.id}
                     name={asset.name}
-                    value={formatCurrency(asset.valueCents)}
-                    category={asset.category}
-                    description={asset.description}
+                    value={formatCurrency(asset.value)}
+                    category={asset.type}
                     type="asset"
                   />
                 ))}
@@ -263,13 +264,12 @@ export default function FinanceScreen() {
               />
             ) : (
               <View style={styles.itemsList}>
-                {liabilities.map((liability: any) => (
+                {liabilities.map((liability) => (
                   <FinanceItemCard
                     key={liability.id}
                     name={liability.name}
-                    value={formatCurrency(liability.balanceCents)}
-                    category={`${liability.type} - ${liability.apr}% APR`}
-                    description={liability.description}
+                    value={formatCurrency(liability.amount)}
+                    category={liability.interestRate ? `${liability.type} - ${liability.interestRate}% APR` : liability.type}
                     type="liability"
                   />
                 ))}
@@ -289,7 +289,6 @@ interface FinanceItemCardProps {
   name: string;
   value: string;
   category?: string;
-  description?: string;
   type: 'asset' | 'liability';
 }
 
@@ -297,7 +296,6 @@ const FinanceItemCard: React.FC<FinanceItemCardProps> = ({
   name,
   value,
   category,
-  description,
   type,
 }) => {
   return (
@@ -305,11 +303,6 @@ const FinanceItemCard: React.FC<FinanceItemCardProps> = ({
       <View style={styles.itemContent}>
         <View style={styles.itemInfo}>
           <Text style={styles.itemName}>{name}</Text>
-          {description && (
-            <Text style={styles.itemDescription} numberOfLines={2}>
-              {description}
-            </Text>
-          )}
           {category && <Text style={styles.itemCategory}>{category}</Text>}
         </View>
         <Text
