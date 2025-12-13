@@ -67,17 +67,30 @@ export async function closeDatabase(): Promise<void> {
 }
 
 /**
- * Reset the database (WARNING: Deletes all data)
- * Useful for development and testing
+ * Drop all tables (WARNING: Deletes all data)
+ * Useful for clearing data without recreating tables
  */
-export async function resetDatabase(): Promise<void> {
-  console.log('[DB] Resetting database...');
+export async function dropAllTables(): Promise<void> {
+  console.log('[DB] Dropping all tables...');
   const db = await getDatabase();
 
   // Drop all tables
   for (const dropSQL of DROP_TABLES) {
     await db.execAsync(dropSQL);
   }
+
+  console.log('[DB] All tables dropped');
+}
+
+/**
+ * Reset the database (WARNING: Deletes all data)
+ * Useful for development and testing
+ */
+export async function resetDatabase(): Promise<void> {
+  console.log('[DB] Resetting database...');
+  await dropAllTables();
+
+  const db = await getDatabase();
 
   // Recreate tables
   for (const createSQL of Object.values(CREATE_TABLES)) {
@@ -180,6 +193,7 @@ export default {
   initDatabase,
   getDatabase,
   closeDatabase,
+  dropAllTables,
   resetDatabase,
   generateId,
   getCurrentTimestamp,
