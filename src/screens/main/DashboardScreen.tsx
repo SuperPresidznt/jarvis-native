@@ -15,9 +15,11 @@ import {
   Animated,
   Alert,
 } from 'react-native';
-import { ActivityIndicator } from 'react-native-paper';
+import { ActivityIndicator, Snackbar } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as dashboardDB from '../../database/dashboard';
+import * as tasksDB from '../../database/tasks';
+import * as financeDB from '../../database/finance';
 import { MetricCard } from '../../components/MetricCard';
 import { StartControls } from '../../components/StartControls';
 import { AppCard, AppButton, EmptyState, LoadingState } from '../../components/ui';
@@ -35,6 +37,12 @@ export default function DashboardScreen() {
   const [metrics, setMetrics] = useState<dashboardDB.TodayMetrics | null>(null);
   const [macroGoals, setMacroGoals] = useState<dashboardDB.MacroGoal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [lastSavedItem, setLastSavedItem] = useState<{
+    type: 'idea' | 'study' | 'cash';
+    id: string;
+  } | null>(null);
   const insets = useSafeAreaInsets();
 
   // Load dashboard data
@@ -88,6 +96,84 @@ export default function DashboardScreen() {
       month: 'long',
       day: 'numeric',
     });
+  };
+
+  const handleIdeaSave = async (idea: string) => {
+    try {
+      const task = await tasksDB.createTask({
+        title: idea,
+        tags: ['idea', 'quick-capture'],
+        priority: 'low',
+      });
+      setLastSavedItem({ type: 'idea', id: task.id });
+      setSnackbarMessage('Idea saved to tasks!');
+      setSnackbarVisible(true);
+      await loadData();
+    } catch (error) {
+      console.error('[Dashboard] Error saving idea:', error);
+      Alert.alert('Error', 'Failed to save idea');
+    }
+  };
+
+  const handleStudySave = async (studyNote: string) => {
+    try {
+      const task = await tasksDB.createTask({
+        title: studyNote,
+        tags: ['study', 'quick-capture'],
+        priority: 'medium',
+      });
+      setLastSavedItem({ type: 'study', id: task.id });
+      setSnackbarMessage('Study session logged!');
+      setSnackbarVisible(true);
+      await loadData();
+    } catch (error) {
+      console.error('[Dashboard] Error saving study:', error);
+      Alert.alert('Error', 'Failed to log study session');
+    }
+  };
+
+  const handleCashSave = async (cashValue: string) => {
+    try {
+      const amount = parseFloat(cashValue);
+      if (isNaN(amount)) {
+        Alert.alert('Invalid Amount', 'Please enter a valid number');
+        return;
+      }
+
+      const transaction = await financeDB.createTransaction({
+        type: amount >= 0 ? 'income' : 'expense',
+        amount: Math.abs(amount),
+        category: 'Cash Snapshot',
+        date: new Date().toISOString().split('T')[0],
+        description: 'Quick capture from dashboard',
+      });
+      setLastSavedItem({ type: 'cash', id: transaction.id });
+      setSnackbarMessage('Cash transaction recorded!');
+      setSnackbarVisible(true);
+      await loadData();
+    } catch (error) {
+      console.error('[Dashboard] Error saving cash:', error);
+      Alert.alert('Error', 'Failed to record cash transaction');
+    }
+  };
+
+  const handleUndo = async () => {
+    if (!lastSavedItem) return;
+
+    try {
+      if (lastSavedItem.type === 'idea' || lastSavedItem.type === 'study') {
+        await tasksDB.deleteTask(lastSavedItem.id);
+        setSnackbarMessage('Undone!');
+      } else if (lastSavedItem.type === 'cash') {
+        await financeDB.deleteTransaction(lastSavedItem.id);
+        setSnackbarMessage('Undone!');
+      }
+      setLastSavedItem(null);
+      await loadData();
+    } catch (error) {
+      console.error('[Dashboard] Error undoing:', error);
+      Alert.alert('Error', 'Failed to undo');
+    }
   };
 
   if (isLoading && !metrics) {
@@ -166,20 +252,41 @@ export default function DashboardScreen() {
               title="Idea"
               placeholder="Capture an idea..."
               emoji="💡"
+              onSave={handleIdeaSave}
             />
             <QuickCaptureCard
               title="Study"
               placeholder="Log study session..."
               emoji="📚"
+              onSave={handleStudySave}
             />
             <QuickCaptureCard
               title="Cash"
-              placeholder="Record cash snapshot..."
+              placeholder="Amount (e.g., 50 or -20)..."
               emoji="💰"
+              onSave={handleCashSave}
             />
           </View>
         </View>
       </View>
+
+      {/* Snackbar for feedback */}
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={4000}
+        action={
+          lastSavedItem
+            ? {
+                label: 'Undo',
+                onPress: handleUndo,
+              }
+            : undefined
+        }
+        style={styles.snackbar}
+      >
+        {snackbarMessage}
+      </Snackbar>
     </ScrollView>
   );
 }
@@ -188,21 +295,33 @@ interface QuickCaptureCardProps {
   title: string;
   placeholder: string;
   emoji: string;
+  onSave: (value: string) => Promise<void>;
 }
 
 const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
   title,
   placeholder,
   emoji,
+  onSave,
 }) => {
   const [value, setValue] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleSubmit = () => {
-    console.log(`Quick capture ${title}:`, value);
-    setValue('');
-    setIsExpanded(false);
+  const handleSubmit = async () => {
+    if (!value.trim() || isSaving) return;
+
+    setIsSaving(true);
+    try {
+      await onSave(value.trim());
+      setValue('');
+      setIsExpanded(false);
+    } catch (error) {
+      console.error(`Error saving ${title}:`, error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -241,20 +360,24 @@ const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
             </TouchableOpacity>
             <TouchableOpacity
               onPress={handleSubmit}
-              disabled={!value.trim()}
+              disabled={!value.trim() || isSaving}
               style={[
                 styles.saveButton,
-                !value.trim() && styles.saveButtonDisabled,
+                (!value.trim() || isSaving) && styles.saveButtonDisabled,
               ]}
             >
-              <Text
-                style={[
-                  styles.saveButtonText,
-                  !value.trim() && styles.saveButtonTextDisabled,
-                ]}
-              >
-                Save
-              </Text>
+              {isSaving ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <Text
+                  style={[
+                    styles.saveButtonText,
+                    !value.trim() && styles.saveButtonTextDisabled,
+                  ]}
+                >
+                  Save
+                </Text>
+              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -415,5 +538,9 @@ const styles = StyleSheet.create({
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
     color: colors.text.tertiary,
+  },
+  snackbar: {
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.md,
   },
 });
