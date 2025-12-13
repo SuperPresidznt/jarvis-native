@@ -8,8 +8,8 @@ import { View, Text, StyleSheet, Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MainTabParamList } from '../types';
+import { useTheme } from '../hooks/useTheme';
 import {
-  colors,
   typography,
   spacing,
   borderRadius,
@@ -34,9 +34,10 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 interface TabIconProps {
   icon: string;
   focused: boolean;
+  colors: ReturnType<typeof import('../theme').getColors>;
 }
 
-const TabIcon: React.FC<TabIconProps> = ({ icon, focused }) => (
+const TabIcon: React.FC<TabIconProps> = ({ icon, focused, colors }) => (
   <View style={[styles.iconContainer, focused && styles.iconContainerFocused]}>
     <IconButton
       icon={icon}
@@ -44,12 +45,13 @@ const TabIcon: React.FC<TabIconProps> = ({ icon, focused }) => (
       size={22}
       style={styles.iconButton}
     />
-    {focused && <View style={styles.focusIndicator} />}
+    {focused && <View style={[styles.focusIndicator, { backgroundColor: colors.primary.main }]} />}
   </View>
 );
 
 export default function MainNavigator() {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
 
   return (
     <Tab.Navigator
@@ -91,7 +93,7 @@ export default function MainNavigator() {
         component={DashboardScreen}
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon icon="view-dashboard" focused={focused} />
+            <TabIcon icon="view-dashboard" focused={focused} colors={colors} />
           ),
           tabBarLabel: 'Home',
           headerShown: false, // Dashboard has its own header
@@ -103,7 +105,7 @@ export default function MainNavigator() {
         component={AIChatScreen}
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon icon="robot" focused={focused} />
+            <TabIcon icon="robot" focused={focused} colors={colors} />
           ),
           tabBarLabel: 'AI',
           title: 'AI Assistant',
@@ -115,7 +117,7 @@ export default function MainNavigator() {
         component={TasksScreen}
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon icon="checkbox-marked-circle-outline" focused={focused} />
+            <TabIcon icon="checkbox-marked-circle-outline" focused={focused} colors={colors} />
           ),
           tabBarLabel: 'Tasks',
           headerShown: false, // Tasks has its own header
@@ -127,7 +129,7 @@ export default function MainNavigator() {
         component={HabitsScreen}
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon icon="chart-line" focused={focused} />
+            <TabIcon icon="chart-line" focused={focused} colors={colors} />
           ),
           tabBarLabel: 'Habits',
           headerShown: false, // Habits has its own header
@@ -139,7 +141,7 @@ export default function MainNavigator() {
         component={CalendarScreen}
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon icon="calendar" focused={focused} />
+            <TabIcon icon="calendar" focused={focused} colors={colors} />
           ),
           tabBarLabel: 'Calendar',
           headerShown: false, // Calendar has its own header
@@ -151,7 +153,7 @@ export default function MainNavigator() {
         component={FinanceScreen}
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon icon="wallet" focused={focused} />
+            <TabIcon icon="wallet" focused={focused} colors={colors} />
           ),
           tabBarLabel: 'Finance',
           headerShown: false, // Finance has its own header
@@ -163,7 +165,7 @@ export default function MainNavigator() {
         component={SettingsNavigator}
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon icon="cog" focused={focused} />
+            <TabIcon icon="cog" focused={focused} colors={colors} />
           ),
           tabBarLabel: 'Settings',
           title: 'Settings',
@@ -193,6 +195,6 @@ const styles = StyleSheet.create({
     width: 4,
     height: 4,
     borderRadius: 2,
-    backgroundColor: colors.primary.main,
+    // backgroundColor is set inline via colors prop
   },
 });
