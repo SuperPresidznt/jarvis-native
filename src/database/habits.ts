@@ -21,6 +21,8 @@ export interface Habit {
   targetCount: number;
   currentStreak: number;
   longestStreak: number;
+  reminderTime?: string;
+  notificationId?: string;
   createdAt: string;
   updatedAt: string;
   synced: boolean;
@@ -43,6 +45,8 @@ interface HabitRow {
   target_count: number;
   current_streak: number;
   longest_streak: number;
+  reminder_time?: string;
+  notification_id?: string;
   created_at: string;
   updated_at: string;
   synced: number;
@@ -62,11 +66,13 @@ export interface CreateHabitData {
   description?: string;
   cadence?: HabitCadence;
   targetCount?: number;
+  reminderTime?: string;
 }
 
 export interface UpdateHabitData extends Partial<CreateHabitData> {
   currentStreak?: number;
   longestStreak?: number;
+  notificationId?: string;
 }
 
 /**
@@ -81,6 +87,8 @@ function rowToHabit(row: HabitRow): Habit {
     targetCount: row.target_count,
     currentStreak: row.current_streak,
     longestStreak: row.longest_streak,
+    reminderTime: row.reminder_time,
+    notificationId: row.notification_id,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     synced: row.synced === 1,
@@ -129,8 +137,9 @@ export async function createHabit(data: CreateHabitData): Promise<Habit> {
   const sql = `
     INSERT INTO habits (
       id, name, description, cadence, target_count,
-      current_streak, longest_streak, created_at, updated_at, synced
-    ) VALUES (?, ?, ?, ?, ?, 0, 0, ?, ?, 0)
+      current_streak, longest_streak, reminder_time, notification_id,
+      created_at, updated_at, synced
+    ) VALUES (?, ?, ?, ?, ?, 0, 0, ?, NULL, ?, ?, 0)
   `;
 
   const params = [
@@ -139,6 +148,7 @@ export async function createHabit(data: CreateHabitData): Promise<Habit> {
     data.description || null,
     data.cadence || 'daily',
     data.targetCount || 1,
+    data.reminderTime || null,
     now,
     now,
   ];
@@ -190,6 +200,16 @@ export async function updateHabit(id: string, data: UpdateHabitData): Promise<Ha
   if (data.longestStreak !== undefined) {
     updates.push('longest_streak = ?');
     params.push(data.longestStreak);
+  }
+
+  if (data.reminderTime !== undefined) {
+    updates.push('reminder_time = ?');
+    params.push(data.reminderTime || null);
+  }
+
+  if (data.notificationId !== undefined) {
+    updates.push('notification_id = ?');
+    params.push(data.notificationId || null);
   }
 
   updates.push('updated_at = ?');
