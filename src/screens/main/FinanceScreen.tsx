@@ -26,6 +26,7 @@ import { MetricCard } from '../../components/MetricCard';
 import { BudgetCard } from '../../components/BudgetCard';
 import { BudgetFormModal } from '../../components/BudgetFormModal';
 import { BudgetSummaryCard } from '../../components/BudgetSummaryCard';
+import { SpendingTrendChart, CategoryPieChart, MonthlyComparisonChart } from '../../components/charts';
 import {
   colors,
   typography,
@@ -315,23 +316,20 @@ export default function FinanceScreen() {
               );
             })()}
 
-            {/* Category Breakdown */}
-            {(() => {
-              const categories = getCategoryBreakdown();
-              return categories.length > 0 ? (
-                <View style={styles.section}>
-                  <Text style={styles.sectionLabel}>TOP SPENDING CATEGORIES</Text>
-                  <View style={styles.categoryList}>
-                    {categories.map(([category, amount]) => (
-                      <View key={category} style={styles.categoryRow}>
-                        <Text style={styles.categoryName}>{category}</Text>
-                        <Text style={styles.categoryAmount}>{formatCurrency(amount)}</Text>
-                      </View>
-                    ))}
-                  </View>
-                </View>
-              ) : null;
-            })()}
+            {/* Spending Trend Chart */}
+            <View style={styles.section}>
+              <SpendingTrendChart days={30} />
+            </View>
+
+            {/* Category Pie Chart */}
+            <View style={styles.section}>
+              <CategoryPieChart />
+            </View>
+
+            {/* Monthly Comparison Chart */}
+            <View style={styles.section}>
+              <MonthlyComparisonChart months={6} />
+            </View>
 
             {/* Recent Assets */}
             <View style={styles.section}>
