@@ -20,7 +20,9 @@ import {
 import { IconButton, Switch } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as habitsDB from '../../database/habits';
+import { getHabitInsights, HabitInsights } from '../../database/habits';
 import { HabitHeatmap } from '../../components/HabitHeatmap';
+import { HabitInsightsCard } from '../../components/habits/HabitInsightsCard';
 import { AppButton, AppChip, EmptyState, LoadingState } from '../../components/ui';
 import { WeeklyCompletionChart, HabitsComparisonChart } from '../../components/charts';
 import {
@@ -55,6 +57,9 @@ export default function HabitsScreen() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [celebratingHabitId, setCelebratingHabitId] = useState<string | null>(null);
   const [celebrationMessage, setCelebrationMessage] = useState('');
+  const [selectedHabitInsights, setSelectedHabitInsights] = useState<HabitInsights | null>(null);
+  const [showInsightsModal, setShowInsightsModal] = useState(false);
+  const [insightsHabitName, setInsightsHabitName] = useState('');
   const insets = useSafeAreaInsets();
 
   // Load habits from local database
@@ -189,6 +194,18 @@ export default function HabitsScreen() {
     setShowHeatmap(true);
   };
 
+  const loadInsights = async (habitId: string, habitName: string) => {
+    try {
+      const insights = await getHabitInsights(habitId);
+      setSelectedHabitInsights(insights);
+      setInsightsHabitName(habitName);
+      setShowInsightsModal(true);
+    } catch (error) {
+      console.error('[HabitsScreen] Error loading insights:', error);
+      Alert.alert('Error', 'Failed to load habit insights. Please try again.');
+    }
+  };
+
   const getMilestoneBadges = (currentStreak: number, longestStreak: number) => {
     const badges: string[] = [];
     if (longestStreak >= 7) badges.push('🥉 7 Day');
@@ -269,6 +286,7 @@ export default function HabitsScreen() {
                     habit={habit}
                     onLogToday={handleLogToday}
                     onViewHeatmap={handleViewHeatmap}
+                    onViewInsights={loadInsights}
                     onEdit={(h) => {
                       setSelectedHabit(h);
                       setShowCreateModal(true);
@@ -293,6 +311,7 @@ export default function HabitsScreen() {
                     habit={habit}
                     onLogToday={handleLogToday}
                     onViewHeatmap={handleViewHeatmap}
+                    onViewInsights={loadInsights}
                     onEdit={(h) => {
                       setSelectedHabit(h);
                       setShowCreateModal(true);
@@ -372,6 +391,32 @@ export default function HabitsScreen() {
           </View>
         </Modal>
       )}
+
+      {/* Insights Modal */}
+      <Modal
+        visible={showInsightsModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowInsightsModal(false)}
+      >
+        <View style={styles.insightsModalContainer}>
+          <View style={styles.insightsModalHeader}>
+            <Text style={styles.insightsModalTitle}>Habit Insights</Text>
+            <IconButton
+              icon="close"
+              onPress={() => setShowInsightsModal(false)}
+              iconColor={colors.text.tertiary}
+            />
+          </View>
+
+          {selectedHabitInsights && (
+            <HabitInsightsCard
+              insights={selectedHabitInsights}
+              habitName={insightsHabitName}
+            />
+          )}
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -381,6 +426,7 @@ interface HabitCardProps {
   habit: Habit;
   onLogToday: (id: string) => void;
   onViewHeatmap: (habit: Habit) => void;
+  onViewInsights: (habitId: string, habitName: string) => void;
   onEdit: (habit: Habit) => void;
   onDelete: (id: string) => void;
   onToggleActive: () => void;
@@ -391,6 +437,7 @@ const HabitCard: React.FC<HabitCardProps> = ({
   habit,
   onLogToday,
   onViewHeatmap,
+  onViewInsights,
   onEdit,
   onDelete,
   onToggleActive,
@@ -516,6 +563,12 @@ const HabitCard: React.FC<HabitCardProps> = ({
 
           {/* Actions */}
           <View style={styles.habitActions}>
+            <TouchableOpacity
+              onPress={() => onViewInsights(habit.id, habit.name)}
+              style={styles.actionButton}
+            >
+              <Text style={styles.actionButtonText}>Insights</Text>
+            </TouchableOpacity>
             <TouchableOpacity
               onPress={() => onViewHeatmap(habit)}
               style={styles.actionButton}
@@ -1045,5 +1098,25 @@ const styles = StyleSheet.create({
     fontWeight: typography.weight.bold,
     color: colors.primary.main,
     textAlign: 'center',
+  },
+  // Insights modal styles
+  insightsModalContainer: {
+    flex: 1,
+    backgroundColor: colors.background.primary,
+  },
+  insightsModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: spacing.base,
+    paddingTop: spacing.base,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.subtle,
+    backgroundColor: colors.background.secondary,
+  },
+  insightsModalTitle: {
+    fontSize: typography.size.xl,
+    fontWeight: typography.weight.semibold,
+    color: colors.text.primary,
   },
 });
