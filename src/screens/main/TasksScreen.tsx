@@ -22,6 +22,7 @@ import {
 import { IconButton, SegmentedButtons, Checkbox, Badge } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as tasksDB from '../../database/tasks';
 import type { Project } from '../../database/projects';
 import { AppButton, AppCard, AppChip, EmptyState, LoadingState } from '../../components/ui';
@@ -355,6 +356,9 @@ interface TaskCardProps {
   compact?: boolean;
   highlightId?: string;
   onHighlightComplete?: () => void;
+  bulkSelectMode?: boolean;
+  selected?: boolean;
+  onToggleSelect?: () => void;
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({
@@ -365,6 +369,9 @@ const TaskCard: React.FC<TaskCardProps> = ({
   compact = false,
   highlightId,
   onHighlightComplete,
+  bulkSelectMode = false,
+  selected = false,
+  onToggleSelect,
 }) => {
   const useHighlight = require('../../hooks/useHighlight').default;
   const { shouldHighlight, highlightOpacity, highlightScale } = useHighlight({
@@ -374,6 +381,15 @@ const TaskCard: React.FC<TaskCardProps> = ({
   });
   const [scaleValue] = useState(new Animated.Value(1));
   const isCompleted = task.status === 'completed';
+
+  // In bulk select mode, pressing card toggles selection
+  const handleCardPress = () => {
+    if (bulkSelectMode && onToggleSelect) {
+      onToggleSelect();
+    } else {
+      onEdit(task);
+    }
+  };
 
   // Check if task is overdue
   const isOverdue = task.dueDate && task.status !== 'completed' && task.status !== 'cancelled'
@@ -412,7 +428,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
       opacity: shouldHighlight ? highlightOpacity : 1,
     }}>
       <TouchableOpacity
-        onPress={() => onEdit(task)}
+        onPress={handleCardPress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         activeOpacity={0.9}
@@ -422,30 +438,51 @@ const TaskCard: React.FC<TaskCardProps> = ({
           { borderLeftWidth: 4, borderLeftColor: borderColor },
           isOverdue && styles.taskCardOverdue,
           shouldHighlight && styles.taskCardHighlight,
+          selected && styles.taskCardSelected,
         ]}
       >
         <View style={styles.taskContent}>
           <View style={styles.taskHeader}>
-            <TouchableOpacity
-              onPress={() =>
-                onStatusChange(
-                  task.id,
-                  isCompleted ? 'todo' : 'completed'
-                )
-              }
-              style={styles.checkbox}
-            >
-              <View
-                style={[
-                  styles.checkboxInner,
-                  isCompleted && styles.checkboxChecked,
-                ]}
+            {bulkSelectMode ? (
+              // Bulk selection checkbox
+              <TouchableOpacity
+                onPress={onToggleSelect}
+                style={styles.checkbox}
               >
-                {isCompleted && (
-                  <Text style={styles.checkmark}>✓</Text>
-                )}
-              </View>
-            </TouchableOpacity>
+                <View
+                  style={[
+                    styles.checkboxInner,
+                    selected && styles.checkboxSelected,
+                  ]}
+                >
+                  {selected && (
+                    <Icon name="check" size={16} color="#FFFFFF" />
+                  )}
+                </View>
+              </TouchableOpacity>
+            ) : (
+              // Normal completion checkbox
+              <TouchableOpacity
+                onPress={() =>
+                  onStatusChange(
+                    task.id,
+                    isCompleted ? 'todo' : 'completed'
+                  )
+                }
+                style={styles.checkbox}
+              >
+                <View
+                  style={[
+                    styles.checkboxInner,
+                    isCompleted && styles.checkboxChecked,
+                  ]}
+                >
+                  {isCompleted && (
+                    <Text style={styles.checkmark}>✓</Text>
+                  )}
+                </View>
+              </TouchableOpacity>
+            )}
 
             <View style={styles.taskInfo}>
               <View style={styles.taskTitleRow}>
@@ -1002,6 +1039,11 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 4,
   },
+  taskCardSelected: {
+    borderWidth: 2,
+    borderColor: colors.primary.main,
+    backgroundColor: colors.primary.light,
+  },
   taskContent: {
     flex: 1,
     padding: spacing.base,
@@ -1024,6 +1066,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   checkboxChecked: {
+    backgroundColor: colors.primary.main,
+    borderColor: colors.primary.main,
+  },
+  checkboxSelected: {
     backgroundColor: colors.primary.main,
     borderColor: colors.primary.main,
   },
