@@ -28,6 +28,8 @@ import { BudgetFormModal } from '../../components/BudgetFormModal';
 import { BudgetSummaryCard } from '../../components/BudgetSummaryCard';
 import { SpendingTrendChart, CategoryPieChart, MonthlyComparisonChart } from '../../components/charts';
 import { ExportButton } from '../../components/finance/ExportButton';
+import { CategoryPicker } from '../../components/finance/CategoryPicker';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {
   colors,
   typography,
@@ -763,9 +765,12 @@ const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   const [type, setType] = useState<financeDB.TransactionType>(transaction?.type || 'expense');
   const [amount, setAmount] = useState(transaction ? (transaction.amount / 100).toString() : '');
   const [category, setCategory] = useState(transaction?.category || '');
+  const [categoryIcon, setCategoryIcon] = useState('wallet');
+  const [categoryColor, setCategoryColor] = useState('#3B82F6');
   const [date, setDate] = useState(transaction?.date || new Date().toISOString().split('T')[0]);
   const [description, setDescription] = useState(transaction?.description || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
 
   React.useEffect(() => {
     if (visible) {
@@ -857,13 +862,29 @@ const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
               {/* Category */}
               <View style={styles.formGroup}>
                 <Text style={styles.label}>Category</Text>
-                <TextInput
-                  value={category}
-                  onChangeText={setCategory}
-                  placeholder="e.g., Food, Rent, Salary..."
-                  placeholderTextColor={colors.text.placeholder}
-                  style={styles.input}
-                />
+                <TouchableOpacity
+                  style={styles.categoryButton}
+                  onPress={() => setShowCategoryPicker(true)}
+                >
+                  {category ? (
+                    <View style={styles.selectedCategory}>
+                      <View
+                        style={[
+                          styles.categoryIconSmall,
+                          { backgroundColor: `${categoryColor}25` },
+                        ]}
+                      >
+                        <Icon name={categoryIcon} size={20} color={categoryColor} />
+                      </View>
+                      <Text style={styles.categoryButtonText}>{category}</Text>
+                    </View>
+                  ) : (
+                    <Text style={styles.categoryPlaceholder}>
+                      Select category...
+                    </Text>
+                  )}
+                  <Icon name="chevron-right" size={24} color={colors.text.tertiary} />
+                </TouchableOpacity>
               </View>
 
               {/* Date */}
@@ -905,6 +926,19 @@ const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
             </View>
           </View>
         </View>
+
+        {/* Category Picker Modal */}
+        <CategoryPicker
+          visible={showCategoryPicker}
+          type={type}
+          selectedCategoryName={category}
+          onSelect={(name, icon, color) => {
+            setCategory(name);
+            setCategoryIcon(icon);
+            setCategoryColor(color);
+          }}
+          onClose={() => setShowCategoryPicker(false)}
+        />
       </KeyboardAvoidingView>
     </Modal>
   );
@@ -1540,5 +1574,37 @@ const styles = StyleSheet.create({
   },
   modalButton: {
     flex: 1,
+  },
+  categoryButton: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.md,
+    borderWidth: 1.5,
+    borderColor: colors.border.default,
+    padding: spacing.md,
+  },
+  selectedCategory: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    flex: 1,
+  },
+  categoryIconSmall: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  categoryButtonText: {
+    fontSize: typography.size.base,
+    color: colors.text.primary,
+    fontWeight: typography.weight.medium,
+  },
+  categoryPlaceholder: {
+    fontSize: typography.size.base,
+    color: colors.text.placeholder,
   },
 });
