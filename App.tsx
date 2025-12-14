@@ -3,17 +3,19 @@
  * Offline-first React Native personal assistant
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, ActivityIndicator, Text, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { PaperProvider, MD3LightTheme } from 'react-native-paper';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { NavigationContainerRef } from '@react-navigation/native';
 
 import RootNavigator from './src/navigation/RootNavigator';
 import { initDatabase } from './src/database';
 import { needsSeeding, seedDatabase } from './src/database/seed';
 import { useThemeStore } from './src/store/themeStore';
+import * as notificationService from './src/services/notifications';
 
 // Create React Query client
 const queryClient = new QueryClient({
@@ -46,6 +48,7 @@ export default function App() {
   const [initError, setInitError] = useState<string | null>(null);
   const loadTheme = useThemeStore((state) => state.loadTheme);
   const themeMode = useThemeStore((state) => state.mode);
+  const navigationRef = useRef<NavigationContainerRef<any> | null>(null);
 
   useEffect(() => {
     async function prepare() {
@@ -82,6 +85,33 @@ export default function App() {
     prepare();
   }, [loadTheme]);
 
+  // Set up notification tap handler
+  useEffect(() => {
+    const subscription = notificationService.addNotificationResponseListener((data) => {
+      console.log('[App] Notification tapped:', data);
+
+      // Handle habit reminders
+      if (data.type === 'habit' && navigationRef.current) {
+        // Navigate to Habits tab
+        navigationRef.current.navigate('Main', {
+          screen: 'Habits',
+        });
+      }
+
+      // Handle event reminders
+      if (data.type === 'event' && navigationRef.current) {
+        // Navigate to Calendar tab
+        navigationRef.current.navigate('Main', {
+          screen: 'Calendar',
+        });
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
   if (!isReady) {
     return (
       <View style={styles.loadingContainer}>
@@ -105,7 +135,7 @@ export default function App() {
       <QueryClientProvider client={queryClient}>
         <PaperProvider theme={theme}>
           <StatusBar style={themeMode === 'dark' ? 'light' : 'dark'} />
-          <RootNavigator />
+          <RootNavigator navigationRef={navigationRef} />
         </PaperProvider>
       </QueryClientProvider>
     </SafeAreaProvider>

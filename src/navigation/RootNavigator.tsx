@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, NavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
 
@@ -20,7 +20,11 @@ import SearchScreen from '../screens/SearchScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-export default function RootNavigator() {
+interface RootNavigatorProps {
+  navigationRef?: React.RefObject<NavigationContainerRef<any> | null>;
+}
+
+export default function RootNavigator({ navigationRef }: RootNavigatorProps) {
   const { isAuthenticated, isLoading, restoreSession } = useAuthStore();
 
   useEffect(() => {
@@ -40,7 +44,7 @@ export default function RootNavigator() {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {(isAuthenticated || FEATURES.DEMO_MODE) ? (
           <>
