@@ -9,6 +9,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MainTabParamList } from '../types';
 import { useTheme } from '../hooks/useTheme';
+import { useBadgeCounts } from '../hooks/useBadgeCounts';
 import {
   typography,
   spacing,
@@ -17,7 +18,7 @@ import {
 } from '../theme';
 
 // Icons (using simple text for now - in production use react-native-vector-icons)
-import { IconButton } from 'react-native-paper';
+import { IconButton, Badge } from 'react-native-paper';
 
 // Screens
 import DashboardScreen from '../screens/main/DashboardScreen';
@@ -36,9 +37,10 @@ interface TabIconProps {
   icon: string;
   focused: boolean;
   colors: ReturnType<typeof import('../theme').getColors>;
+  badgeCount?: number;
 }
 
-const TabIcon: React.FC<TabIconProps> = ({ icon, focused, colors }) => (
+const TabIcon: React.FC<TabIconProps> = ({ icon, focused, colors, badgeCount }) => (
   <View style={[styles.iconContainer, focused && styles.iconContainerFocused]}>
     <IconButton
       icon={icon}
@@ -46,6 +48,17 @@ const TabIcon: React.FC<TabIconProps> = ({ icon, focused, colors }) => (
       size={22}
       style={styles.iconButton}
     />
+    {badgeCount !== undefined && badgeCount > 0 && (
+      <Badge
+        size={18}
+        style={[
+          styles.badge,
+          { backgroundColor: colors.error }
+        ]}
+      >
+        {badgeCount > 99 ? '99+' : badgeCount}
+      </Badge>
+    )}
     {focused && <View style={[styles.focusIndicator, { backgroundColor: colors.primary.main }]} />}
   </View>
 );
@@ -53,6 +66,7 @@ const TabIcon: React.FC<TabIconProps> = ({ icon, focused, colors }) => (
 export default function MainNavigator() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { counts } = useBadgeCounts();
 
   return (
     <Tab.Navigator
@@ -126,7 +140,12 @@ export default function MainNavigator() {
         component={TasksScreen}
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon icon="checkbox-marked-circle-outline" focused={focused} colors={colors} />
+            <TabIcon
+              icon="checkbox-marked-circle-outline"
+              focused={focused}
+              colors={colors}
+              badgeCount={counts.tasks}
+            />
           ),
           tabBarLabel: 'Tasks',
           headerShown: false, // Tasks has its own header
@@ -150,7 +169,12 @@ export default function MainNavigator() {
         component={HabitsScreen}
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon icon="chart-line" focused={focused} colors={colors} />
+            <TabIcon
+              icon="chart-line"
+              focused={focused}
+              colors={colors}
+              badgeCount={counts.habits}
+            />
           ),
           tabBarLabel: 'Habits',
           headerShown: false, // Habits has its own header
@@ -162,7 +186,12 @@ export default function MainNavigator() {
         component={CalendarScreen}
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon icon="calendar" focused={focused} colors={colors} />
+            <TabIcon
+              icon="calendar"
+              focused={focused}
+              colors={colors}
+              badgeCount={counts.calendar}
+            />
           ),
           tabBarLabel: 'Calendar',
           headerShown: false, // Calendar has its own header
@@ -209,6 +238,13 @@ const styles = StyleSheet.create({
   iconButton: {
     margin: 0,
     padding: 0,
+  },
+  badge: {
+    position: 'absolute',
+    top: -2,
+    right: -4,
+    fontSize: 10,
+    fontWeight: '600',
   },
   focusIndicator: {
     position: 'absolute',

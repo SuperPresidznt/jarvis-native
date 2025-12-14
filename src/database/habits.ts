@@ -563,6 +563,28 @@ export async function getHabitInsights(habitId: string): Promise<HabitInsights> 
   }
 }
 
+/**
+ * Get count of incomplete daily habits for today (for badge display)
+ */
+export async function getTodayIncompleteHabitsCount(): Promise<number> {
+  const today = new Date().toISOString().split('T')[0];
+
+  const sql = `
+    SELECT COUNT(*) as count
+    FROM habits h
+    WHERE h.cadence = 'daily'
+    AND NOT EXISTS (
+      SELECT 1 FROM habit_logs hl
+      WHERE hl.habit_id = h.id
+      AND hl.date = ?
+      AND hl.completed = 1
+    )
+  `;
+
+  const result = await executeQuerySingle<{ count: number }>(sql, [today]);
+  return result?.count || 0;
+}
+
 export default {
   getHabits,
   getHabit,
@@ -575,4 +597,5 @@ export default {
   getHabitStats,
   isHabitCompletedToday,
   getHabitInsights,
+  getTodayIncompleteHabitsCount,
 };

@@ -539,6 +539,20 @@ export async function bulkCompleteTasks(taskIds: string[]): Promise<void> {
   await executeWrite(sql, [now, now, ...taskIds]);
 }
 
+/**
+ * Get count of active (non-completed) tasks for badge display
+ */
+export async function getActiveTasksCount(): Promise<number> {
+  const sql = `
+    SELECT COUNT(*) as count
+    FROM tasks
+    WHERE status != 'completed' AND status != 'cancelled'
+  `;
+
+  const result = await executeQuerySingle<{ count: number }>(sql);
+  return result?.count || 0;
+}
+
 export default {
   getTasks,
   getTask,
@@ -552,4 +566,5 @@ export default {
   bulkUpdateTasks,
   bulkDeleteTasks,
   bulkCompleteTasks,
+  getActiveTasksCount,
 };
