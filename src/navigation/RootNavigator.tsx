@@ -9,6 +9,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
 
 import { useAuthStore } from '../store/authStore';
+import { useOnboarding } from '../hooks/useOnboarding';
 import { RootStackParamList } from '../types';
 import { FEATURES } from '../constants/config';
 
@@ -17,6 +18,7 @@ import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import MainNavigator from './MainNavigator';
 import SearchScreen from '../screens/SearchScreen';
+import OnboardingFlow from '../screens/onboarding/OnboardingFlow';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -26,6 +28,7 @@ interface RootNavigatorProps {
 
 export default function RootNavigator({ navigationRef }: RootNavigatorProps) {
   const { isAuthenticated, isLoading, restoreSession } = useAuthStore();
+  const { isOnboardingComplete, isLoading: isOnboardingLoading } = useOnboarding();
 
   useEffect(() => {
     // Skip session restore in demo mode
@@ -34,12 +37,32 @@ export default function RootNavigator({ navigationRef }: RootNavigatorProps) {
     }
   }, []);
 
-  // Skip loading in demo mode
-  if (isLoading && !FEATURES.DEMO_MODE) {
+  // Show loading while checking onboarding and auth status
+  if ((isLoading && !FEATURES.DEMO_MODE) || isOnboardingLoading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#007AFF" />
       </View>
+    );
+  }
+
+  // Show onboarding flow for first-time users
+  if (!isOnboardingComplete) {
+    return (
+      <NavigationContainer ref={navigationRef}>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Onboarding">
+            {() => (
+              <OnboardingFlow
+                onComplete={() => {
+                  // Navigation will automatically update when onboarding completes
+                  console.log('[RootNavigator] Onboarding completed');
+                }}
+              />
+            )}
+          </Stack.Screen>
+        </Stack.Navigator>
+      </NavigationContainer>
     );
   }
 

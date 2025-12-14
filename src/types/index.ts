@@ -196,6 +196,7 @@ export type RootStackParamList = {
   Login: undefined;
   Register: undefined;
   Search: undefined;
+  Onboarding: undefined;
 };
 
 export type MainTabParamList = {
