@@ -108,6 +108,60 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
 }
 
 /**
+ * Seed default finance categories
+ * Creates expense and income categories with icons and colors
+ */
+async function seedDefaultCategories(db: SQLite.SQLiteDatabase): Promise<void> {
+  console.log('[DB] Seeding default categories...');
+
+  try {
+    // Check if categories already exist
+    const existing = await db.getFirstAsync<{ count: number }>(
+      'SELECT COUNT(*) as count FROM finance_categories WHERE is_custom = 0'
+    );
+
+    if (existing && existing.count > 0) {
+      console.log('[DB] Default categories already exist, skipping seed');
+      return;
+    }
+
+    const now = new Date().toISOString();
+    const defaultCategories = [
+      // Expense categories
+      { id: 'cat-expense-food', name: 'Food & Dining', icon: 'food', color: '#F59E0B', type: 'expense', is_custom: 0, created_at: now },
+      { id: 'cat-expense-transport', name: 'Transportation', icon: 'car', color: '#3B82F6', type: 'expense', is_custom: 0, created_at: now },
+      { id: 'cat-expense-housing', name: 'Housing', icon: 'home', color: '#8B5CF6', type: 'expense', is_custom: 0, created_at: now },
+      { id: 'cat-expense-utilities', name: 'Utilities', icon: 'lightbulb', color: '#10B981', type: 'expense', is_custom: 0, created_at: now },
+      { id: 'cat-expense-entertainment', name: 'Entertainment', icon: 'theater', color: '#EC4899', type: 'expense', is_custom: 0, created_at: now },
+      { id: 'cat-expense-healthcare', name: 'Healthcare', icon: 'medical-bag', color: '#EF4444', type: 'expense', is_custom: 0, created_at: now },
+      { id: 'cat-expense-shopping', name: 'Shopping', icon: 'shopping', color: '#F97316', type: 'expense', is_custom: 0, created_at: now },
+      { id: 'cat-expense-other', name: 'Other Expenses', icon: 'dots-horizontal', color: '#64748B', type: 'expense', is_custom: 0, created_at: now },
+
+      // Income categories
+      { id: 'cat-income-salary', name: 'Salary', icon: 'cash', color: '#10B981', type: 'income', is_custom: 0, created_at: now },
+      { id: 'cat-income-freelance', name: 'Freelance', icon: 'briefcase', color: '#3B82F6', type: 'income', is_custom: 0, created_at: now },
+      { id: 'cat-income-investments', name: 'Investments', icon: 'trending-up', color: '#8B5CF6', type: 'income', is_custom: 0, created_at: now },
+      { id: 'cat-income-other', name: 'Other Income', icon: 'plus-circle', color: '#64748B', type: 'income', is_custom: 0, created_at: now },
+    ];
+
+    // Insert all categories in a transaction
+    await db.withTransactionAsync(async () => {
+      for (const category of defaultCategories) {
+        await db.runAsync(
+          'INSERT INTO finance_categories (id, name, icon, color, type, is_custom, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+          [category.id, category.name, category.icon, category.color, category.type, category.is_custom, category.created_at]
+        );
+      }
+    });
+
+    console.log('[DB] Default categories seeded successfully');
+  } catch (error) {
+    console.error('[DB] Error seeding default categories:', error);
+    throw error;
+  }
+}
+
+/**
  * Initialize the database
  * Creates tables and indexes if they don't exist
  */
@@ -137,6 +191,9 @@ export async function initDatabase(): Promise<SQLite.SQLiteDatabase> {
 
     // Run migrations for existing databases
     await runMigrations(database);
+
+    // Seed default categories
+    await seedDefaultCategories(database);
 
     console.log('[DB] Database initialized successfully');
     return database;
