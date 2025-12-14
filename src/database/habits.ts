@@ -384,6 +384,185 @@ export async function isHabitCompletedToday(habitId: string): Promise<boolean> {
   return log ? log.completed : false;
 }
 
+// ============================================================================
+// HABIT INSIGHTS & ANALYTICS
+// ============================================================================
+
+export interface TimeDistribution {
+  morning: number;
+  afternoon: number;
+  evening: number;
+}
+
+export interface WeekdayPattern {
+  Sunday: number;
+  Monday: number;
+  Tuesday: number;
+  Wednesday: number;
+  Thursday: number;
+  Friday: number;
+  Saturday: number;
+}
+
+export interface HabitInsights {
+  habitId: string;
+  completionRate30Days: number;
+  completionRate7Days: number;
+  bestTimeOfDay: 'morning' | 'afternoon' | 'evening' | null;
+  longestStreak: number;
+  currentStreak: number;
+  totalCompletions: number;
+  weekdayPattern: WeekdayPattern;
+  timeDistribution: TimeDistribution;
+}
+
+/**
+ * Analyze time-of-day completion patterns
+ */
+function analyzeTimeOfDay(logs: HabitLogRow[]): TimeDistribution {
+  const distribution: TimeDistribution = {
+    morning: 0,
+    afternoon: 0,
+    evening: 0,
+  };
+
+  logs.forEach(log => {
+    if (log.completed !== 1 || !log.created_at) return;
+
+    const hour = new Date(log.created_at).getHours();
+
+    if (hour >= 5 && hour < 12) {
+      distribution.morning++;
+    } else if (hour >= 12 && hour < 18) {
+      distribution.afternoon++;
+    } else {
+      distribution.evening++;
+    }
+  });
+
+  return distribution;
+}
+
+/**
+ * Determine best time of day based on completion distribution
+ */
+function getBestTimeOfDay(
+  distribution: TimeDistribution
+): 'morning' | 'afternoon' | 'evening' | null {
+  const total = distribution.morning + distribution.afternoon + distribution.evening;
+
+  if (total === 0) return null;
+
+  const max = Math.max(
+    distribution.morning,
+    distribution.afternoon,
+    distribution.evening
+  );
+
+  if (distribution.morning === max) return 'morning';
+  if (distribution.afternoon === max) return 'afternoon';
+  return 'evening';
+}
+
+/**
+ * Analyze completion rates by weekday
+ */
+function analyzeWeekdayPattern(logs: HabitLogRow[]): WeekdayPattern {
+  const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const;
+
+  const counts: Record<string, { completed: number; total: number }> = {};
+
+  weekdays.forEach(day => {
+    counts[day] = { completed: 0, total: 0 };
+  });
+
+  logs.forEach(log => {
+    const dayName = weekdays[new Date(log.date).getDay()];
+    counts[dayName].total++;
+    if (log.completed === 1) {
+      counts[dayName].completed++;
+    }
+  });
+
+  const pattern: WeekdayPattern = {
+    Sunday: 0,
+    Monday: 0,
+    Tuesday: 0,
+    Wednesday: 0,
+    Thursday: 0,
+    Friday: 0,
+    Saturday: 0,
+  };
+
+  weekdays.forEach(day => {
+    pattern[day] = counts[day].total > 0
+      ? Math.round((counts[day].completed / counts[day].total) * 100)
+      : 0;
+  });
+
+  return pattern;
+}
+
+/**
+ * Get comprehensive habit insights and analytics
+ */
+export async function getHabitInsights(habitId: string): Promise<HabitInsights> {
+  try {
+    const today = new Date();
+    const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    // Get completion logs for last 30 days
+    const sql = `
+      SELECT * FROM habit_logs
+      WHERE habit_id = ?
+      AND date >= ?
+      ORDER BY date DESC
+    `;
+    const logs = await executeQuery<HabitLogRow>(
+      sql,
+      [habitId, thirtyDaysAgo.toISOString().split('T')[0]]
+    );
+
+    // Calculate 30-day completion rate
+    const completedLast30 = logs.filter(l => l.completed === 1).length;
+    const completionRate30Days = (completedLast30 / 30) * 100;
+
+    // Calculate 7-day completion rate
+    const sevenDaysAgoDate = sevenDaysAgo.toISOString().split('T')[0];
+    const completedLast7 = logs.filter(
+      l => l.date >= sevenDaysAgoDate && l.completed === 1
+    ).length;
+    const completionRate7Days = (completedLast7 / 7) * 100;
+
+    // Analyze patterns
+    const timeDistribution = analyzeTimeOfDay(logs);
+    const bestTimeOfDay = getBestTimeOfDay(timeDistribution);
+    const weekdayPattern = analyzeWeekdayPattern(logs);
+
+    // Get streak data from habit record
+    const habit = await getHabit(habitId);
+    if (!habit) {
+      throw new Error(`Habit ${habitId} not found`);
+    }
+
+    return {
+      habitId,
+      completionRate30Days: Math.round(completionRate30Days),
+      completionRate7Days: Math.round(completionRate7Days),
+      bestTimeOfDay,
+      longestStreak: habit.longestStreak,
+      currentStreak: habit.currentStreak,
+      totalCompletions: completedLast30,
+      weekdayPattern,
+      timeDistribution,
+    };
+  } catch (error) {
+    console.error('[Habits] Error getting insights:', error);
+    throw error;
+  }
+}
+
 export default {
   getHabits,
   getHabit,
@@ -395,4 +574,5 @@ export default {
   getHabitLogs,
   getHabitStats,
   isHabitCompletedToday,
+  getHabitInsights,
 };
