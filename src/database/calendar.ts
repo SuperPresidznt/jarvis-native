@@ -10,6 +10,7 @@ import {
   executeQuerySingle,
   executeWrite,
 } from './index';
+import type { RecurrenceRule } from '../types';
 
 export interface CalendarEvent {
   id: string;
@@ -20,7 +21,7 @@ export interface CalendarEvent {
   location?: string;
   attendees?: string[];
   isAllDay: boolean;
-  recurring?: string;
+  recurrence?: RecurrenceRule;
   createdAt: string;
   updatedAt: string;
   synced: boolean;
@@ -49,7 +50,7 @@ export interface CreateEventData {
   location?: string;
   attendees?: string[];
   isAllDay?: boolean;
-  recurring?: string;
+  recurrence?: RecurrenceRule;
 }
 
 export interface UpdateEventData extends Partial<CreateEventData> {}
@@ -67,7 +68,7 @@ function rowToEvent(row: CalendarEventRow): CalendarEvent {
     location: row.location,
     attendees: row.attendees ? JSON.parse(row.attendees) : [],
     isAllDay: row.is_all_day === 1,
-    recurring: row.recurring,
+    recurrence: row.recurring ? JSON.parse(row.recurring) : undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     synced: row.synced === 1,
@@ -158,7 +159,7 @@ export async function createEvent(data: CreateEventData): Promise<CalendarEvent>
     data.location || null,
     JSON.stringify(data.attendees || []),
     data.isAllDay ? 1 : 0,
-    data.recurring || null,
+    data.recurrence ? JSON.stringify(data.recurrence) : null,
     now,
     now,
   ];
@@ -217,9 +218,9 @@ export async function updateEvent(id: string, data: UpdateEventData): Promise<Ca
     params.push(data.isAllDay ? 1 : 0);
   }
 
-  if (data.recurring !== undefined) {
+  if (data.recurrence !== undefined) {
     updates.push('recurring = ?');
-    params.push(data.recurring || null);
+    params.push(data.recurrence ? JSON.stringify(data.recurrence) : null);
   }
 
   updates.push('updated_at = ?');
