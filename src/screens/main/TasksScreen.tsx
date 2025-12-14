@@ -303,6 +303,19 @@ const TaskCard: React.FC<TaskCardProps> = ({
   const [scaleValue] = useState(new Animated.Value(1));
   const isCompleted = task.status === 'completed';
 
+  // Check if task is overdue
+  const isOverdue = task.dueDate && task.status !== 'completed' && task.status !== 'cancelled'
+    ? new Date(task.dueDate) < new Date()
+    : false;
+
+  // Get priority color or use default
+  const priorityColor = task.priority
+    ? PRIORITY_CONFIG[task.priority].color
+    : colors.border.default;
+
+  // For overdue tasks, always use error color
+  const borderColor = isOverdue ? colors.error : priorityColor;
+
   const handlePressIn = () => {
     Animated.spring(scaleValue, {
       toValue: 0.98,
@@ -326,18 +339,13 @@ const TaskCard: React.FC<TaskCardProps> = ({
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         activeOpacity={0.9}
-        style={[styles.taskCard, compact && styles.taskCardCompact]}
+        style={[
+          styles.taskCard,
+          compact && styles.taskCardCompact,
+          { borderLeftWidth: 4, borderLeftColor: borderColor },
+          isOverdue && styles.taskCardOverdue,
+        ]}
       >
-        {/* Priority indicator */}
-        {task.priority && (
-          <View
-            style={[
-              styles.priorityIndicator,
-              { backgroundColor: PRIORITY_CONFIG[task.priority].color },
-            ]}
-          />
-        )}
-
         <View style={styles.taskContent}>
           <View style={styles.taskHeader}>
             <TouchableOpacity
@@ -388,19 +396,61 @@ const TaskCard: React.FC<TaskCardProps> = ({
             <>
               {/* Meta info */}
               <View style={styles.taskMeta}>
+                {/* Priority badge with dot */}
                 {task.priority && (
-                  <AppChip
-                    label={PRIORITY_CONFIG[task.priority].label}
-                    variant={
-                      task.priority === 'urgent'
-                        ? 'error'
-                        : task.priority === 'high'
-                        ? 'warning'
-                        : 'default'
-                    }
-                    compact
-                  />
+                  <View style={styles.priorityBadge}>
+                    <View
+                      style={[
+                        styles.priorityDot,
+                        { backgroundColor: PRIORITY_CONFIG[task.priority].color },
+                      ]}
+                    />
+                    <Text style={styles.priorityLabel}>
+                      {PRIORITY_CONFIG[task.priority].label}
+                    </Text>
+                  </View>
                 )}
+
+                {/* Overdue badge */}
+                {isOverdue && (
+                  <View style={styles.overdueBadge}>
+                    <Text style={styles.overdueText}>Overdue</Text>
+                  </View>
+                )}
+
+                {/* Due date badge */}
+                {task.dueDate && !isCompleted && (
+                  <View style={styles.dueDateBadge}>
+                    <Text style={styles.dueDateText}>
+                      Due {new Date(task.dueDate).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </Text>
+                  </View>
+                )}
+
+                {/* Project badge */}
+                {task.project && (
+                  <View
+                    style={[
+                      styles.projectBadge,
+                      task.project.color && {
+                        backgroundColor: `${task.project.color}20`,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.projectBadgeText,
+                        task.project.color && { color: task.project.color },
+                      ]}
+                    >
+                      {task.project.name}
+                    </Text>
+                  </View>
+                )}
+
                 {task.tags.slice(0, 2).map((tag) => (
                   <AppChip key={tag} label={`#${tag}`} compact />
                 ))}
@@ -826,15 +876,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.secondary,
     borderRadius: borderRadius.lg,
     overflow: 'hidden',
-    flexDirection: 'row',
     marginBottom: spacing.md,
     ...shadows.sm,
   },
   taskCardCompact: {
     marginBottom: spacing.sm,
   },
-  priorityIndicator: {
-    width: 4,
+  taskCardOverdue: {
+    backgroundColor: `${colors.error}10`,
   },
   taskContent: {
     flex: 1,
@@ -900,6 +949,58 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: spacing.sm,
     marginTop: spacing.md,
+    alignItems: 'center',
+  },
+  priorityBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.background.tertiary,
+    borderRadius: borderRadius.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+  },
+  priorityDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: spacing.xs,
+  },
+  priorityLabel: {
+    fontSize: typography.size.xs,
+    color: colors.text.secondary,
+    fontWeight: typography.weight.medium,
+  },
+  overdueBadge: {
+    backgroundColor: `${colors.error}20`,
+    borderRadius: borderRadius.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+  },
+  overdueText: {
+    fontSize: typography.size.xs,
+    color: colors.error,
+    fontWeight: typography.weight.semibold,
+  },
+  dueDateBadge: {
+    backgroundColor: colors.background.tertiary,
+    borderRadius: borderRadius.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+  },
+  dueDateText: {
+    fontSize: typography.size.xs,
+    color: colors.text.tertiary,
+  },
+  projectBadge: {
+    backgroundColor: colors.background.tertiary,
+    borderRadius: borderRadius.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+  },
+  projectBadgeText: {
+    fontSize: typography.size.xs,
+    color: colors.text.secondary,
+    fontWeight: typography.weight.medium,
   },
   taskActions: {
     flexDirection: 'row',
