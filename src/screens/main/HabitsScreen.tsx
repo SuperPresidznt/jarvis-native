@@ -32,6 +32,8 @@ import * as storage from '../../services/storage';
 import { WeeklyCompletionChart, HabitsComparisonChart } from '../../components/charts';
 import * as notificationService from '../../services/notifications';
 import { useOptimisticUpdate } from '../../hooks/useOptimisticUpdate';
+import { useTooltip } from '../../hooks/useTooltip';
+import Tooltip from '../../components/ui/Tooltip';
 import {
   colors,
   typography,
@@ -76,6 +78,7 @@ export default function HabitsScreen() {
   const [historyHabitName, setHistoryHabitName] = useState('');
   const insets = useSafeAreaInsets();
   const { updateOptimistically, isPending } = useOptimisticUpdate();
+  const tooltip = useTooltip();
 
   // Load habits from local database
   const loadHabits = useCallback(async () => {
@@ -227,6 +230,14 @@ export default function HabitsScreen() {
             setCelebrationMessage(message);
             Vibration.vibrate([100, 50, 100]);
             setTimeout(() => setCelebratingHabitId(null), 3000);
+          }
+
+          // Show tooltip on first habit completion
+          if (streak === 1) {
+            tooltip.showTooltip({
+              id: 'first-habit-completed',
+              message: 'Awesome! You completed your first habit. Keep building your streak to unlock celebrations at milestones.',
+            });
           }
         }
       },
@@ -600,6 +611,14 @@ export default function HabitsScreen() {
           />
         )}
       </Modal>
+
+      {/* First-use Tooltip */}
+      <Tooltip
+        visible={tooltip.visible}
+        message={tooltip.message}
+        onDismiss={tooltip.hideTooltip}
+        position="bottom"
+      />
     </View>
   );
 }

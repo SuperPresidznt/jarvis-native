@@ -38,6 +38,8 @@ import { clearHighlight } from '../../utils/navigation';
 import type { RecurrenceRule } from '../../types';
 import { formatDueDate, getDateUrgency, getDaysUntil } from '../../utils/dateUtils';
 import { useOptimisticUpdate } from '../../hooks/useOptimisticUpdate';
+import { useTooltip } from '../../hooks/useTooltip';
+import Tooltip from '../../components/ui/Tooltip';
 import {
   colors,
   typography,
@@ -97,6 +99,7 @@ export default function TasksScreen() {
   const [selectedTaskIds, setSelectedTaskIds] = useState<Set<string>>(new Set());
   const insets = useSafeAreaInsets();
   const { updateOptimistically, isPending } = useOptimisticUpdate();
+  const tooltip = useTooltip();
 
   // Load persisted filters on mount
   useEffect(() => {
@@ -557,6 +560,13 @@ export default function TasksScreen() {
         }}
         onSuccess={() => {
           setRefreshTrigger(prev => prev + 1);
+          // Show tooltip on first task creation
+          if (!selectedTask && tasks.length === 0) {
+            tooltip.showTooltip({
+              id: 'first-task-created',
+              message: 'Great! Your first task is created. Swipe left on any task to quickly complete or delete it.',
+            });
+          }
         }}
       />
 
@@ -567,6 +577,14 @@ export default function TasksScreen() {
         onApply={handleApplyFilters}
         availableProjects={availableProjects}
         availableTags={availableTags}
+      />
+
+      {/* First-use Tooltip */}
+      <Tooltip
+        visible={tooltip.visible}
+        message={tooltip.message}
+        onDismiss={tooltip.hideTooltip}
+        position="bottom"
       />
     </View>
   );
