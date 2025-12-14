@@ -30,6 +30,7 @@ import { SpendingTrendChart, CategoryPieChart, MonthlyComparisonChart } from '..
 import { ExportButton } from '../../components/finance/ExportButton';
 import { CategoryPicker } from '../../components/finance/CategoryPicker';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useOptimisticUpdate } from '../../hooks/useOptimisticUpdate';
 import {
   colors,
   typography,
@@ -62,6 +63,7 @@ export default function FinanceScreen() {
   const [budgetSummary, setBudgetSummary] = useState<budgetsDB.BudgetSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const insets = useSafeAreaInsets();
+  const { isPending } = useOptimisticUpdate();
 
   // Load finance data
   const loadData = useCallback(async () => {
@@ -175,9 +177,16 @@ export default function FinanceScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <View>
+        <View style={styles.headerLeft}>
           <Text style={styles.title}>Finance</Text>
-          <Text style={styles.subtitle}>Track your wealth</Text>
+          <View style={styles.subtitleRow}>
+            <Text style={styles.subtitle}>Track your wealth</Text>
+            {isPending && (
+              <View style={styles.savingIndicator}>
+                <Text style={styles.savingText}>Saving...</Text>
+              </View>
+            )}
+          </View>
         </View>
         {viewMode === 'transactions' && transactions.length > 0 && (
           <ExportButton transactions={transactions} />
@@ -1212,15 +1221,34 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
     paddingBottom: spacing.base,
   },
+  headerLeft: {
+    flex: 1,
+  },
   title: {
     fontSize: typography.size['2xl'],
     fontWeight: typography.weight.bold,
     color: colors.text.primary,
   },
+  subtitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginTop: spacing.xs,
+  },
   subtitle: {
     fontSize: typography.size.sm,
     color: colors.text.tertiary,
-    marginTop: spacing.xs,
+  },
+  savingIndicator: {
+    backgroundColor: colors.primary.light,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: borderRadius.sm,
+  },
+  savingText: {
+    fontSize: typography.size.xs,
+    color: colors.primary.main,
+    fontWeight: typography.weight.medium,
   },
   viewSelectorContainer: {
     paddingHorizontal: spacing.lg,
