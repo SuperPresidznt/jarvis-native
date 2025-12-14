@@ -31,9 +31,11 @@ import { ProjectPicker } from '../../components/ProjectPicker';
 import { TaskFilterBar } from '../../components/TaskFilterBar';
 import { BulkActionBar } from '../../components/tasks/BulkActionBar';
 import { SwipeableTaskItem } from '../../components/tasks/SwipeableTaskItem';
+import { EnhancedDatePicker } from '../../components/tasks/EnhancedDatePicker';
 import * as filterStore from '../../store/taskFilterStore';
 import { clearHighlight } from '../../utils/navigation';
 import type { RecurrenceRule } from '../../types';
+import { formatDueDate, getDateUrgency, getDaysUntil } from '../../utils/dateUtils';
 import {
   colors,
   typography,
@@ -690,24 +692,57 @@ const TaskCard: React.FC<TaskCardProps> = ({
                   </View>
                 )}
 
-                {/* Overdue badge */}
-                {isOverdue && (
-                  <View style={styles.overdueBadge}>
-                    <Text style={styles.overdueText}>Overdue</Text>
-                  </View>
-                )}
+                {/* Enhanced Due date badge with color coding */}
+                {task.dueDate && !isCompleted && (() => {
+                  const urgency = getDateUrgency(task.dueDate);
+                  const daysUntil = getDaysUntil(task.dueDate);
+                  const formattedDate = formatDueDate(task.dueDate);
 
-                {/* Due date badge */}
-                {task.dueDate && !isCompleted && (
-                  <View style={styles.dueDateBadge}>
-                    <Text style={styles.dueDateText}>
-                      Due {new Date(task.dueDate).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                      })}
-                    </Text>
-                  </View>
-                )}
+                  // Choose badge style based on urgency
+                  const badgeStyle = urgency === 'overdue'
+                    ? styles.overdueBadge
+                    : urgency === 'today'
+                    ? styles.dueTodayBadge
+                    : urgency === 'this-week'
+                    ? styles.dueThisWeekBadge
+                    : styles.dueFutureBadge;
+
+                  const textStyle = urgency === 'overdue'
+                    ? styles.overdueText
+                    : urgency === 'today'
+                    ? styles.dueTodayText
+                    : urgency === 'this-week'
+                    ? styles.dueThisWeekText
+                    : styles.dueFutureText;
+
+                  const icon = urgency === 'overdue'
+                    ? 'alert-circle'
+                    : urgency === 'today'
+                    ? 'clock-alert'
+                    : urgency === 'this-week'
+                    ? 'calendar-clock'
+                    : 'calendar';
+
+                  return (
+                    <View style={[styles.dueDateBadge, badgeStyle]}>
+                      <Icon name={icon} size={14} color={
+                        urgency === 'overdue' ? colors.error :
+                        urgency === 'today' ? colors.warning :
+                        urgency === 'this-week' ? '#F59E0B' :
+                        colors.text.tertiary
+                      } />
+                      <Text style={[styles.dueDateText, textStyle]}>
+                        {urgency === 'overdue'
+                          ? `Overdue (${formattedDate})`
+                          : daysUntil === 0
+                          ? 'Due Today'
+                          : daysUntil === 1
+                          ? 'Due Tomorrow'
+                          : `Due ${formattedDate}`}
+                      </Text>
+                    </View>
+                  );
+                })()}
 
                 {/* Project badge */}
                 {task.project && (
@@ -913,6 +948,7 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
   const [title, setTitle] = useState(task?.title || '');
   const [description, setDescription] = useState(task?.description || '');
   const [priority, setPriority] = useState<TaskPriority>(task?.priority || 'medium');
+  const [dueDate, setDueDate] = useState<string | undefined>(task?.dueDate);
   const [recurrence, setRecurrence] = useState<RecurrenceRule | undefined>(task?.recurrence);
   const [project, setProject] = useState<Project | null>(task?.project ? task.project as Project : null);
   const [showRecurrencePicker, setShowRecurrencePicker] = useState(false);
@@ -925,6 +961,7 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
       setTitle(task?.title || '');
       setDescription(task?.description || '');
       setPriority(task?.priority || 'medium');
+      setDueDate(task?.dueDate);
       setRecurrence(task?.recurrence);
       setProject(task?.project ? task.project as Project : null);
     }
@@ -950,6 +987,7 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
         title,
         description: description || undefined,
         priority,
+        dueDate,
         status: task?.status || ('todo' as TaskStatus),
         tags: task?.tags || [],
         recurrence,
@@ -1053,6 +1091,12 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
                   )}
                 </View>
               </View>
+
+              <EnhancedDatePicker
+                value={dueDate}
+                onChange={setDueDate}
+                label="Due Date"
+              />
 
               <View style={styles.formGroup}>
                 <Text style={styles.label}>Recurrence</Text>
@@ -1317,24 +1361,53 @@ const styles = StyleSheet.create({
   },
   overdueBadge: {
     backgroundColor: `${colors.error}20`,
-    borderRadius: borderRadius.sm,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: colors.error,
   },
   overdueText: {
     fontSize: typography.size.xs,
     color: colors.error,
     fontWeight: typography.weight.semibold,
   },
-  dueDateBadge: {
+  dueTodayBadge: {
+    backgroundColor: `${colors.warning}20`,
+    borderWidth: 1,
+    borderColor: colors.warning,
+  },
+  dueTodayText: {
+    fontSize: typography.size.xs,
+    color: colors.warning,
+    fontWeight: typography.weight.semibold,
+  },
+  dueThisWeekBadge: {
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1,
+    borderColor: '#F59E0B',
+  },
+  dueThisWeekText: {
+    fontSize: typography.size.xs,
+    color: '#F59E0B',
+    fontWeight: typography.weight.medium,
+  },
+  dueFutureBadge: {
     backgroundColor: colors.background.tertiary,
+    borderWidth: 1,
+    borderColor: colors.border.subtle,
+  },
+  dueFutureText: {
+    fontSize: typography.size.xs,
+    color: colors.text.tertiary,
+  },
+  dueDateBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     borderRadius: borderRadius.sm,
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
   },
   dueDateText: {
     fontSize: typography.size.xs,
-    color: colors.text.tertiary,
   },
   projectBadge: {
     backgroundColor: colors.background.tertiary,
