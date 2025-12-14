@@ -27,6 +27,7 @@ import { BudgetCard } from '../../components/BudgetCard';
 import { BudgetFormModal } from '../../components/BudgetFormModal';
 import { BudgetSummaryCard } from '../../components/BudgetSummaryCard';
 import { SpendingTrendChart, CategoryPieChart, MonthlyComparisonChart } from '../../components/charts';
+import { ExportButton } from '../../components/finance/ExportButton';
 import {
   colors,
   typography,
@@ -176,6 +177,9 @@ export default function FinanceScreen() {
           <Text style={styles.title}>Finance</Text>
           <Text style={styles.subtitle}>Track your wealth</Text>
         </View>
+        {viewMode === 'transactions' && transactions.length > 0 && (
+          <ExportButton transactions={transactions} />
+        )}
       </View>
 
       {/* View Selector */}
