@@ -172,6 +172,34 @@ export async function getTask(id: string): Promise<Task | null> {
 }
 
 /**
+ * Get all tasks for a specific project
+ */
+export async function getTasksByProject(projectId: string): Promise<Task[]> {
+  const sql = `
+    SELECT
+      t.*,
+      p.name as project_name,
+      p.color as project_color
+    FROM tasks t
+    LEFT JOIN projects p ON t.project_id = p.id
+    WHERE t.project_id = ?
+    ORDER BY
+      CASE t.status
+        WHEN 'in_progress' THEN 1
+        WHEN 'todo' THEN 2
+        WHEN 'blocked' THEN 3
+        WHEN 'completed' THEN 4
+        WHEN 'cancelled' THEN 5
+        ELSE 6
+      END,
+      t.created_at DESC
+  `;
+
+  const rows = await executeQuery<TaskRow>(sql, [projectId]);
+  return rows.map(rowToTask);
+}
+
+/**
  * Create a new task
  */
 export async function createTask(data: CreateTaskData): Promise<Task> {
@@ -361,6 +389,7 @@ export async function getTaskStats(): Promise<{
 export default {
   getTasks,
   getTask,
+  getTasksByProject,
   createTask,
   updateTask,
   deleteTask,

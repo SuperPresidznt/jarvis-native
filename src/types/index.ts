@@ -202,10 +202,16 @@ export type MainTabParamList = {
   Dashboard: undefined;
   AIChat: undefined;
   Tasks: undefined;
+  Projects: undefined;
   Habits: undefined;
   Calendar: undefined;
   Finance: undefined;
   Settings: undefined;
+};
+
+export type ProjectsStackParamList = {
+  ProjectsList: undefined;
+  ProjectDetail: { projectId: string };
 };
 
 export type SettingsStackParamList = {

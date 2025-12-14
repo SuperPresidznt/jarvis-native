@@ -22,8 +22,10 @@ import {
 import { IconButton, SegmentedButtons, Checkbox } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as tasksDB from '../../database/tasks';
+import type { Project } from '../../database/projects';
 import { AppButton, AppCard, AppChip, EmptyState, LoadingState } from '../../components/ui';
 import { RecurrencePicker } from '../../components/RecurrencePicker';
+import { ProjectPicker } from '../../components/ProjectPicker';
 import type { RecurrenceRule } from '../../types';
 import {
   colors,
@@ -47,7 +49,8 @@ interface Task {
   dueDate?: string;
   tags: string[];
   recurrence?: RecurrenceRule;
-  project?: { id: string; name: string };
+  projectId?: string;
+  project?: { id: string; name: string; color?: string };
 }
 
 const STATUS_LABELS: Record<TaskStatus, string> = {
@@ -564,6 +567,7 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
   const [description, setDescription] = useState(task?.description || '');
   const [priority, setPriority] = useState<TaskPriority>(task?.priority || 'medium');
   const [recurrence, setRecurrence] = useState<RecurrenceRule | undefined>(task?.recurrence);
+  const [project, setProject] = useState<Project | null>(task?.project ? task.project as Project : null);
   const [showRecurrencePicker, setShowRecurrencePicker] = useState(false);
   const [titleFocused, setTitleFocused] = useState(false);
   const [descFocused, setDescFocused] = useState(false);
@@ -575,6 +579,7 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
       setDescription(task?.description || '');
       setPriority(task?.priority || 'medium');
       setRecurrence(task?.recurrence);
+      setProject(task?.project ? task.project as Project : null);
     }
   }, [visible, task]);
 
@@ -601,6 +606,7 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
         status: task?.status || ('todo' as TaskStatus),
         tags: task?.tags || [],
         recurrence,
+        projectId: project?.id,
       };
 
       if (task) {
@@ -717,6 +723,15 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
                     iconColor={colors.text.tertiary}
                   />
                 </TouchableOpacity>
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Project</Text>
+                <ProjectPicker
+                  value={project}
+                  onChange={setProject}
+                  placeholder="No Project"
+                />
               </View>
             </ScrollView>
 

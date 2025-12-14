@@ -23,6 +23,7 @@ import { IconButton } from 'react-native-paper';
 import DashboardScreen from '../screens/main/DashboardScreen';
 import AIChatScreen from '../screens/main/AIChatScreen';
 import TasksScreen from '../screens/main/TasksScreen';
+import ProjectsNavigator from './ProjectsNavigator';
 import HabitsScreen from '../screens/main/HabitsScreen';
 import CalendarScreen from '../screens/main/CalendarScreen';
 import FinanceScreen from '../screens/main/FinanceScreen';
@@ -129,6 +130,18 @@ export default function MainNavigator() {
           ),
           tabBarLabel: 'Tasks',
           headerShown: false, // Tasks has its own header
+        }}
+      />
+
+      <Tab.Screen
+        name="Projects"
+        component={ProjectsNavigator}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIcon icon="folder-outline" focused={focused} colors={colors} />
+          ),
+          tabBarLabel: 'Projects',
+          headerShown: false, // ProjectsNavigator has its own headers
         }}
       />
 
