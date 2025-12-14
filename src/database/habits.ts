@@ -404,6 +404,41 @@ export async function isHabitCompletedToday(habitId: string): Promise<boolean> {
   return log ? log.completed : false;
 }
 
+/**
+ * Update notes for an existing habit log
+ */
+export async function updateHabitLogNotes(
+  habitId: string,
+  date: string,
+  notes: string | null
+): Promise<HabitLog> {
+  const sql = `
+    UPDATE habit_logs
+    SET notes = ?
+    WHERE habit_id = ? AND date = ?
+  `;
+
+  await executeWrite(sql, [notes, habitId, date]);
+
+  const log = await getHabitLog(habitId, date);
+  if (!log) {
+    throw new Error('Habit log not found after update');
+  }
+
+  return log;
+}
+
+/**
+ * Delete a habit log
+ */
+export async function deleteHabitLog(habitId: string, date: string): Promise<void> {
+  const sql = 'DELETE FROM habit_logs WHERE habit_id = ? AND date = ?';
+  await executeWrite(sql, [habitId, date]);
+
+  // Update streak after deleting log
+  await updateHabitStreak(habitId);
+}
+
 // ============================================================================
 // HABIT INSIGHTS & ANALYTICS
 // ============================================================================
@@ -616,6 +651,8 @@ export default {
   getHabitLogs,
   getHabitStats,
   isHabitCompletedToday,
+  updateHabitLogNotes,
+  deleteHabitLog,
   getHabitInsights,
   getTodayIncompleteHabitsCount,
 };
