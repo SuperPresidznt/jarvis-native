@@ -456,6 +456,89 @@ export async function getTaskStats(): Promise<{
   };
 }
 
+/**
+ * Bulk update multiple tasks
+ */
+export async function bulkUpdateTasks(
+  taskIds: string[],
+  data: UpdateTaskData
+): Promise<void> {
+  if (taskIds.length === 0) {
+    return;
+  }
+
+  const now = getCurrentTimestamp();
+  const updates: string[] = [];
+  const params: any[] = [];
+
+  if (data.status !== undefined) {
+    updates.push('status = ?');
+    params.push(data.status);
+  }
+
+  if (data.priority !== undefined) {
+    updates.push('priority = ?');
+    params.push(data.priority);
+  }
+
+  if (data.projectId !== undefined) {
+    updates.push('project_id = ?');
+    params.push(data.projectId || null);
+  }
+
+  if (data.completedAt !== undefined) {
+    updates.push('completed_at = ?');
+    params.push(data.completedAt || null);
+  }
+
+  updates.push('updated_at = ?');
+  params.push(now);
+
+  updates.push('synced = 0');
+
+  // Create placeholders for IN clause
+  const placeholders = taskIds.map(() => '?').join(', ');
+  params.push(...taskIds);
+
+  const sql = `UPDATE tasks SET ${updates.join(', ')} WHERE id IN (${placeholders})`;
+  await executeWrite(sql, params);
+}
+
+/**
+ * Bulk delete multiple tasks
+ */
+export async function bulkDeleteTasks(taskIds: string[]): Promise<void> {
+  if (taskIds.length === 0) {
+    return;
+  }
+
+  const placeholders = taskIds.map(() => '?').join(', ');
+  const sql = `DELETE FROM tasks WHERE id IN (${placeholders})`;
+  await executeWrite(sql, taskIds);
+}
+
+/**
+ * Bulk complete multiple tasks
+ */
+export async function bulkCompleteTasks(taskIds: string[]): Promise<void> {
+  if (taskIds.length === 0) {
+    return;
+  }
+
+  const now = getCurrentTimestamp();
+  const placeholders = taskIds.map(() => '?').join(', ');
+  const sql = `
+    UPDATE tasks
+    SET status = 'completed',
+        completed_at = ?,
+        updated_at = ?,
+        synced = 0
+    WHERE id IN (${placeholders})
+  `;
+
+  await executeWrite(sql, [now, now, ...taskIds]);
+}
+
 export default {
   getTasks,
   getTask,
@@ -466,4 +549,7 @@ export default {
   markTaskSynced,
   getUnsyncedTasks,
   getTaskStats,
+  bulkUpdateTasks,
+  bulkDeleteTasks,
+  bulkCompleteTasks,
 };
