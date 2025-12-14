@@ -29,6 +29,7 @@ import { RecurrencePicker } from '../../components/RecurrencePicker';
 import type { RecurrenceRule } from '../../types';
 import DayTimelineView from '../../components/calendar/DayTimelineView';
 import WeekGridView from '../../components/calendar/WeekGridView';
+import { useOptimisticUpdate } from '../../hooks/useOptimisticUpdate';
 import {
   colors,
   typography,
@@ -52,6 +53,7 @@ export default function CalendarScreen() {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const { updateOptimistically, isPending } = useOptimisticUpdate();
 
   // Load events from local database
   const loadEvents = useCallback(async () => {
@@ -118,13 +120,25 @@ export default function CalendarScreen() {
         text: 'Delete',
         style: 'destructive',
         onPress: async () => {
-          try {
-            await calendarDB.deleteEvent(eventId);
-            await loadEvents();
-          } catch (error) {
-            console.error('Error deleting event:', error);
-            Alert.alert('Error', 'Failed to delete event');
-          }
+          const previousEvents = [...events];
+          const updatedEvents = events.filter(e => e.id !== eventId);
+
+          await updateOptimistically(
+            // Optimistic update - remove from UI immediately
+            () => setEvents(updatedEvents),
+            // Async operation
+            async () => {
+              await calendarDB.deleteEvent(eventId);
+              await loadEvents();
+            },
+            // Options
+            {
+              onError: (error) => {
+                console.error('[CalendarScreen] Error deleting event:', error);
+                setEvents(previousEvents); // Rollback
+              },
+            }
+          );
         },
       },
     ]);
@@ -159,11 +173,18 @@ export default function CalendarScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <View>
+        <View style={styles.headerLeft}>
           <Text style={styles.title}>Calendar</Text>
-          <Text style={styles.subtitle}>
-            {events.length} event{events.length !== 1 ? 's' : ''}
-          </Text>
+          <View style={styles.subtitleRow}>
+            <Text style={styles.subtitle}>
+              {events.length} event{events.length !== 1 ? 's' : ''}
+            </Text>
+            {isPending && (
+              <View style={styles.savingIndicator}>
+                <Text style={styles.savingText}>Saving...</Text>
+              </View>
+            )}
+          </View>
         </View>
         <AppButton
           title="New Event"
@@ -742,15 +763,34 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
     paddingBottom: spacing.base,
   },
+  headerLeft: {
+    flex: 1,
+  },
   title: {
     fontSize: typography.size['2xl'],
     fontWeight: typography.weight.bold,
     color: colors.text.primary,
   },
+  subtitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginTop: spacing.xs,
+  },
   subtitle: {
     fontSize: typography.size.sm,
     color: colors.text.tertiary,
-    marginTop: spacing.xs,
+  },
+  savingIndicator: {
+    backgroundColor: colors.primary.light,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: borderRadius.sm,
+  },
+  savingText: {
+    fontSize: typography.size.xs,
+    color: colors.primary.main,
+    fontWeight: typography.weight.medium,
   },
   filterContainer: {
     marginBottom: spacing.md,
