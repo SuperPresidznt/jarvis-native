@@ -11,3 +11,4 @@ export { EmptyState } from './EmptyState';
 export { LoadingState, CardSkeleton } from './LoadingState';
 export { Skeleton, SkeletonCircle, SkeletonText } from './Skeleton';
 export { SearchBar } from './SearchBar';
+export { LastUpdated } from './LastUpdated';
