@@ -23,6 +23,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import * as calendarDB from '../../database/calendar';
 import { detectConflicts, EventConflict } from '../../database/calendar';
 import { ConflictWarning } from '../../components/calendar/ConflictWarning';
+import { ReminderPicker } from '../../components/calendar/ReminderPicker';
 import { AppButton, AppChip, EmptyState, LoadingState } from '../../components/ui';
 import { RecurrencePicker } from '../../components/RecurrencePicker';
 import type { RecurrenceRule } from '../../types';
@@ -343,6 +344,7 @@ const EventFormModal: React.FC<EventFormModalProps> = ({
     event?.endTime || new Date(Date.now() + 60 * 60 * 1000).toISOString()
   );
   const [recurrence, setRecurrence] = useState<RecurrenceRule | undefined>(event?.recurrence);
+  const [reminderMinutes, setReminderMinutes] = useState<number | null>(event?.reminderMinutes ?? null);
   const [showRecurrencePicker, setShowRecurrencePicker] = useState(false);
   const [titleFocused, setTitleFocused] = useState(false);
   const [descFocused, setDescFocused] = useState(false);
@@ -365,6 +367,7 @@ const EventFormModal: React.FC<EventFormModalProps> = ({
         event?.endTime || new Date(Date.now() + 60 * 60 * 1000).toISOString()
       );
       setRecurrence(event?.recurrence);
+      setReminderMinutes(event?.reminderMinutes ?? null);
     }
   }, [visible, event]);
 
@@ -416,6 +419,7 @@ const EventFormModal: React.FC<EventFormModalProps> = ({
       location: location || undefined,
       isAllDay: false,
       recurrence,
+      reminderMinutes: reminderMinutes ?? undefined,
     };
 
     if (event) {
@@ -598,6 +602,11 @@ const EventFormModal: React.FC<EventFormModalProps> = ({
                   />
                 </TouchableOpacity>
               </View>
+
+              <ReminderPicker
+                value={reminderMinutes}
+                onChange={setReminderMinutes}
+              />
             </ScrollView>
 
             {/* Date/Time Pickers */}
