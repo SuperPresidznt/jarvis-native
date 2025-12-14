@@ -53,6 +53,8 @@ export const CREATE_TABLES = {
       target_count INTEGER DEFAULT 1,
       current_streak INTEGER DEFAULT 0,
       longest_streak INTEGER DEFAULT 0,
+      reminder_time TEXT,
+      notification_id TEXT,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
       synced INTEGER DEFAULT 0

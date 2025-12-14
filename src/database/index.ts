@@ -78,6 +78,32 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
     console.error('[DB] Migration: Error adding reminder fields:', error);
   }
 
+  // Migration 4: Add reminder fields to habits
+  try {
+    const tableInfo = await db.getAllAsync<{ name: string }>(
+      'PRAGMA table_info(habits)'
+    );
+
+    const hasReminderTime = tableInfo.some(col => col.name === 'reminder_time');
+    const hasNotificationId = tableInfo.some(col => col.name === 'notification_id');
+
+    if (!hasReminderTime) {
+      await db.execAsync('ALTER TABLE habits ADD COLUMN reminder_time TEXT;');
+      console.log('[DB] Migration: Added reminder_time column to habits');
+    }
+
+    if (!hasNotificationId) {
+      await db.execAsync('ALTER TABLE habits ADD COLUMN notification_id TEXT;');
+      console.log('[DB] Migration: Added notification_id column to habits');
+    }
+
+    if (hasReminderTime && hasNotificationId) {
+      console.log('[DB] Migration: Habit reminder fields already exist');
+    }
+  } catch (error) {
+    console.error('[DB] Migration: Error adding habit reminder fields:', error);
+  }
+
   console.log('[DB] Migrations complete');
 }
 
