@@ -19,13 +19,15 @@ import {
   Animated,
   FlatList,
 } from 'react-native';
-import { IconButton, SegmentedButtons, Checkbox } from 'react-native-paper';
+import { IconButton, SegmentedButtons, Checkbox, Badge } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as tasksDB from '../../database/tasks';
 import type { Project } from '../../database/projects';
 import { AppButton, AppCard, AppChip, EmptyState, LoadingState } from '../../components/ui';
 import { RecurrencePicker } from '../../components/RecurrencePicker';
 import { ProjectPicker } from '../../components/ProjectPicker';
+import { TaskFilterBar } from '../../components/TaskFilterBar';
+import * as filterStore from '../../store/taskFilterStore';
 import type { RecurrenceRule } from '../../types';
 import {
   colors,
@@ -77,12 +79,18 @@ export default function TasksScreen() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [filters, setFilters] = useState<filterStore.TaskFilters>(filterStore.getFilters());
   const insets = useSafeAreaInsets();
 
-  // Load tasks from local database
+  // Load persisted filters on mount
+  useEffect(() => {
+    filterStore.loadFilters().then(setFilters);
+  }, []);
+
+  // Load tasks from local database with filters
   const loadTasks = useCallback(async () => {
     try {
-      const filters = filterStatus !== 'all' ? { status: filterStatus } : undefined;
       const loadedTasks = await tasksDB.getTasks(filters);
       setTasks(loadedTasks);
     } catch (error) {
@@ -91,7 +99,7 @@ export default function TasksScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [filterStatus]);
+  }, [filters]);
 
   useEffect(() => {
     loadTasks();
@@ -140,6 +148,25 @@ export default function TasksScreen() {
     setShowCreateModal(true);
   };
 
+  const handleApplyFilters = (newFilters: filterStore.TaskFilters) => {
+    setFilters(newFilters);
+  };
+
+  // Extract unique projects and tags from tasks
+  const availableProjects = Array.from(
+    new Map(
+      tasks
+        .filter((t) => t.project)
+        .map((t) => [t.project!.id, t.project!])
+    ).values()
+  );
+
+  const availableTags = Array.from(
+    new Set(tasks.flatMap((t) => t.tags))
+  ).sort();
+
+  const activeFilterCount = filterStore.countActiveFilters(filters);
+
   if (isLoading && tasks.length === 0) {
     return <LoadingState fullScreen message="Loading tasks..." />;
   }
@@ -152,16 +179,35 @@ export default function TasksScreen() {
           <Text style={styles.title}>Tasks</Text>
           <Text style={styles.subtitle}>
             {tasks.filter((t) => t.status !== 'completed').length} active
+            {activeFilterCount > 0 && (
+              <Text style={styles.filterBadgeText}> • {activeFilterCount} filter{activeFilterCount > 1 ? 's' : ''}</Text>
+            )}
           </Text>
         </View>
-        <AppButton
-          title="New Task"
-          onPress={() => {
-            setSelectedTask(null);
-            setShowCreateModal(true);
-          }}
-          size="small"
-        />
+        <View style={styles.headerActions}>
+          <View style={styles.filterButtonContainer}>
+            <IconButton
+              icon="filter-variant"
+              size={24}
+              onPress={() => setShowFilterModal(true)}
+              iconColor={activeFilterCount > 0 ? colors.primary.main : colors.text.secondary}
+              style={styles.filterButton}
+            />
+            {activeFilterCount > 0 && (
+              <View style={styles.filterCountBadge}>
+                <Text style={styles.filterCountText}>{activeFilterCount}</Text>
+              </View>
+            )}
+          </View>
+          <AppButton
+            title="New Task"
+            onPress={() => {
+              setSelectedTask(null);
+              setShowCreateModal(true);
+            }}
+            size="small"
+          />
+        </View>
       </View>
 
       {/* View Mode Selector */}
@@ -279,6 +325,15 @@ export default function TasksScreen() {
         onSuccess={() => {
           setRefreshTrigger(prev => prev + 1);
         }}
+      />
+
+      {/* Filter Modal */}
+      <TaskFilterBar
+        visible={showFilterModal}
+        onClose={() => setShowFilterModal(false)}
+        onApply={handleApplyFilters}
+        availableProjects={availableProjects}
+        availableTags={availableTags}
       />
     </View>
   );
@@ -841,6 +896,37 @@ const styles = StyleSheet.create({
     fontSize: typography.size.sm,
     color: colors.text.tertiary,
     marginTop: spacing.xs,
+  },
+  filterBadgeText: {
+    color: colors.primary.main,
+    fontWeight: typography.weight.semibold,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  filterButtonContainer: {
+    position: 'relative',
+  },
+  filterButton: {
+    margin: 0,
+  },
+  filterCountBadge: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    backgroundColor: colors.primary.main,
+    borderRadius: borderRadius.full,
+    width: 18,
+    height: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  filterCountText: {
+    fontSize: 10,
+    fontWeight: typography.weight.bold,
+    color: colors.text.inverse,
   },
   viewSelectorContainer: {
     paddingHorizontal: spacing.lg,

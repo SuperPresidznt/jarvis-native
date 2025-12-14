@@ -11,6 +11,7 @@ import {
   executeWrite,
 } from './index';
 import type { RecurrenceRule } from '../types';
+import type { TaskFilters } from '../store/taskFilterStore';
 
 export type TaskStatus = 'todo' | 'in_progress' | 'blocked' | 'completed' | 'cancelled';
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
@@ -75,13 +76,6 @@ export interface UpdateTaskData extends Partial<CreateTaskData> {
   completedAt?: string;
 }
 
-export interface TaskFilters {
-  status?: TaskStatus;
-  priority?: TaskPriority;
-  projectId?: string;
-  tag?: string;
-}
-
 /**
  * Convert database row to Task object
  */
@@ -113,7 +107,7 @@ function rowToTask(row: TaskRow): Task {
 }
 
 /**
- * Get all tasks with optional filters
+ * Get all tasks with optional advanced filters and sorting
  */
 export async function getTasks(filters?: TaskFilters): Promise<Task[]> {
   let sql = `
@@ -127,27 +121,103 @@ export async function getTasks(filters?: TaskFilters): Promise<Task[]> {
   `;
   const params: any[] = [];
 
-  if (filters?.status) {
-    sql += ' AND t.status = ?';
-    params.push(filters.status);
+  // Search filter (title or description)
+  if (filters?.search) {
+    sql += ' AND (t.title LIKE ? OR t.description LIKE ?)';
+    const searchTerm = `%${filters.search}%`;
+    params.push(searchTerm, searchTerm);
   }
 
-  if (filters?.priority) {
-    sql += ' AND t.priority = ?';
-    params.push(filters.priority);
+  // Priority filter (array)
+  if (filters?.priorities && filters.priorities.length > 0) {
+    const placeholders = filters.priorities.map(() => '?').join(', ');
+    sql += ` AND t.priority IN (${placeholders})`;
+    params.push(...filters.priorities);
   }
 
-  if (filters?.projectId) {
-    sql += ' AND t.project_id = ?';
-    params.push(filters.projectId);
+  // Status filter (array)
+  if (filters?.statuses && filters.statuses.length > 0) {
+    const placeholders = filters.statuses.map(() => '?').join(', ');
+    sql += ` AND t.status IN (${placeholders})`;
+    params.push(...filters.statuses);
   }
 
-  if (filters?.tag) {
-    sql += ' AND t.tags LIKE ?';
-    params.push(`%"${filters.tag}"%`);
+  // Project filter (array)
+  if (filters?.projects && filters.projects.length > 0) {
+    const placeholders = filters.projects.map(() => '?').join(', ');
+    sql += ` AND t.project_id IN (${placeholders})`;
+    params.push(...filters.projects);
   }
 
-  sql += ' ORDER BY t.created_at DESC';
+  // Tag filter (array - check if ANY tag matches)
+  if (filters?.tags && filters.tags.length > 0) {
+    const tagConditions = filters.tags.map(() => 't.tags LIKE ?').join(' OR ');
+    sql += ` AND (${tagConditions})`;
+    filters.tags.forEach(tag => {
+      params.push(`%"${tag}"%`);
+    });
+  }
+
+  // Due date range filters
+  if (filters?.dueDateFrom) {
+    sql += ' AND t.due_date >= ?';
+    params.push(filters.dueDateFrom);
+  }
+
+  if (filters?.dueDateTo) {
+    sql += ' AND t.due_date <= ?';
+    params.push(filters.dueDateTo);
+  }
+
+  // Sorting
+  if (filters?.sortField) {
+    const sortField = filters.sortField;
+    const sortDirection = filters.sortDirection || 'asc';
+
+    let orderBy = '';
+    switch (sortField) {
+      case 'priority':
+        // Custom priority order: urgent > high > medium > low
+        orderBy = `CASE t.priority
+          WHEN 'urgent' THEN 1
+          WHEN 'high' THEN 2
+          WHEN 'medium' THEN 3
+          WHEN 'low' THEN 4
+          ELSE 5
+        END`;
+        break;
+      case 'dueDate':
+        orderBy = 't.due_date';
+        break;
+      case 'createdAt':
+        orderBy = 't.created_at';
+        break;
+      case 'updatedAt':
+        orderBy = 't.updated_at';
+        break;
+      case 'title':
+        orderBy = 't.title';
+        break;
+      case 'status':
+        // Custom status order: in_progress > todo > blocked > completed > cancelled
+        orderBy = `CASE t.status
+          WHEN 'in_progress' THEN 1
+          WHEN 'todo' THEN 2
+          WHEN 'blocked' THEN 3
+          WHEN 'completed' THEN 4
+          WHEN 'cancelled' THEN 5
+          ELSE 6
+        END`;
+        break;
+      default:
+        orderBy = 't.created_at';
+    }
+
+    sql += ` ORDER BY ${orderBy} ${sortDirection.toUpperCase()}`;
+  } else {
+    // Default sorting
+    sql += ' ORDER BY t.created_at DESC';
+  }
 
   const rows = await executeQuery<TaskRow>(sql, params);
   return rows.map(rowToTask);
