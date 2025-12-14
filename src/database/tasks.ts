@@ -10,6 +10,7 @@ import {
   executeQuerySingle,
   executeWrite,
 } from './index';
+import type { RecurrenceRule } from '../types';
 
 export type TaskStatus = 'todo' | 'in_progress' | 'blocked' | 'completed' | 'cancelled';
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
@@ -26,6 +27,7 @@ export interface Task {
   completedAt?: string;
   projectId?: string;
   tags: string[];
+  recurrence?: RecurrenceRule;
   createdAt: string;
   updatedAt: string;
   synced: boolean;
@@ -48,6 +50,7 @@ interface TaskRow {
   completed_at?: string;
   project_id?: string;
   tags: string;
+  recurrence_rule?: string;
   created_at: string;
   updated_at: string;
   synced: number;
@@ -65,6 +68,7 @@ export interface CreateTaskData {
   dueDate?: string;
   projectId?: string;
   tags?: string[];
+  recurrence?: RecurrenceRule;
 }
 
 export interface UpdateTaskData extends Partial<CreateTaskData> {
@@ -94,6 +98,7 @@ function rowToTask(row: TaskRow): Task {
     completedAt: row.completed_at,
     projectId: row.project_id,
     tags: row.tags ? JSON.parse(row.tags) : [],
+    recurrence: row.recurrence_rule ? JSON.parse(row.recurrence_rule) : undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     synced: row.synced === 1,
@@ -176,8 +181,8 @@ export async function createTask(data: CreateTaskData): Promise<Task> {
   const sql = `
     INSERT INTO tasks (
       id, title, description, status, priority, effort, impact,
-      due_date, project_id, tags, created_at, updated_at, synced
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+      due_date, project_id, tags, recurrence_rule, created_at, updated_at, synced
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
   `;
 
   const params = [
@@ -191,6 +196,7 @@ export async function createTask(data: CreateTaskData): Promise<Task> {
     data.dueDate || null,
     data.projectId || null,
     JSON.stringify(data.tags || []),
+    data.recurrence ? JSON.stringify(data.recurrence) : null,
     now,
     now,
   ];
@@ -262,6 +268,11 @@ export async function updateTask(id: string, data: UpdateTaskData): Promise<Task
   if (data.tags !== undefined) {
     updates.push('tags = ?');
     params.push(JSON.stringify(data.tags));
+  }
+
+  if (data.recurrence !== undefined) {
+    updates.push('recurrence_rule = ?');
+    params.push(data.recurrence ? JSON.stringify(data.recurrence) : null);
   }
 
   updates.push('updated_at = ?');

@@ -54,6 +54,7 @@ export interface Task {
   priority: TaskPriority;
   dueDate?: string;
   projectId?: string;
+  recurrence?: RecurrenceRule;
   createdAt: string;
   updatedAt: string;
 }
@@ -120,6 +121,19 @@ export interface ChatSession {
   updatedAt: string;
 }
 
+// Recurrence
+export type RecurrenceFrequency = 'daily' | 'weekly' | 'monthly' | 'yearly';
+export type RecurrenceEndType = 'never' | 'until' | 'count';
+
+export interface RecurrenceRule {
+  frequency: RecurrenceFrequency;
+  interval: number; // every N days/weeks/months/years
+  endType: RecurrenceEndType;
+  endDate?: string; // ISO date string, for 'until' endType
+  count?: number; // number of occurrences, for 'count' endType
+  weekdays?: number[]; // for weekly: 0=Sun, 1=Mon, ... 6=Sat
+}
+
 // Calendar
 export interface CalendarEvent {
   id: string;
@@ -130,6 +144,7 @@ export interface CalendarEvent {
   location?: string;
   attendees?: string[];
   isAllDay: boolean;
+  recurrence?: RecurrenceRule;
 }
 
 // Finance

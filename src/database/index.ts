@@ -9,6 +9,25 @@ import { DB_NAME, CREATE_TABLES, CREATE_INDEXES, DROP_TABLES } from './schema';
 let database: SQLite.SQLiteDatabase | null = null;
 
 /**
+ * Run database migrations
+ * Handles schema changes for existing databases
+ */
+async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
+  console.log('[DB] Running migrations...');
+
+  // Migration 1: Add recurrence_rule column to tasks
+  try {
+    await db.execAsync('ALTER TABLE tasks ADD COLUMN recurrence_rule TEXT;');
+    console.log('[DB] Migration: Added recurrence_rule to tasks');
+  } catch (error) {
+    // Column might already exist, ignore error
+    console.log('[DB] Migration: recurrence_rule column already exists or error:', error);
+  }
+
+  console.log('[DB] Migrations complete');
+}
+
+/**
  * Initialize the database
  * Creates tables and indexes if they don't exist
  */
@@ -35,6 +54,9 @@ export async function initDatabase(): Promise<SQLite.SQLiteDatabase> {
       console.log(`[DB] Creating index: ${indexName}`);
       await database.execAsync(createSQL);
     }
+
+    // Run migrations for existing databases
+    await runMigrations(database);
 
     console.log('[DB] Database initialized successfully');
     return database;

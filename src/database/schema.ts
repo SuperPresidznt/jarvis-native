@@ -36,6 +36,7 @@ export const CREATE_TABLES = {
       completed_at TEXT,
       project_id TEXT,
       tags TEXT,
+      recurrence_rule TEXT,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
       synced INTEGER DEFAULT 0,
