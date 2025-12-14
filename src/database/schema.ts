@@ -152,6 +152,18 @@ export const CREATE_TABLES = {
       UNIQUE(category, start_date)
     );
   `,
+
+  finance_categories: `
+    CREATE TABLE IF NOT EXISTS finance_categories (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL UNIQUE,
+      icon TEXT NOT NULL,
+      color TEXT NOT NULL,
+      type TEXT NOT NULL CHECK(type IN ('income', 'expense')),
+      is_custom INTEGER DEFAULT 0,
+      created_at TEXT NOT NULL
+    );
+  `,
 };
 
 /**
@@ -177,6 +189,9 @@ export const CREATE_INDEXES = {
   finance_budgets_category: 'CREATE INDEX IF NOT EXISTS idx_budgets_category ON finance_budgets(category);',
   finance_budgets_period: 'CREATE INDEX IF NOT EXISTS idx_budgets_period ON finance_budgets(start_date, end_date);',
   finance_budgets_recurring: 'CREATE INDEX IF NOT EXISTS idx_budgets_recurring ON finance_budgets(is_recurring);',
+
+  finance_categories_type: 'CREATE INDEX IF NOT EXISTS idx_categories_type ON finance_categories(type);',
+  finance_categories_custom: 'CREATE INDEX IF NOT EXISTS idx_categories_custom ON finance_categories(is_custom);',
 };
 
 /**
@@ -189,6 +204,7 @@ export const DROP_TABLES = [
   'DROP TABLE IF EXISTS projects',
   'DROP TABLE IF EXISTS calendar_events',
   'DROP TABLE IF EXISTS finance_transactions',
+  'DROP TABLE IF EXISTS finance_categories',
   'DROP TABLE IF EXISTS finance_assets',
   'DROP TABLE IF EXISTS finance_liabilities',
   'DROP TABLE IF EXISTS finance_budgets',
