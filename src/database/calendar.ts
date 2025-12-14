@@ -11,6 +11,7 @@ import {
   executeWrite,
 } from './index';
 import type { RecurrenceRule } from '../types';
+import * as notificationService from '../services/notifications';
 
 export interface CalendarEvent {
   id: string;
@@ -22,6 +23,8 @@ export interface CalendarEvent {
   attendees?: string[];
   isAllDay: boolean;
   recurrence?: RecurrenceRule;
+  reminderMinutes?: number | null;
+  notificationId?: string | null;
   createdAt: string;
   updatedAt: string;
   synced: boolean;
@@ -37,6 +40,8 @@ interface CalendarEventRow {
   attendees?: string;
   is_all_day: number;
   recurring?: string;
+  reminder_minutes?: number;
+  notification_id?: string;
   created_at: string;
   updated_at: string;
   synced: number;
@@ -51,6 +56,7 @@ export interface CreateEventData {
   attendees?: string[];
   isAllDay?: boolean;
   recurrence?: RecurrenceRule;
+  reminderMinutes?: number | null;
 }
 
 export interface UpdateEventData extends Partial<CreateEventData> {}
@@ -79,6 +85,8 @@ function rowToEvent(row: CalendarEventRow): CalendarEvent {
     attendees: row.attendees ? JSON.parse(row.attendees) : [],
     isAllDay: row.is_all_day === 1,
     recurrence: row.recurring ? JSON.parse(row.recurring) : undefined,
+    reminderMinutes: row.reminder_minutes ?? null,
+    notificationId: row.notification_id ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     synced: row.synced === 1,
@@ -153,11 +161,40 @@ export async function createEvent(data: CreateEventData): Promise<CalendarEvent>
   const id = generateId();
   const now = getCurrentTimestamp();
 
+  // Schedule notification if reminder is set
+  let notificationId: string | null = null;
+
+  if (data.reminderMinutes && data.startTime) {
+    try {
+      const eventStart = new Date(data.startTime);
+      const reminderTime = new Date(
+        eventStart.getTime() - (data.reminderMinutes * 60 * 1000)
+      );
+
+      if (reminderTime > new Date()) {
+        notificationId = await notificationService.scheduleEventNotification({
+          title: 'Event Reminder',
+          body: `${data.title} starts in ${notificationService.formatReminderTime(data.reminderMinutes)}`,
+          data: {
+            eventId: id,
+            type: 'event_reminder',
+            eventTitle: data.title,
+          },
+          triggerDate: reminderTime,
+        });
+      }
+    } catch (error) {
+      console.error('[Calendar] Failed to schedule notification:', error);
+      // Continue creating event even if notification fails
+    }
+  }
+
   const sql = `
     INSERT INTO calendar_events (
       id, title, description, start_time, end_time, location,
-      attendees, is_all_day, recurring, created_at, updated_at, synced
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+      attendees, is_all_day, recurring, reminder_minutes, notification_id,
+      created_at, updated_at, synced
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
   `;
 
   const params = [
@@ -170,6 +207,8 @@ export async function createEvent(data: CreateEventData): Promise<CalendarEvent>
     JSON.stringify(data.attendees || []),
     data.isAllDay ? 1 : 0,
     data.recurrence ? JSON.stringify(data.recurrence) : null,
+    data.reminderMinutes ?? null,
+    notificationId,
     now,
     now,
   ];
@@ -189,6 +228,53 @@ export async function createEvent(data: CreateEventData): Promise<CalendarEvent>
  */
 export async function updateEvent(id: string, data: UpdateEventData): Promise<CalendarEvent> {
   const now = getCurrentTimestamp();
+
+  // Get existing event for notification handling
+  const existingEvent = await getEvent(id);
+  if (!existingEvent) {
+    throw new Error('Event not found');
+  }
+
+  // Cancel existing notification if present
+  if (existingEvent.notificationId) {
+    try {
+      await notificationService.cancelNotification(existingEvent.notificationId);
+    } catch (error) {
+      console.error('[Calendar] Failed to cancel notification:', error);
+    }
+  }
+
+  // Schedule new notification if reminder is set
+  let notificationId: string | null = null;
+  const startTime = data.startTime || existingEvent.startTime;
+  const reminderMinutes = data.reminderMinutes !== undefined
+    ? data.reminderMinutes
+    : existingEvent.reminderMinutes;
+
+  if (reminderMinutes && startTime) {
+    try {
+      const eventStart = new Date(startTime);
+      const reminderTime = new Date(
+        eventStart.getTime() - (reminderMinutes * 60 * 1000)
+      );
+
+      if (reminderTime > new Date()) {
+        const title = data.title || existingEvent.title;
+        notificationId = await notificationService.scheduleEventNotification({
+          title: 'Event Reminder',
+          body: `${title} starts in ${notificationService.formatReminderTime(reminderMinutes)}`,
+          data: {
+            eventId: id,
+            type: 'event_reminder',
+            eventTitle: title,
+          },
+          triggerDate: reminderTime,
+        });
+      }
+    } catch (error) {
+      console.error('[Calendar] Failed to schedule notification:', error);
+    }
+  }
 
   const updates: string[] = [];
   const params: any[] = [];
@@ -233,6 +319,15 @@ export async function updateEvent(id: string, data: UpdateEventData): Promise<Ca
     params.push(data.recurrence ? JSON.stringify(data.recurrence) : null);
   }
 
+  if (data.reminderMinutes !== undefined) {
+    updates.push('reminder_minutes = ?');
+    params.push(data.reminderMinutes);
+  }
+
+  // Update notification ID regardless of whether a new one was scheduled
+  updates.push('notification_id = ?');
+  params.push(notificationId);
+
   updates.push('updated_at = ?');
   params.push(now);
 
@@ -255,6 +350,17 @@ export async function updateEvent(id: string, data: UpdateEventData): Promise<Ca
  * Delete an event
  */
 export async function deleteEvent(id: string): Promise<void> {
+  // Get event to cancel notification if present
+  const event = await getEvent(id);
+
+  if (event?.notificationId) {
+    try {
+      await notificationService.cancelNotification(event.notificationId);
+    } catch (error) {
+      console.error('[Calendar] Failed to cancel notification:', error);
+    }
+  }
+
   const sql = 'DELETE FROM calendar_events WHERE id = ?';
   await executeWrite(sql, [id]);
 }
