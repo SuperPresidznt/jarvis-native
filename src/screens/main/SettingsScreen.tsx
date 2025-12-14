@@ -436,6 +436,13 @@ export default function SettingsScreen() {
         <Text style={styles.sectionLabel}>ADVANCED</Text>
         <View style={styles.sectionContent}>
           <SettingItem styles={styles}
+            icon="💰"
+            title="Category Management"
+            subtitle="Manage income and expense categories"
+            onPress={() => navigation.navigate('CategoryManagement')}
+            showChevron
+          />
+          <SettingItem styles={styles}
             icon="⚙️"
             title="Data Management"
             subtitle="Advanced database options"

@@ -9,6 +9,7 @@ import type { SettingsStackParamList } from '../types';
 import SettingsScreen from '../screens/main/SettingsScreen';
 import StorageOverviewScreen from '../screens/settings/StorageOverviewScreen';
 import DataManagementScreen from '../screens/settings/DataManagementScreen';
+import CategoryManagementScreen from '../screens/CategoryManagementScreen';
 import { colors, typography } from '../theme';
 
 const Stack = createNativeStackNavigator<SettingsStackParamList>();
@@ -50,6 +51,14 @@ export default function SettingsNavigator() {
         component={DataManagementScreen}
         options={{
           title: 'Data Management',
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
+        name="CategoryManagement"
+        component={CategoryManagementScreen}
+        options={{
+          title: 'Category Management',
           headerShown: true,
         }}
       />
