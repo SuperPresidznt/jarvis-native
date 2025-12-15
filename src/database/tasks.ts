@@ -553,6 +553,218 @@ export async function getActiveTasksCount(): Promise<number> {
   return result?.count || 0;
 }
 
+// ============================================================================
+// TASK LATENCY ANALYTICS
+// ============================================================================
+
+/**
+ * Get average task completion latency grouped by priority
+ */
+export async function getAverageLatencyByPriority(): Promise<{
+  priority: TaskPriority;
+  avgDays: number;
+  count: number;
+}[]> {
+  const sql = `
+    SELECT
+      priority,
+      AVG((julianday(completed_at) - julianday(created_at))) as avgDays,
+      COUNT(*) as count
+    FROM tasks
+    WHERE status = 'completed'
+      AND completed_at IS NOT NULL
+      AND created_at IS NOT NULL
+    GROUP BY priority
+    ORDER BY avgDays DESC
+  `;
+
+  const rows = await executeQuery<{
+    priority: TaskPriority;
+    avgDays: number;
+    count: number;
+  }>(sql);
+
+  return rows.map(row => ({
+    priority: row.priority || 'medium',
+    avgDays: Math.round(row.avgDays * 10) / 10,
+    count: row.count,
+  }));
+}
+
+/**
+ * Get average task completion latency grouped by project
+ */
+export async function getAverageLatencyByProject(): Promise<{
+  projectId: string;
+  projectName: string;
+  avgDays: number;
+  count: number;
+}[]> {
+  const sql = `
+    SELECT
+      t.project_id as projectId,
+      p.name as projectName,
+      AVG((julianday(t.completed_at) - julianday(t.created_at))) as avgDays,
+      COUNT(*) as count
+    FROM tasks t
+    LEFT JOIN projects p ON t.project_id = p.id
+    WHERE t.status = 'completed'
+      AND t.completed_at IS NOT NULL
+      AND t.created_at IS NOT NULL
+      AND t.project_id IS NOT NULL
+    GROUP BY t.project_id, p.name
+    ORDER BY avgDays DESC
+  `;
+
+  const rows = await executeQuery<{
+    projectId: string;
+    projectName: string;
+    avgDays: number;
+    count: number;
+  }>(sql);
+
+  return rows.map(row => ({
+    projectId: row.projectId,
+    projectName: row.projectName,
+    avgDays: Math.round(row.avgDays * 10) / 10,
+    count: row.count,
+  }));
+}
+
+/**
+ * Get all stale tasks (incomplete tasks older than threshold)
+ */
+export async function getStaleTasks(thresholdDays: number = 7): Promise<Task[]> {
+  const thresholdDate = new Date();
+  thresholdDate.setDate(thresholdDate.getDate() - thresholdDays);
+
+  const sql = `
+    SELECT
+      t.*,
+      p.name as project_name,
+      p.color as project_color
+    FROM tasks t
+    LEFT JOIN projects p ON t.project_id = p.id
+    WHERE t.status != 'completed'
+      AND t.status != 'cancelled'
+      AND t.created_at < ?
+    ORDER BY t.created_at ASC
+  `;
+
+  const rows = await executeQuery<TaskRow>(sql, [thresholdDate.toISOString()]);
+  return rows.map(rowToTask);
+}
+
+/**
+ * Get task completion latency trend over specified days
+ */
+export async function getLatencyTrend(days: number = 30): Promise<{
+  date: string;
+  avgDays: number;
+  count: number;
+}[]> {
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - days);
+
+  const sql = `
+    SELECT
+      DATE(completed_at) as date,
+      AVG((julianday(completed_at) - julianday(created_at))) as avgDays,
+      COUNT(*) as count
+    FROM tasks
+    WHERE status = 'completed'
+      AND completed_at IS NOT NULL
+      AND created_at IS NOT NULL
+      AND completed_at >= ?
+    GROUP BY DATE(completed_at)
+    ORDER BY date ASC
+  `;
+
+  const rows = await executeQuery<{
+    date: string;
+    avgDays: number;
+    count: number;
+  }>(sql, [startDate.toISOString()]);
+
+  return rows.map(row => ({
+    date: row.date,
+    avgDays: Math.round(row.avgDays * 10) / 10,
+    count: row.count,
+  }));
+}
+
+/**
+ * Get comprehensive task latency statistics
+ */
+export async function getCompletionLatencyStats(): Promise<{
+  overall: number;
+  staleCount: number;
+  byPriority: {
+    priority: TaskPriority;
+    avgDays: number;
+    count: number;
+  }[];
+  byProject: {
+    projectId: string;
+    projectName: string;
+    avgDays: number;
+    count: number;
+  }[];
+}> {
+  // Overall average latency
+  const overallSql = `
+    SELECT AVG((julianday(completed_at) - julianday(created_at))) as avgDays
+    FROM tasks
+    WHERE status = 'completed'
+      AND completed_at IS NOT NULL
+      AND created_at IS NOT NULL
+  `;
+  const overallResult = await executeQuerySingle<{ avgDays: number }>(overallSql);
+
+  // Stale tasks count
+  const staleTasks = await getStaleTasks(7);
+
+  // Get stats by priority and project in parallel
+  const [byPriority, byProject] = await Promise.all([
+    getAverageLatencyByPriority(),
+    getAverageLatencyByProject(),
+  ]);
+
+  return {
+    overall: Math.round((overallResult?.avgDays || 0) * 10) / 10,
+    staleCount: staleTasks.length,
+    byPriority,
+    byProject,
+  };
+}
+
+/**
+ * Get latency trend data for sparkline (last 7 days)
+ */
+export async function getLatencyTrendSparkline(): Promise<number[]> {
+  const trend = await getLatencyTrend(7);
+
+  // If no data, return empty array
+  if (trend.length === 0) {
+    return [];
+  }
+
+  // Fill in missing days with 0 and return avgDays values
+  const last7Days: number[] = [];
+  const today = new Date();
+
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(date.getDate() - i);
+    const dateStr = date.toISOString().split('T')[0];
+
+    const dayData = trend.find(t => t.date === dateStr);
+    last7Days.push(dayData?.avgDays || 0);
+  }
+
+  return last7Days;
+}
+
 export default {
   getTasks,
   getTask,
@@ -567,4 +779,10 @@ export default {
   bulkDeleteTasks,
   bulkCompleteTasks,
   getActiveTasksCount,
+  getAverageLatencyByPriority,
+  getAverageLatencyByProject,
+  getStaleTasks,
+  getLatencyTrend,
+  getCompletionLatencyStats,
+  getLatencyTrendSparkline,
 };
