@@ -103,6 +103,9 @@ export default function TasksScreen() {
   }, []);
 
   // Load tasks from local database with filters
+  // Note: Filtering is done at the database level for performance
+  // The taskFiltering utilities in src/utils/taskFiltering.ts are available
+  // for client-side filtering when needed (e.g., in-memory filter changes)
   const loadTasks = useCallback(async () => {
     try {
       const loadedTasks = await tasksDB.getTasks(filters);
