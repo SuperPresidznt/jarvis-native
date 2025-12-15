@@ -50,6 +50,8 @@ import {
   shadows,
   animation,
 } from '../../theme';
+import { PRIORITY_COLORS, PRIORITY_LABELS, PRIORITY_ICONS } from '../../constants/priorities';
+import { sortTasks, isOverdue } from '../../utils/taskSorting';
 
 type ViewMode = 'list' | 'kanban' | 'matrix';
 type TaskStatus = 'todo' | 'in_progress' | 'blocked' | 'completed' | 'cancelled';
@@ -74,13 +76,6 @@ const STATUS_LABELS: Record<TaskStatus, string> = {
   blocked: 'Blocked',
   completed: 'Completed',
   cancelled: 'Cancelled',
-};
-
-const PRIORITY_CONFIG: Record<TaskPriority, { color: string; label: string }> = {
-  low: { color: '#64748B', label: 'Low' },
-  medium: { color: '#F59E0B', label: 'Medium' },
-  high: { color: '#F97316', label: 'High' },
-  urgent: { color: '#EF4444', label: 'Urgent' },
 };
 
 export default function TasksScreen() {
@@ -111,7 +106,9 @@ export default function TasksScreen() {
   const loadTasks = useCallback(async () => {
     try {
       const loadedTasks = await tasksDB.getTasks(filters);
-      setTasks(loadedTasks);
+      // Apply intelligent sorting: status > overdue > priority > due date > created date
+      const sortedTasks = sortTasks(loadedTasks);
+      setTasks(sortedTasks);
     } catch (error) {
       console.error('Error loading tasks:', error);
       Alert.alert('Error', 'Failed to load tasks');
@@ -654,17 +651,15 @@ const TaskCard: React.FC<TaskCardProps> = ({
   };
 
   // Check if task is overdue
-  const isOverdue = task.dueDate && task.status !== 'completed' && task.status !== 'cancelled'
-    ? new Date(task.dueDate) < new Date()
-    : false;
+  const taskIsOverdue = isOverdue(task.dueDate, task.status);
 
   // Get priority color or use default
   const priorityColor = task.priority
-    ? PRIORITY_CONFIG[task.priority].color
-    : colors.border.default;
+    ? PRIORITY_COLORS[task.priority]
+    : PRIORITY_COLORS.medium;
 
   // For overdue tasks, always use error color
-  const borderColor = isOverdue ? colors.error : priorityColor;
+  const borderColor = taskIsOverdue ? colors.error : priorityColor;
 
   const handlePressIn = () => {
     Animated.spring(scaleValue, {
@@ -698,11 +693,32 @@ const TaskCard: React.FC<TaskCardProps> = ({
           styles.taskCard,
           compact && styles.taskCardCompact,
           { borderLeftWidth: 4, borderLeftColor: borderColor },
-          isOverdue && styles.taskCardOverdue,
+          taskIsOverdue && styles.taskCardOverdue,
           shouldHighlight && styles.taskCardHighlight,
           selected && styles.taskCardSelected,
         ]}
       >
+        {/* Priority Badge - Top Right Corner */}
+        {task.priority && !compact && (
+          <View style={[styles.priorityCornerBadge, { backgroundColor: priorityColor }]}>
+            <Icon
+              name={PRIORITY_ICONS[task.priority]}
+              size={12}
+              color="#FFFFFF"
+            />
+          </View>
+        )}
+
+        {/* Overdue Badge - Top Right Corner (below priority if both exist) */}
+        {taskIsOverdue && !isCompleted && (
+          <View style={[
+            styles.overdueCornerBadge,
+            task.priority && !compact ? { top: 36 } : { top: 8 }
+          ]}>
+            <Text style={styles.overdueCornerText}>OVERDUE</Text>
+          </View>
+        )}
+
         <View style={styles.taskContent}>
           <View style={styles.taskHeader}>
             {bulkSelectMode ? (
@@ -779,11 +795,11 @@ const TaskCard: React.FC<TaskCardProps> = ({
                     <View
                       style={[
                         styles.priorityDot,
-                        { backgroundColor: PRIORITY_CONFIG[task.priority].color },
+                        { backgroundColor: PRIORITY_COLORS[task.priority] },
                       ]}
                     />
                     <Text style={styles.priorityLabel}>
-                      {PRIORITY_CONFIG[task.priority].label}
+                      {PRIORITY_LABELS[task.priority]}
                     </Text>
                   </View>
                 )}
@@ -911,6 +927,7 @@ const KanbanView: React.FC<KanbanViewProps> = ({
   selectedTaskIds = new Set(),
   onToggleSelect,
 }) => {
+  const { sortTasksByPriority } = require('../../utils/taskSorting');
   const columns: TaskStatus[] = ['todo', 'in_progress', 'blocked', 'completed'];
 
   return (
@@ -918,6 +935,9 @@ const KanbanView: React.FC<KanbanViewProps> = ({
       <View style={styles.kanbanView}>
         {columns.map((status) => {
           const columnTasks = tasks.filter((t) => t.status === status);
+          // Sort tasks within each column by priority and due date
+          const sortedColumnTasks = sortTasksByPriority(columnTasks);
+
           return (
             <View key={status} style={styles.kanbanColumn}>
               <View style={styles.kanbanHeader}>
@@ -925,14 +945,14 @@ const KanbanView: React.FC<KanbanViewProps> = ({
                   {STATUS_LABELS[status]}
                 </Text>
                 <View style={styles.kanbanCount}>
-                  <Text style={styles.kanbanCountText}>{columnTasks.length}</Text>
+                  <Text style={styles.kanbanCountText}>{sortedColumnTasks.length}</Text>
                 </View>
               </View>
               <ScrollView
                 style={styles.kanbanContent}
                 showsVerticalScrollIndicator={false}
               >
-                {columnTasks.map((task) => (
+                {sortedColumnTasks.map((task: Task) => (
                   <TaskCard
                     key={task.id}
                     task={task}
@@ -974,18 +994,20 @@ const MatrixView: React.FC<MatrixViewProps> = ({
   selectedTaskIds = new Set(),
   onToggleSelect,
 }) => {
+  const { sortTasksByPriority } = require('../../utils/taskSorting');
+
   const matrix = {
-    urgent: tasks.filter(
-      (t) => t.priority === 'urgent' && t.status !== 'completed'
+    urgent: sortTasksByPriority(
+      tasks.filter((t) => t.priority === 'urgent' && t.status !== 'completed')
     ),
-    high: tasks.filter(
-      (t) => t.priority === 'high' && t.status !== 'completed'
+    high: sortTasksByPriority(
+      tasks.filter((t) => t.priority === 'high' && t.status !== 'completed')
     ),
-    medium: tasks.filter(
-      (t) => t.priority === 'medium' && t.status !== 'completed'
+    medium: sortTasksByPriority(
+      tasks.filter((t) => t.priority === 'medium' && t.status !== 'completed')
     ),
-    low: tasks.filter(
-      (t) => (t.priority === 'low' || !t.priority) && t.status !== 'completed'
+    low: sortTasksByPriority(
+      tasks.filter((t) => (t.priority === 'low' || !t.priority) && t.status !== 'completed')
     ),
   };
 
@@ -1007,7 +1029,7 @@ const MatrixView: React.FC<MatrixViewProps> = ({
           <Text style={styles.matrixCount}>
             {matrix[quadrant.key as keyof typeof matrix].length} tasks
           </Text>
-          {matrix[quadrant.key as keyof typeof matrix].map((task) => (
+          {matrix[quadrant.key as keyof typeof matrix].map((task: Task) => (
             <TaskCard
               key={task.id}
               task={task}
@@ -1178,7 +1200,7 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
                     (p) => (
                       <AppChip
                         key={p}
-                        label={PRIORITY_CONFIG[p].label}
+                        label={PRIORITY_LABELS[p]}
                         selected={priority === p}
                         onPress={() => setPriority(p)}
                         style={styles.priorityChip}
@@ -1474,6 +1496,18 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     fontWeight: typography.weight.medium,
   },
+  priorityCornerBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    borderRadius: borderRadius.full,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+    ...shadows.sm,
+  },
   overdueBadge: {
     backgroundColor: `${colors.error}20`,
     borderWidth: 1,
@@ -1483,6 +1517,23 @@ const styles = StyleSheet.create({
     fontSize: typography.size.xs,
     color: colors.error,
     fontWeight: typography.weight.semibold,
+  },
+  overdueCornerBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: colors.error,
+    borderRadius: borderRadius.sm,
+    paddingHorizontal: spacing.xs,
+    paddingVertical: 2,
+    zIndex: 10,
+    ...shadows.sm,
+  },
+  overdueCornerText: {
+    fontSize: 9,
+    color: '#FFFFFF',
+    fontWeight: typography.weight.bold,
+    letterSpacing: 0.5,
   },
   dueTodayBadge: {
     backgroundColor: `${colors.warning}20`,
