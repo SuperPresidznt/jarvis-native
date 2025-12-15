@@ -34,6 +34,7 @@ import { TaskFilterBar } from '../../components/TaskFilterBar';
 import { BulkActionBar } from '../../components/tasks/BulkActionBar';
 import { SwipeableTaskItem } from '../../components/tasks/SwipeableTaskItem';
 import { EnhancedDatePicker } from '../../components/tasks/EnhancedDatePicker';
+import { TaskLatencyBadge } from '../../components/tasks/TaskLatencyBadge';
 import * as filterStore from '../../store/taskFilterStore';
 import { clearHighlight } from '../../utils/navigation';
 import type { RecurrenceRule } from '../../types';
@@ -792,6 +793,9 @@ const TaskCard: React.FC<TaskCardProps> = ({
             <>
               {/* Meta info */}
               <View style={styles.taskMeta}>
+                {/* Task Latency Badge */}
+                <TaskLatencyBadge task={task as any} showIcon />
+
                 {/* Priority badge with dot */}
                 {task.priority && (
                   <View style={styles.priorityBadge}>
