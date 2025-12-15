@@ -126,8 +126,72 @@ export function sortTasksByPriority<T extends SortableTask>(tasks: T[]): T[] {
   });
 }
 
+/**
+ * Sort tasks by due date (earliest first, null dates last)
+ */
+export function sortByDueDate<T extends SortableTask>(tasks: T[]): T[] {
+  return [...tasks].sort((a, b) => {
+    // Null dates go last
+    if (!a.dueDate && !b.dueDate) return 0;
+    if (!a.dueDate) return 1;
+    if (!b.dueDate) return -1;
+
+    const aTime = new Date(a.dueDate).getTime();
+    const bTime = new Date(b.dueDate).getTime();
+    return aTime - bTime;
+  });
+}
+
+/**
+ * Sort tasks by creation date (newest first)
+ */
+export function sortByCreated<T extends SortableTask>(tasks: T[]): T[] {
+  return [...tasks].sort((a, b) => {
+    const aTime = new Date(a.createdAt).getTime();
+    const bTime = new Date(b.createdAt).getTime();
+    return bTime - aTime; // Newest first
+  });
+}
+
+/**
+ * Sort tasks alphabetically by title (case-insensitive)
+ */
+export function sortAlphabetically<T extends SortableTask>(tasks: T[]): T[] {
+  return [...tasks].sort((a, b) => {
+    // Extract title from SortableTask (we need to add id as a temporary key)
+    const aTitle = (a as any).title || a.id;
+    const bTitle = (b as any).title || b.id;
+    return aTitle.localeCompare(bTitle, undefined, { sensitivity: 'base' });
+  });
+}
+
+/**
+ * Apply sorting based on sort field
+ */
+export function applySorting<T extends SortableTask>(
+  tasks: T[],
+  sortBy: 'priority' | 'dueDate' | 'created' | 'alphabetical'
+): T[] {
+  switch (sortBy) {
+    case 'priority':
+      return sortTasks(tasks);
+    case 'dueDate':
+      return sortByDueDate(tasks);
+    case 'created':
+      return sortByCreated(tasks);
+    case 'alphabetical':
+      return sortAlphabetically(tasks);
+    default:
+      return tasks;
+  }
+}
+
 export default {
   sortTasks,
   sortTasksByPriority,
+  sortByDueDate,
+  sortByCreated,
+  sortAlphabetically,
+  applySorting,
   isOverdue,
 };
