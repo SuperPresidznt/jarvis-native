@@ -26,6 +26,7 @@ import * as analyticsDB from '../../database/analytics';
 import { MetricCard } from '../../components/MetricCard';
 import { StartControls } from '../../components/StartControls';
 import { TodaysFocusCard } from '../../components/TodaysFocusCard';
+import { TaskLatencyWidget } from '../../components/dashboard/TaskLatencyWidget';
 import { AppCard, AppButton, EmptyState, LoadingState, LastUpdated } from '../../components/ui';
 import { DashboardCardSkeleton } from '../../components/dashboard/DashboardCardSkeleton';
 import { DetailedChartModal, ChartDataType } from '../../components/charts/DetailedChartModal';
@@ -345,6 +346,12 @@ export default function DashboardScreen() {
             </View>
           </View>
         )}
+
+        {/* Task Latency Widget */}
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>TASK COMPLETION</Text>
+          <TaskLatencyWidget />
+        </View>
 
         {/* Budget Alerts */}
         {budgetAlerts.length > 0 && (
