@@ -640,6 +640,74 @@ export async function getTodayIncompleteHabitsCount(): Promise<number> {
   return result?.count || 0;
 }
 
+/**
+ * Get habit completion times for time-of-day analysis
+ * Returns timestamps of when habit was completed (from created_at)
+ */
+export async function getHabitCompletionTimes(
+  habitId: string,
+  days: number = 90
+): Promise<Date[]> {
+  try {
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    const sql = `
+      SELECT created_at
+      FROM habit_logs
+      WHERE habit_id = ?
+      AND completed = 1
+      AND date >= ?
+      ORDER BY created_at DESC
+    `;
+
+    const result = await executeQuery<{ created_at: string }>(sql, [
+      habitId,
+      startDate.toISOString().split('T')[0],
+    ]);
+
+    return result.map((row) => new Date(row.created_at));
+  } catch (error) {
+    console.error('[Habits] Error getting completion times:', error);
+    return [];
+  }
+}
+
+/**
+ * Get habit completion dates as strings for trend analysis
+ * Returns array of date strings (YYYY-MM-DD) for completed days
+ */
+export async function getHabitCompletionDates(
+  habitId: string,
+  days: number = 30
+): Promise<string[]> {
+  try {
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    const sql = `
+      SELECT date
+      FROM habit_logs
+      WHERE habit_id = ?
+      AND completed = 1
+      AND date >= ?
+      ORDER BY date DESC
+    `;
+
+    const result = await executeQuery<{ date: string }>(sql, [
+      habitId,
+      startDate.toISOString().split('T')[0],
+    ]);
+
+    return result.map((row) => row.date);
+  } catch (error) {
+    console.error('[Habits] Error getting completion dates:', error);
+    return [];
+  }
+}
+
 export default {
   getHabits,
   getHabit,
@@ -655,4 +723,6 @@ export default {
   deleteHabitLog,
   getHabitInsights,
   getTodayIncompleteHabitsCount,
+  getHabitCompletionTimes,
+  getHabitCompletionDates,
 };
