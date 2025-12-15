@@ -3,7 +3,7 @@
  * Bottom sheet modal for advanced task filtering and sorting
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -14,8 +14,12 @@ import {
   TextInput,
 } from 'react-native';
 import { IconButton, Chip } from 'react-native-paper';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as filterStore from '../store/taskFilterStore';
 import { colors, typography, spacing, borderRadius, shadows } from '../theme';
+
+// Debounce delay for search input (milliseconds)
+const SEARCH_DEBOUNCE_DELAY = 300;
 
 interface TaskFilterBarProps {
   visible: boolean;
@@ -33,12 +37,40 @@ export const TaskFilterBar: React.FC<TaskFilterBarProps> = ({
   availableTags = [],
 }) => {
   const [filters, setFilters] = useState<filterStore.TaskFilters>(filterStore.getFilters());
+  const [searchInput, setSearchInput] = useState(filters.search || '');
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (visible) {
-      setFilters(filterStore.getFilters());
+      const currentFilters = filterStore.getFilters();
+      setFilters(currentFilters);
+      setSearchInput(currentFilters.search || '');
     }
   }, [visible]);
+
+  // Debounced search handler
+  const handleSearchChange = useCallback((text: string) => {
+    setSearchInput(text);
+
+    // Clear existing timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    // Set new timeout for debounced update
+    searchTimeoutRef.current = setTimeout(() => {
+      setFilters((prev) => ({ ...prev, search: text || undefined }));
+    }, SEARCH_DEBOUNCE_DELAY);
+  }, []);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleApply = async () => {
     await filterStore.updateFilters(filters);
@@ -49,8 +81,17 @@ export const TaskFilterBar: React.FC<TaskFilterBarProps> = ({
   const handleClear = async () => {
     const cleared = await filterStore.clearFilters();
     setFilters(cleared);
+    setSearchInput('');
     onApply(cleared);
     onClose();
+  };
+
+  const clearSearch = () => {
+    setSearchInput('');
+    setFilters((prev) => ({ ...prev, search: undefined }));
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
   };
 
   const togglePriority = (priority: filterStore.TaskPriority) => {
@@ -118,15 +159,29 @@ export const TaskFilterBar: React.FC<TaskFilterBarProps> = ({
             {/* Search */}
             <View style={styles.section}>
               <Text style={styles.sectionLabel}>SEARCH</Text>
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Search tasks..."
-                placeholderTextColor={colors.text.disabled}
-                value={filters.search || ''}
-                onChangeText={(text) =>
-                  setFilters({ ...filters, search: text || undefined })
-                }
-              />
+              <View style={styles.searchContainer}>
+                <Icon
+                  name="magnify"
+                  size={20}
+                  color={colors.text.tertiary}
+                  style={styles.searchIcon}
+                />
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Search tasks by title or description..."
+                  placeholderTextColor={colors.text.disabled}
+                  value={searchInput}
+                  onChangeText={handleSearchChange}
+                  returnKeyType="search"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+                {searchInput.length > 0 && (
+                  <TouchableOpacity onPress={clearSearch} style={styles.clearSearchButton}>
+                    <Icon name="close-circle" size={20} color={colors.text.tertiary} />
+                  </TouchableOpacity>
+                )}
+              </View>
             </View>
 
             {/* Sort */}
@@ -328,14 +383,28 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     marginBottom: spacing.sm,
   },
-  searchInput: {
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: colors.background.secondary,
     borderRadius: borderRadius.md,
     borderWidth: 1.5,
     borderColor: colors.border.default,
+    paddingHorizontal: spacing.md,
+  },
+  searchIcon: {
+    marginRight: spacing.sm,
+  },
+  searchInput: {
+    flex: 1,
     padding: spacing.md,
+    paddingLeft: 0,
     color: colors.text.primary,
     fontSize: typography.size.base,
+  },
+  clearSearchButton: {
+    padding: spacing.xs,
+    marginLeft: spacing.xs,
   },
   chipGroup: {
     flexDirection: 'row',
