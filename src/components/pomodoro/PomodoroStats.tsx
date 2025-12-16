@@ -7,13 +7,13 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { IconButton } from 'react-native-paper';
 import { useTheme } from '../../hooks/useTheme';
-import { PomodoroStats, DayStats } from '../../database/pomodoro';
+import type { PomodoroStats as PomodoroStatsType, DayStats } from '../../database/pomodoro';
 import { formatDuration } from '../../utils/pomodoroHelpers';
 import { typography, spacing, borderRadius, shadows } from '../../theme';
 
 interface PomodoroStatsProps {
-  todayStats: PomodoroStats;
-  weeklyStats: PomodoroStats;
+  todayStats: PomodoroStatsType;
+  weeklyStats: PomodoroStatsType;
   streak: number;
   sevenDayHistory: DayStats[];
   hourlyData: { hour: number; count: number }[];
