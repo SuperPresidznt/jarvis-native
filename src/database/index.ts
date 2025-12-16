@@ -104,6 +104,47 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
     console.error('[DB] Migration: Error adding habit reminder fields:', error);
   }
 
+  // Migration 5: Add reminder fields to tasks
+  try {
+    const tableInfo = await db.getAllAsync<{ name: string }>(
+      'PRAGMA table_info(tasks)'
+    );
+
+    const hasReminderTime = tableInfo.some(col => col.name === 'reminder_time');
+    const hasReminderMinutes = tableInfo.some(col => col.name === 'reminder_minutes');
+    const hasNotificationId = tableInfo.some(col => col.name === 'notification_id');
+    const hasSnoozeUntil = tableInfo.some(col => col.name === 'snooze_until');
+
+    if (!hasReminderTime) {
+      await db.execAsync('ALTER TABLE tasks ADD COLUMN reminder_time TEXT;');
+      console.log('[DB] Migration: Added reminder_time column to tasks');
+    }
+
+    if (!hasReminderMinutes) {
+      await db.execAsync('ALTER TABLE tasks ADD COLUMN reminder_minutes INTEGER;');
+      console.log('[DB] Migration: Added reminder_minutes column to tasks');
+    }
+
+    if (!hasNotificationId) {
+      await db.execAsync('ALTER TABLE tasks ADD COLUMN notification_id TEXT;');
+      console.log('[DB] Migration: Added notification_id column to tasks');
+    }
+
+    if (!hasSnoozeUntil) {
+      await db.execAsync('ALTER TABLE tasks ADD COLUMN snooze_until TEXT;');
+      console.log('[DB] Migration: Added snooze_until column to tasks');
+    }
+
+    if (hasReminderTime && hasReminderMinutes && hasNotificationId && hasSnoozeUntil) {
+      console.log('[DB] Migration: Task reminder fields already exist');
+    }
+
+    // Create index for task reminders
+    await db.execAsync('CREATE INDEX IF NOT EXISTS idx_tasks_reminder_time ON tasks(reminder_time);');
+  } catch (error) {
+    console.error('[DB] Migration: Error adding task reminder fields:', error);
+  }
+
   console.log('[DB] Migrations complete');
 }
 

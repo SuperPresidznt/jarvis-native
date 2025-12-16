@@ -215,6 +215,35 @@ export const CREATE_TABLES = {
       updated_at TEXT NOT NULL
     );
   `,
+
+  recurring_alarms: `
+    CREATE TABLE IF NOT EXISTS recurring_alarms (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      description TEXT,
+      time TEXT NOT NULL,
+      days_of_week TEXT NOT NULL,
+      alarm_type TEXT DEFAULT 'gentle',
+      is_enabled INTEGER DEFAULT 1,
+      notification_id TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+  `,
+
+  notification_history: `
+    CREATE TABLE IF NOT EXISTS notification_history (
+      id TEXT PRIMARY KEY,
+      notification_type TEXT NOT NULL,
+      reference_id TEXT,
+      title TEXT NOT NULL,
+      body TEXT,
+      scheduled_time TEXT NOT NULL,
+      delivered_time TEXT,
+      action_taken TEXT,
+      created_at TEXT NOT NULL
+    );
+  `,
 };
 
 /**
@@ -251,12 +280,21 @@ export const CREATE_INDEXES = {
   pomodoro_sessions_task: 'CREATE INDEX IF NOT EXISTS idx_pomodoro_sessions_task ON pomodoro_sessions(task_id);',
   pomodoro_sessions_status: 'CREATE INDEX IF NOT EXISTS idx_pomodoro_sessions_status ON pomodoro_sessions(status);',
   pomodoro_sessions_started_at: 'CREATE INDEX IF NOT EXISTS idx_pomodoro_sessions_started_at ON pomodoro_sessions(started_at);',
+
+  recurring_alarms_enabled: 'CREATE INDEX IF NOT EXISTS idx_recurring_alarms_enabled ON recurring_alarms(is_enabled);',
+  recurring_alarms_time: 'CREATE INDEX IF NOT EXISTS idx_recurring_alarms_time ON recurring_alarms(time);',
+
+  notification_history_type: 'CREATE INDEX IF NOT EXISTS idx_notification_history_type ON notification_history(notification_type);',
+  notification_history_reference: 'CREATE INDEX IF NOT EXISTS idx_notification_history_reference ON notification_history(reference_id);',
+  notification_history_scheduled: 'CREATE INDEX IF NOT EXISTS idx_notification_history_scheduled ON notification_history(scheduled_time);',
 };
 
 /**
  * Drop all tables (for reset/testing)
  */
 export const DROP_TABLES = [
+  'DROP TABLE IF EXISTS notification_history',
+  'DROP TABLE IF EXISTS recurring_alarms',
   'DROP TABLE IF EXISTS pomodoro_sessions',
   'DROP TABLE IF EXISTS pomodoro_settings',
   'DROP TABLE IF EXISTS focus_blocks',
