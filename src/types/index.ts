@@ -210,6 +210,7 @@ export type MainTabParamList = {
   Calendar: undefined;
   Finance: undefined;
   Alarms: undefined;
+  Reviews: undefined;
   Settings: undefined;
 };
 
@@ -224,3 +225,83 @@ export type SettingsStackParamList = {
   DataManagement: undefined;
   CategoryManagement: undefined;
 };
+
+// Reviews & Insights
+export type ReviewType = 'weekly' | 'monthly' | 'custom';
+export type InsightType = 'positive' | 'neutral' | 'improvement';
+
+export interface Insight {
+  category: string;
+  type: InsightType;
+  message: string;
+  recommendation?: string;
+}
+
+export interface ReviewPeriod {
+  start: string;
+  end: string;
+  type: ReviewType;
+}
+
+export interface TasksReviewData {
+  completed: number;
+  created: number;
+  averageLatency: number;
+  completionRate: number;
+  byPriority: Record<string, number>;
+  byProject: Record<string, number>;
+}
+
+export interface HabitsReviewData {
+  totalCompletions: number;
+  averageStreak: number;
+  bestStreak: number;
+  completionRate: number;
+  byHabit: Array<{ name: string; completions: number; streak: number }>;
+}
+
+export interface FocusReviewData {
+  totalSessions: number;
+  totalMinutes: number;
+  averageSessionLength: number;
+  mostProductiveHours: number[];
+  byTask: Array<{ taskName: string; minutes: number }>;
+}
+
+export interface PomodoroReviewData {
+  totalPomodoros: number;
+  totalMinutes: number;
+  completionRate: number;
+  averagePerDay: number;
+  mostProductiveHours: number[];
+}
+
+export interface FinanceReviewData {
+  totalIncome: number;
+  totalExpenses: number;
+  netCashFlow: number;
+  byCategory: Record<string, number>;
+  budgetAdherence: number;
+}
+
+export interface ReviewData {
+  period: ReviewPeriod;
+  tasks: TasksReviewData;
+  habits: HabitsReviewData;
+  focus: FocusReviewData;
+  pomodoro: PomodoroReviewData;
+  finance: FinanceReviewData;
+  insights: Insight[];
+}
+
+export interface Review {
+  id: string;
+  reviewType: ReviewType;
+  periodStart: string;
+  periodEnd: string;
+  data: ReviewData;
+  insights?: Insight[];
+  exported: boolean;
+  createdAt: string;
+  synced: boolean;
+}
