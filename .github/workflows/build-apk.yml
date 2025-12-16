@@ -1,8 +1,6 @@
 name: Build Android APK
 
 on:
-  # push:
-  #   branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -30,16 +28,6 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Cache Gradle
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
       - name: Install dependencies
         run: npm ci
 
@@ -49,72 +37,40 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x android/gradlew
 
-      - name: Build APK (Release)
+      - name: Build APK
+        working-directory: android
         run: |
-          cd android
-          ./gradlew clean
-          ./gradlew assembleRelease --no-daemon --stacktrace --max-workers=1 --no-parallel --no-build-cache
-        env:
-          GRADLE_OPTS: -Xmx2g -XX:MaxMetaspaceSize=512m -Dorg.gradle.jvmargs=-Xmx2g
+          ./gradlew assembleRelease \
+            --stacktrace \
+            --info \
+            -Dorg.gradle.jvmargs="-Xmx1536m -XX:MaxMetaspaceSize=512m" \
+            -Dorg.gradle.daemon=false
 
-      - name: List APK files
+      - name: Find APK
+        id: find_apk
         run: |
-          echo "Listing APK output directory:"
-          ls -la android/app/build/outputs/apk/release/ || echo "Release directory not found"
-          find android/app/build/outputs/apk -name "*.apk" || echo "No APK files found"
+          APK_PATH=$(find android/app/build/outputs/apk/release -name "*.apk" | head -n 1)
+          echo "apk_path=$APK_PATH" >> $GITHUB_OUTPUT
+          echo "Found APK at: $APK_PATH"
 
-      - name: Rename APK
-        run: |
-          mkdir -p release
-          find android/app/build/outputs/apk/release -name "*.apk" -exec cp {} release/jarvis-native.apk \;
-
-      - name: Upload APK as Artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: jarvis-native-apk
-          path: release/jarvis-native.apk
+          path: ${{ steps.find_apk.outputs.apk_path }}
           retention-days: 90
-
-      - name: Get current date
-        id: date
-        run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
-        if: github.ref == 'refs/heads/main'
         with:
           tag_name: v1.0.${{ github.run_number }}
           name: Jarvis Native v1.0.${{ github.run_number }}
-          files: release/jarvis-native.apk
-          draft: false
-          prerelease: false
+          files: ${{ steps.find_apk.outputs.apk_path }}
           body: |
-            # 🤖 Jarvis Native APK - Build ${{ github.run_number }}
+            # Jarvis Native APK - Build ${{ github.run_number }}
 
-            **Release Date:** ${{ steps.date.outputs.date }}
-            **Build:** #${{ github.run_number }}
+            Download the APK below and install on Android 7.0+
 
-            ## 📥 Installation
-
-            1. Download `jarvis-native.apk` below
-            2. Enable "Install from Unknown Sources"
-            3. Install and launch
-
-            ## ⚙️ Setup
-
-            Configure backend URL in Settings:
-            - Development: `http://10.0.2.2:800` (Android emulator)
-            - Production: Your deployed backend URL
-
-            ## 📱 Requirements
-            - Android 7.0+
-            - ~60MB storage
-
-            ## ✨ Features
-            - AI Chat, Tasks, Habits, Finance, Calendar
-            - Voice input, Camera, Notifications
-
-            ---
-            *Auto-built from ${{ github.sha }}*
+            Built from commit: ${{ github.sha }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
