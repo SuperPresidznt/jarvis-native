@@ -45,7 +45,7 @@ jobs:
       - name: Build APK
         working-directory: android
         run: |
-          ./gradlew assembleRelease \
+          ./gradlew assembleDebug \
             --stacktrace \
             --info \
             -Dorg.gradle.jvmargs="-Xmx1536m -XX:MaxMetaspaceSize=512m" \
@@ -54,7 +54,7 @@ jobs:
       - name: Find APK
         id: find_apk
         run: |
-          APK_PATH=$(find android/app/build/outputs/apk/release -name "*.apk" | head -n 1)
+          APK_PATH=$(find android/app/build/outputs/apk/debug -name "*.apk" | head -n 1)
           echo "apk_path=$APK_PATH" >> $GITHUB_OUTPUT
           echo "Found APK at: $APK_PATH"
 
