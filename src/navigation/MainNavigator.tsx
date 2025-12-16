@@ -31,6 +31,7 @@ import PomodoroScreen from '../screens/main/PomodoroScreen';
 import CalendarScreen from '../screens/main/CalendarScreen';
 import FinanceScreen from '../screens/main/FinanceScreen';
 import AlarmsScreen from '../screens/main/AlarmsScreen';
+import ReviewsScreen from '../screens/main/ReviewsScreen';
 import SettingsNavigator from './SettingsNavigator';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -259,6 +260,18 @@ export default function MainNavigator() {
           ),
           tabBarLabel: 'Alarms',
           title: 'Alarms',
+        }}
+      />
+
+      <Tab.Screen
+        name="Reviews"
+        component={ReviewsScreen}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIcon icon="clipboard-text" focused={focused} colors={colors} />
+          ),
+          tabBarLabel: 'Reviews',
+          headerShown: false, // Reviews has its own header
         }}
       />
 
