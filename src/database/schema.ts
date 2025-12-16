@@ -244,6 +244,20 @@ export const CREATE_TABLES = {
       created_at TEXT NOT NULL
     );
   `,
+
+  review_history: `
+    CREATE TABLE IF NOT EXISTS review_history (
+      id TEXT PRIMARY KEY,
+      review_type TEXT NOT NULL,
+      period_start TEXT NOT NULL,
+      period_end TEXT NOT NULL,
+      data TEXT NOT NULL,
+      insights TEXT,
+      exported INTEGER DEFAULT 0,
+      created_at TEXT NOT NULL,
+      synced INTEGER DEFAULT 0
+    );
+  `,
 };
 
 /**
@@ -287,12 +301,16 @@ export const CREATE_INDEXES = {
   notification_history_type: 'CREATE INDEX IF NOT EXISTS idx_notification_history_type ON notification_history(notification_type);',
   notification_history_reference: 'CREATE INDEX IF NOT EXISTS idx_notification_history_reference ON notification_history(reference_id);',
   notification_history_scheduled: 'CREATE INDEX IF NOT EXISTS idx_notification_history_scheduled ON notification_history(scheduled_time);',
+
+  review_history_type: 'CREATE INDEX IF NOT EXISTS idx_review_history_type ON review_history(review_type);',
+  review_history_period: 'CREATE INDEX IF NOT EXISTS idx_review_history_period ON review_history(period_start, period_end);',
 };
 
 /**
  * Drop all tables (for reset/testing)
  */
 export const DROP_TABLES = [
+  'DROP TABLE IF EXISTS review_history',
   'DROP TABLE IF EXISTS notification_history',
   'DROP TABLE IF EXISTS recurring_alarms',
   'DROP TABLE IF EXISTS pomodoro_sessions',
