@@ -8,11 +8,13 @@ import { useFocusEffect } from '@react-navigation/native';
 import * as tasksDB from '../database/tasks';
 import * as habitsDB from '../database/habits';
 import * as calendarDB from '../database/calendar';
+import * as alarmsDB from '../database/alarms';
 
 export interface BadgeCounts {
   tasks: number;
   habits: number;
   calendar: number;
+  alarms: number;
 }
 
 /**
@@ -24,22 +26,25 @@ export function useBadgeCounts() {
     tasks: 0,
     habits: 0,
     calendar: 0,
+    alarms: 0,
   });
   const [loading, setLoading] = useState(true);
 
   const loadCounts = useCallback(async () => {
     try {
       setLoading(true);
-      const [taskCount, habitCount, calendarCount] = await Promise.all([
+      const [taskCount, habitCount, calendarCount, alarmsCount] = await Promise.all([
         tasksDB.getActiveTasksCount(),
         habitsDB.getTodayIncompleteHabitsCount(),
         calendarDB.getTodayEventsCount(),
+        alarmsDB.getActiveAlarmsCount(),
       ]);
 
       setCounts({
         tasks: taskCount,
         habits: habitCount,
         calendar: calendarCount,
+        alarms: alarmsCount,
       });
     } catch (error) {
       console.error('[BadgeCounts] Error loading counts:', error);

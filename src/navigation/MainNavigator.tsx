@@ -30,6 +30,7 @@ import FocusScreen from '../screens/main/FocusScreen';
 import PomodoroScreen from '../screens/main/PomodoroScreen';
 import CalendarScreen from '../screens/main/CalendarScreen';
 import FinanceScreen from '../screens/main/FinanceScreen';
+import AlarmsScreen from '../screens/main/AlarmsScreen';
 import SettingsNavigator from './SettingsNavigator';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -241,6 +242,23 @@ export default function MainNavigator() {
           ),
           tabBarLabel: 'Finance',
           headerShown: false, // Finance has its own header
+        }}
+      />
+
+      <Tab.Screen
+        name="Alarms"
+        component={AlarmsScreen}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIcon
+              icon="alarm"
+              focused={focused}
+              colors={colors}
+              badgeCount={counts.alarms}
+            />
+          ),
+          tabBarLabel: 'Alarms',
+          title: 'Alarms',
         }}
       />
 

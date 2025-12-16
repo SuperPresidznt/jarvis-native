@@ -209,6 +209,7 @@ export type MainTabParamList = {
   Pomodoro: undefined;
   Calendar: undefined;
   Finance: undefined;
+  Alarms: undefined;
   Settings: undefined;
 };
 
