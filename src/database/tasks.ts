@@ -29,6 +29,10 @@ export interface Task {
   projectId?: string;
   tags: string[];
   recurrence?: RecurrenceRule;
+  reminderTime?: string;
+  reminderMinutes?: number;
+  notificationId?: string;
+  snoozeUntil?: string;
   createdAt: string;
   updatedAt: string;
   synced: boolean;
@@ -52,6 +56,10 @@ interface TaskRow {
   project_id?: string;
   tags: string;
   recurrence_rule?: string;
+  reminder_time?: string;
+  reminder_minutes?: number;
+  notification_id?: string;
+  snooze_until?: string;
   created_at: string;
   updated_at: string;
   synced: number;
@@ -70,10 +78,14 @@ export interface CreateTaskData {
   projectId?: string;
   tags?: string[];
   recurrence?: RecurrenceRule;
+  reminderTime?: string;
+  reminderMinutes?: number;
 }
 
 export interface UpdateTaskData extends Partial<CreateTaskData> {
   completedAt?: string;
+  notificationId?: string;
+  snoozeUntil?: string;
 }
 
 /**
@@ -93,6 +105,10 @@ function rowToTask(row: TaskRow): Task {
     projectId: row.project_id,
     tags: row.tags ? JSON.parse(row.tags) : [],
     recurrence: row.recurrence_rule ? JSON.parse(row.recurrence_rule) : undefined,
+    reminderTime: row.reminder_time,
+    reminderMinutes: row.reminder_minutes,
+    notificationId: row.notification_id,
+    snoozeUntil: row.snooze_until,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     synced: row.synced === 1,
@@ -279,8 +295,9 @@ export async function createTask(data: CreateTaskData): Promise<Task> {
   const sql = `
     INSERT INTO tasks (
       id, title, description, status, priority, effort, impact,
-      due_date, project_id, tags, recurrence_rule, created_at, updated_at, synced
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+      due_date, project_id, tags, recurrence_rule, reminder_time, reminder_minutes,
+      created_at, updated_at, synced
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
   `;
 
   const params = [
@@ -295,6 +312,8 @@ export async function createTask(data: CreateTaskData): Promise<Task> {
     data.projectId || null,
     JSON.stringify(data.tags || []),
     data.recurrence ? JSON.stringify(data.recurrence) : null,
+    data.reminderTime || null,
+    data.reminderMinutes || null,
     now,
     now,
   ];
@@ -371,6 +390,26 @@ export async function updateTask(id: string, data: UpdateTaskData): Promise<Task
   if (data.recurrence !== undefined) {
     updates.push('recurrence_rule = ?');
     params.push(data.recurrence ? JSON.stringify(data.recurrence) : null);
+  }
+
+  if (data.reminderTime !== undefined) {
+    updates.push('reminder_time = ?');
+    params.push(data.reminderTime || null);
+  }
+
+  if (data.reminderMinutes !== undefined) {
+    updates.push('reminder_minutes = ?');
+    params.push(data.reminderMinutes || null);
+  }
+
+  if (data.notificationId !== undefined) {
+    updates.push('notification_id = ?');
+    params.push(data.notificationId || null);
+  }
+
+  if (data.snoozeUntil !== undefined) {
+    updates.push('snooze_until = ?');
+    params.push(data.snoozeUntil || null);
   }
 
   updates.push('updated_at = ?');
