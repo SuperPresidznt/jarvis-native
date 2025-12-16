@@ -17,6 +17,11 @@ import { initDatabase } from './src/database';
 import { needsSeeding, seedDatabase } from './src/database/seed';
 import { useThemeStore } from './src/store/themeStore';
 import * as notificationService from './src/services/notifications';
+import {
+  registerNotificationCategories,
+  createNotificationChannels,
+  handleNotificationResponse,
+} from './src/services/notificationManager';
 import { toastConfig } from './src/components/ui/UndoToast';
 
 // Create React Query client
@@ -65,6 +70,11 @@ export default function App() {
         await initDatabase();
         console.log('[App] Database initialized');
 
+        // Register notification categories and channels
+        await registerNotificationCategories();
+        await createNotificationChannels();
+        console.log('[App] Notification categories and channels registered');
+
         // NOTE: Sample data seeding is DISABLED for production use
         // Users start with a clean, empty database
         // To enable demo data, uncomment the lines below:
@@ -89,23 +99,28 @@ export default function App() {
 
   // Set up notification tap handler
   useEffect(() => {
-    const subscription = notificationService.addNotificationResponseListener((data) => {
+    const subscription = notificationService.addNotificationResponseListener(async (data) => {
       console.log('[App] Notification tapped:', data);
 
-      // Handle habit reminders
-      if (data.type === 'habit' && navigationRef.current) {
-        // Navigate to Habits tab
-        navigationRef.current.navigate('Main', {
-          screen: 'Habits',
-        });
-      }
+      // Handle notification response (includes actions like complete, snooze, etc.)
+      await handleNotificationResponse(data as any);
 
-      // Handle event reminders
-      if (data.type === 'event' && navigationRef.current) {
-        // Navigate to Calendar tab
-        navigationRef.current.navigate('Main', {
-          screen: 'Calendar',
-        });
+      // Navigate based on notification type
+      if (navigationRef.current) {
+        switch (data.type) {
+          case 'task':
+            navigationRef.current.navigate('Main', { screen: 'Tasks' });
+            break;
+          case 'habit':
+            navigationRef.current.navigate('Main', { screen: 'Habits' });
+            break;
+          case 'calendar':
+            navigationRef.current.navigate('Main', { screen: 'Calendar' });
+            break;
+          case 'alarm':
+            navigationRef.current.navigate('Main', { screen: 'Alarms' });
+            break;
+        }
       }
     });
 
