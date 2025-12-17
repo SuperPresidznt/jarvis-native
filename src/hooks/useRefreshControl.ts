@@ -1,11 +1,14 @@
 /**
  * useRefreshControl Hook
  * Standardized pull-to-refresh behavior with haptics and timestamp tracking
+ *
+ * TEMPORARILY DISABLED: expo-haptics breaks release builds
  */
 
 import { useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Haptics from 'expo-haptics';
+// TEMPORARILY DISABLED
+// import * as Haptics from 'expo-haptics';
 
 interface UseRefreshControlOptions {
   screenName: string;
@@ -58,11 +61,12 @@ export function useRefreshControl({
     setRefreshing(true);
 
     // Trigger haptic feedback on refresh start
-    try {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    } catch (error) {
-      console.warn('[useRefreshControl] Haptic feedback failed:', error);
-    }
+    // TEMPORARILY DISABLED
+    // try {
+    //   await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    // } catch (error) {
+    //   console.warn('[useRefreshControl] Haptic feedback failed:', error);
+    // }
 
     try {
       // Execute the actual refresh logic

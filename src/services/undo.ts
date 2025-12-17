@@ -2,10 +2,13 @@
  * Undo Service
  * High-level API for undo/redo functionality with toast notifications
  * Handles deletion operations across all entity types
+ *
+ * TEMPORARILY DISABLED: expo-haptics breaks release builds
  */
 
 import Toast from 'react-native-toast-message';
-import * as Haptics from 'expo-haptics';
+// TEMPORARILY DISABLED
+// import * as Haptics from 'expo-haptics';
 import { undoQueue, UndoAction } from './undoQueue';
 import * as tasksDB from '../database/tasks';
 import * as habitsDB from '../database/habits';
@@ -44,13 +47,16 @@ function showUndoToast(
 
 /**
  * Perform haptic feedback for undo action
+ * TEMPORARILY DISABLED
  */
 async function performHapticFeedback(): Promise<void> {
-  try {
-    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-  } catch (error) {
-    console.warn('[UndoService] Haptic feedback not available:', error);
-  }
+  // TEMPORARILY DISABLED
+  // try {
+  //   await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  // } catch (error) {
+  //   console.warn('[UndoService] Haptic feedback not available:', error);
+  // }
+  console.warn('[UndoService] Haptic feedback DISABLED');
 }
 
 // ========================================

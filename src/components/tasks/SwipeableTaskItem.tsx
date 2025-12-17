@@ -3,12 +3,15 @@
  * Wraps TaskCard with swipe gestures for quick actions
  * - Swipe right: Complete/Uncomplete toggle
  * - Swipe left: Delete with confirmation
+ *
+ * TEMPORARILY DISABLED: expo-haptics breaks release builds
  */
 
 import React, { useRef } from 'react';
 import { View, StyleSheet, Animated, Text, Alert, Platform } from 'react-native';
 import { Swipeable, RectButton } from 'react-native-gesture-handler';
-import * as Haptics from 'expo-haptics';
+// TEMPORARILY DISABLED
+// import * as Haptics from 'expo-haptics';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { colors, spacing, borderRadius, typography } from '../../theme';
 
@@ -36,17 +39,19 @@ export const SwipeableTaskItem: React.FC<SwipeableTaskItemProps> = ({
   const swipeableRef = useRef<Swipeable>(null);
 
   // Haptic feedback helper
+  // TEMPORARILY DISABLED
   const triggerHaptic = async () => {
-    try {
-      if (Platform.OS === 'ios') {
-        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      } else {
-        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-      }
-    } catch (error) {
-      // Haptics not available or permission denied - fail silently
-      console.log('[SwipeableTaskItem] Haptics not available:', error);
-    }
+    // TEMPORARILY DISABLED
+    // try {
+    //   if (Platform.OS === 'ios') {
+    //     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    //   } else {
+    //     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    //   }
+    // } catch (error) {
+    //   // Haptics not available or permission denied - fail silently
+    //   console.log('[SwipeableTaskItem] Haptics not available:', error);
+    // }
   };
 
   // Right swipe action: Complete/Uncomplete

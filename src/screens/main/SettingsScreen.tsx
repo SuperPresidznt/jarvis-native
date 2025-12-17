@@ -18,7 +18,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Clipboard from '@react-native-clipboard/clipboard';
-import * as Notifications from 'expo-notifications';
+// TEMPORARILY DISABLED
+// import * as Notifications from 'expo-notifications';
 import { useAuthStore } from '../../store/authStore';
 import { useThemeStore } from '../../store/themeStore';
 import { useTheme } from '../../hooks/useTheme';
@@ -69,9 +70,12 @@ export default function SettingsScreen() {
   // Check notification permission and load preferences on mount
   useEffect(() => {
     (async () => {
-      const { status } = await Notifications.getPermissionsAsync();
-      setNotificationsPermissionStatus(status);
-      setNotificationsEnabled(status === 'granted');
+      // TEMPORARILY DISABLED
+      // const { status } = await Notifications.getPermissionsAsync();
+      // setNotificationsPermissionStatus(status);
+      // setNotificationsEnabled(status === 'granted');
+      setNotificationsPermissionStatus('denied');
+      setNotificationsEnabled(false);
 
       // Load habit notes prompt preference
       const notesPromptPref = await storage.getItem('habit_notes_prompt_enabled');
@@ -166,16 +170,19 @@ export default function SettingsScreen() {
   };
 
   const handleNotificationToggle = async (value: boolean) => {
-    if (value) {
-      // Request permission when turning on
-      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    // TEMPORARILY DISABLED
+    // if (value) {
+    //   // Request permission when turning on
+    //   const { status: existingStatus } = await Notifications.getPermissionsAsync();
 
-      if (existingStatus !== 'granted') {
-        const { status } = await Notifications.requestPermissionsAsync();
-        setNotificationsPermissionStatus(status);
-        setNotificationsEnabled(status === 'granted');
+    //   if (existingStatus !== 'granted') {
+    //     const { status } = await Notifications.requestPermissionsAsync();
+    //     setNotificationsPermissionStatus(status);
+    //     setNotificationsEnabled(status === 'granted');
 
-        if (status !== 'granted') {
+    //     if (status !== 'granted') {
+    Alert.alert('Notifications Disabled', 'Notifications are temporarily disabled.');
+    if (false) {
           Alert.alert(
             'Permission Denied',
             'Please enable notifications in your device settings to receive alerts for tasks and events.',
