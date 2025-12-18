@@ -12,14 +12,14 @@ import {
   Text,
   TouchableOpacity,
   Platform,
+  Linking,
 } from 'react-native';
 import { Switch } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Clipboard from '@react-native-clipboard/clipboard';
-// TEMPORARILY DISABLED
-// import * as Notifications from 'expo-notifications';
+import notifee, { AuthorizationStatus } from '@notifee/react-native';
 import { useAuthStore } from '../../store/authStore';
 import { useThemeStore } from '../../store/themeStore';
 import { useTheme } from '../../hooks/useTheme';
@@ -40,6 +40,7 @@ import {
   getLiabilities
 } from '../../database/finance';
 import { useFocusEffect } from '@react-navigation/native';
+import * as notificationService from '../../services/notifications';
 
 // Import version from package.json
 const packageJson = require('../../../package.json');
@@ -69,19 +70,37 @@ export default function SettingsScreen() {
 
   // Check notification permission and load preferences on mount
   useEffect(() => {
-    (async () => {
-      // TEMPORARILY DISABLED
-      // const { status } = await Notifications.getPermissionsAsync();
-      // setNotificationsPermissionStatus(status);
-      // setNotificationsEnabled(status === 'granted');
-      setNotificationsPermissionStatus('denied');
-      setNotificationsEnabled(false);
+    checkNotificationPermissions();
+  }, []);
+
+  const checkNotificationPermissions = async () => {
+    try {
+      const settings = await notifee.getNotificationSettings();
+      const authorized =
+        settings.authorizationStatus === AuthorizationStatus.AUTHORIZED ||
+        settings.authorizationStatus === AuthorizationStatus.PROVISIONAL;
+
+      setNotificationsEnabled(authorized);
+      setNotificationsPermissionStatus(
+        authorized ? 'granted' : settings.authorizationStatus === AuthorizationStatus.DENIED ? 'denied' : 'undetermined'
+      );
 
       // Load habit notes prompt preference
       const notesPromptPref = await storage.getItem('habit_notes_prompt_enabled');
       setHabitNotesPrompt(notesPromptPref === 'true');
-    })();
-  }, []);
+    } catch (error) {
+      console.error('Error checking notification permissions:', error);
+      setNotificationsEnabled(false);
+      setNotificationsPermissionStatus('denied');
+    }
+  };
+
+  // Refresh notification status when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      checkNotificationPermissions();
+    }, [])
+  );
 
   const loadTotalRecords = useCallback(async () => {
     try {
@@ -170,9 +189,69 @@ export default function SettingsScreen() {
   };
 
   const handleNotificationToggle = async (value: boolean) => {
-    // TEMPORARILY DISABLED - notifications not available in release builds
-    Alert.alert('Notifications Disabled', 'Notifications are temporarily disabled due to build compatibility issues.');
-    setNotificationsEnabled(false);
+    try {
+      if (value) {
+        // Request permissions
+        const granted = await notificationService.requestPermissions();
+
+        if (granted) {
+          setNotificationsEnabled(true);
+          setNotificationsPermissionStatus('granted');
+          Alert.alert(
+            'Notifications Enabled',
+            'You will now receive reminders for habits and calendar events.'
+          );
+        } else {
+          setNotificationsEnabled(false);
+          const settings = await notifee.getNotificationSettings();
+          if (settings.authorizationStatus === AuthorizationStatus.DENIED) {
+            setNotificationsPermissionStatus('denied');
+            // Permissions permanently denied - direct to settings
+            Alert.alert(
+              'Permission Denied',
+              'Notifications are blocked. Please enable them in your device settings.',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Open Settings',
+                  onPress: () => {
+                    if (Platform.OS === 'ios') {
+                      Linking.openURL('app-settings:');
+                    } else {
+                      notifee.openNotificationSettings();
+                    }
+                  },
+                },
+              ]
+            );
+          }
+        }
+      } else {
+        // User wants to disable notifications
+        setNotificationsEnabled(false);
+        Alert.alert(
+          'Notifications Disabled',
+          'You can re-enable notifications anytime from Settings.',
+          [
+            {
+              text: 'Open Settings to Fully Disable',
+              onPress: () => {
+                if (Platform.OS === 'ios') {
+                  Linking.openURL('app-settings:');
+                } else {
+                  notifee.openNotificationSettings();
+                }
+              },
+            },
+            { text: 'OK', style: 'cancel' },
+          ]
+        );
+      }
+    } catch (error) {
+      console.error('Error toggling notifications:', error);
+      Alert.alert('Error', 'Failed to update notification settings. Please try again.');
+      setNotificationsEnabled(false);
+    }
   };
 
   const handleHabitNotesPromptToggle = async (value: boolean) => {

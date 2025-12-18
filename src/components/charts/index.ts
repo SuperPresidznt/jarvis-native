@@ -12,6 +12,9 @@ import { HabitsComparisonChart } from './HabitsComparisonChart';
 import { Sparkline } from './Sparkline';
 import { PercentageChange } from './PercentageChange';
 import { DetailedChartModal } from './DetailedChartModal';
+import { BarChart } from './BarChart';
+import { LineChart } from './LineChart';
+import { PieChart } from './PieChart';
 
 export {
   BaseChart,
@@ -24,6 +27,9 @@ export {
   Sparkline,
   PercentageChange,
   DetailedChartModal,
+  BarChart,
+  LineChart,
+  PieChart,
 };
 
 export default {
@@ -37,4 +43,7 @@ export default {
   Sparkline,
   PercentageChange,
   DetailedChartModal,
+  BarChart,
+  LineChart,
+  PieChart,
 };

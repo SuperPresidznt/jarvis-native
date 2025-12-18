@@ -26,6 +26,7 @@ import { PomodoroControls } from '../../components/pomodoro/PomodoroControls';
 import { PomodoroStats as StatsComponent } from '../../components/pomodoro/PomodoroStats';
 import { PomodoroHistory } from '../../components/pomodoro/PomodoroHistory';
 import { PomodoroSettingsModal } from '../../components/pomodoro/PomodoroSettings';
+import { TaskPickerModal } from '../../components/pomodoro/TaskPickerModal';
 import { typography, spacing, shadows } from '../../theme';
 
 type ViewMode = 'timer' | 'stats' | 'history';
@@ -50,6 +51,7 @@ export default function PomodoroScreen() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showTaskPicker, setShowTaskPicker] = useState(false);
 
   // Stats data
   const [todayStats, setTodayStats] = useState<PomodoroStats>({
@@ -175,9 +177,14 @@ export default function PomodoroScreen() {
   };
 
   const handleSelectTask = () => {
-    // Task selection could be implemented with a custom modal
-    // For now, just start without a task
-    handleStart();
+    setShowTaskPicker(true);
+  };
+
+  const handleTaskSelected = async (task: Task | null) => {
+    // Update the task ID in the timer state if needed
+    // For now, start the timer with the selected task
+    await startWork(task?.id || null);
+    await playHapticFeedback('warning');
   };
 
   const handleSaveSettings = async (newSettings: Partial<pomodoroDB.PomodoroSettings>) => {
@@ -315,6 +322,14 @@ export default function PomodoroScreen() {
         settings={settings}
         onClose={() => setShowSettings(false)}
         onSave={handleSaveSettings}
+      />
+
+      {/* Task Picker Modal */}
+      <TaskPickerModal
+        visible={showTaskPicker}
+        onClose={() => setShowTaskPicker(false)}
+        onSelect={handleTaskSelected}
+        currentTaskId={state.taskId}
       />
     </View>
   );

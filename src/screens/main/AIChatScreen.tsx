@@ -13,6 +13,8 @@ import {
   Platform,
   Alert,
   TextInput as RNTextInput,
+  TouchableOpacity,
+  ScrollView,
 } from 'react-native';
 import {
   TextInput,
@@ -21,6 +23,7 @@ import {
   Card,
   ActivityIndicator,
   FAB,
+  Chip,
 } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Speech from 'expo-speech';
@@ -28,6 +31,15 @@ import { ChatMessage } from '../../types';
 import { aiApi } from '../../services/ai.api';
 import { EmptyState } from '../../components/ui';
 import { colors, typography, spacing, borderRadius, textStyles, shadows } from '../../theme';
+
+const QUICK_PROMPTS = [
+  { id: '1', icon: '✅', label: 'What should I focus on today?', prompt: 'Based on my tasks and schedule, what should I focus on today?' },
+  { id: '2', icon: '💪', label: 'Habit streak tips', prompt: 'Give me tips to maintain my habit streaks' },
+  { id: '3', icon: '💰', label: 'Budget insights', prompt: 'Analyze my spending patterns and give me budget recommendations' },
+  { id: '4', icon: '📅', label: 'Schedule conflicts', prompt: 'Check my calendar for any scheduling conflicts or time management issues' },
+  { id: '5', icon: '🎯', label: 'Weekly review', prompt: 'Help me do a weekly review of my tasks, habits, and goals' },
+  { id: '6', icon: '⏰', label: 'Time blocking', prompt: 'Suggest a time-blocking schedule for my day based on my tasks' },
+];
 
 export default function AIChatScreen() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -84,6 +96,10 @@ export default function AIChatScreen() {
     });
   };
 
+  const handleQuickPrompt = (prompt: string) => {
+    setInputText(prompt);
+  };
+
   const renderMessage = ({ item }: { item: ChatMessage }) => {
     const isUser = item.role === 'user';
 
@@ -133,13 +149,37 @@ export default function AIChatScreen() {
     >
       <View style={styles.container}>
         {messages.length === 0 ? (
-          <View style={[styles.emptyContainer, { paddingTop: insets.top + spacing['4xl'] }]}>
+          <ScrollView
+            style={styles.emptyScrollView}
+            contentContainerStyle={[styles.emptyContainer, { paddingTop: insets.top + spacing.xl }]}
+            showsVerticalScrollIndicator={false}
+          >
             <EmptyState
               icon="💬"
               title="Hi, I'm Jarvis"
               description="Your AI-powered personal assistant. I can help you manage tasks, track habits, schedule events, plan finances, and organize your life. Ask me anything to get started!"
             />
-          </View>
+
+            {/* Quick Prompts */}
+            <View style={styles.quickPromptsContainer}>
+              <Text style={styles.quickPromptsTitle}>Quick Prompts</Text>
+              <View style={styles.quickPromptsGrid}>
+                {QUICK_PROMPTS.map((item) => (
+                  <TouchableOpacity
+                    key={item.id}
+                    style={styles.promptCard}
+                    onPress={() => handleQuickPrompt(item.prompt)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.promptIcon}>{item.icon}</Text>
+                    <Text style={styles.promptLabel} numberOfLines={2}>
+                      {item.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          </ScrollView>
         ) : (
           <FlatList
             ref={flatListRef}
@@ -201,11 +241,53 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background.primary,
   },
-  emptyContainer: {
+  emptyScrollView: {
     flex: 1,
-    justifyContent: 'center',
+  },
+  emptyContainer: {
     alignItems: 'center',
     padding: spacing.lg,
+    paddingBottom: spacing['4xl'],
+  },
+  quickPromptsContainer: {
+    width: '100%',
+    marginTop: spacing.xl,
+  },
+  quickPromptsTitle: {
+    fontSize: typography.size.lg,
+    fontWeight: typography.weight.semibold,
+    color: colors.text.primary,
+    marginBottom: spacing.base,
+    paddingHorizontal: spacing.sm,
+  },
+  quickPromptsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.md,
+    justifyContent: 'center',
+  },
+  promptCard: {
+    width: '45%',
+    minWidth: 140,
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.lg,
+    padding: spacing.base,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadows.sm,
+    borderWidth: 1,
+    borderColor: colors.border.subtle,
+  },
+  promptIcon: {
+    fontSize: 32,
+    marginBottom: spacing.sm,
+  },
+  promptLabel: {
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.medium,
+    color: colors.text.primary,
+    textAlign: 'center',
+    lineHeight: typography.size.sm * 1.4,
   },
   messageList: {
     padding: spacing.lg,
