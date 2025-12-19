@@ -18,6 +18,7 @@ interface PomodoroControlsProps {
   onStop: () => void;
   onSkip: () => void;
   onSelectTask?: () => void;
+  linkedTaskTitle?: string;
 }
 
 export function PomodoroControls({
@@ -28,6 +29,7 @@ export function PomodoroControls({
   onStop,
   onSkip,
   onSelectTask,
+  linkedTaskTitle,
 }: PomodoroControlsProps) {
   const { colors } = useTheme();
 
@@ -35,6 +37,15 @@ export function PomodoroControls({
     // Show start button
     return (
       <View style={styles.container}>
+        {linkedTaskTitle && (
+          <View style={[styles.linkedTaskBadge, { backgroundColor: colors.background.tertiary, borderColor: colors.primary.main }]}>
+            <IconButton icon="link-variant" iconColor={colors.primary.main} size={16} />
+            <Text style={[styles.linkedTaskText, { color: colors.text.primary }]} numberOfLines={1}>
+              {linkedTaskTitle}
+            </Text>
+          </View>
+        )}
+
         <TouchableOpacity
           style={[
             styles.primaryButton,
@@ -207,5 +218,20 @@ const styles = StyleSheet.create({
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
     marginLeft: spacing.xs,
+  },
+  linkedTaskBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.base,
+    borderRadius: borderRadius.md,
+    borderWidth: 1.5,
+    marginBottom: spacing.md,
+  },
+  linkedTaskText: {
+    flex: 1,
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.medium,
+    marginLeft: -spacing.xs,
   },
 });

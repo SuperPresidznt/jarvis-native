@@ -52,6 +52,7 @@ export default function PomodoroScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showTaskPicker, setShowTaskPicker] = useState(false);
+  const [linkedTask, setLinkedTask] = useState<Task | null>(null);
 
   // Stats data
   const [todayStats, setTodayStats] = useState<PomodoroStats>({
@@ -111,6 +112,24 @@ export default function PomodoroScreen() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Load linked task details when taskId changes
+  useEffect(() => {
+    const loadLinkedTask = async () => {
+      if (state.taskId) {
+        try {
+          const task = await tasksDB.getTask(state.taskId);
+          setLinkedTask(task);
+        } catch (error) {
+          console.error('Error loading linked task:', error);
+          setLinkedTask(null);
+        }
+      } else {
+        setLinkedTask(null);
+      }
+    };
+    loadLinkedTask();
+  }, [state.taskId]);
 
   // Refresh on phase change
   useEffect(() => {
@@ -234,6 +253,7 @@ export default function PomodoroScreen() {
               onStop={handleStop}
               onSkip={handleSkip}
               onSelectTask={handleSelectTask}
+              linkedTaskTitle={linkedTask?.title}
             />
           </View>
         );
