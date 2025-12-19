@@ -1,6 +1,6 @@
 /**
  * Tasks Screen
- * Professional task management with list, kanban, and priority matrix views
+ * Professional task management with list view
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
@@ -19,7 +19,7 @@ import {
   Animated,
   FlatList,
 } from 'react-native';
-import { IconButton, SegmentedButtons, Checkbox, Badge } from 'react-native-paper';
+import { IconButton, Checkbox, Badge } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -63,7 +63,7 @@ import { useTheme } from '../../theme/ThemeProvider';
 import { PRIORITY_COLORS, PRIORITY_LABELS, PRIORITY_ICONS } from '../../constants/priorities';
 import { sortTasks, isOverdue } from '../../utils/taskSorting';
 
-type ViewMode = 'list' | 'kanban' | 'matrix';
+type ViewMode = 'list';
 type TaskStatus = 'todo' | 'in_progress' | 'blocked' | 'completed' | 'cancelled';
 type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 
@@ -93,7 +93,7 @@ export default function TasksScreen() {
   const route = useRoute();
   const navigation = useNavigation();
   const params = route.params as { highlightId?: string; scrollTo?: boolean } | undefined;
-  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const viewMode: ViewMode = 'list'; // Only list view is implemented
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [filterStatus, setFilterStatus] = useState<TaskStatus | 'all' | 'overdue'>('all');
@@ -504,52 +504,51 @@ export default function TasksScreen() {
         </View>
       )}
 
-      {/* View Mode Selector */}
-      {!bulkSelectMode && (
-        <View
-          style={styles.viewSelectorContainer}
-          accessible={true}
-          accessibilityRole="radiogroup"
-          accessibilityLabel="View mode selector"
-        >
-          <SegmentedButtons
-            value={viewMode}
-            onValueChange={(value) => setViewMode(value as ViewMode)}
-            buttons={[
-              { value: 'list', label: 'List', accessibilityLabel: 'List view' },
-              { value: 'kanban', label: 'Board', accessibilityLabel: 'Board view' },
-              { value: 'matrix', label: 'Matrix', accessibilityLabel: 'Matrix view' },
-            ]}
-            style={styles.viewSelector}
-            theme={{
-              colors: {
-                secondaryContainer: colors.primary.main,
-                onSecondaryContainer: '#FFFFFF',
-                onSurface: colors.text.secondary,
-              },
-            }}
-          />
-        </View>
-      )}
+      {/* View Mode Selector - Removed: Only list view is implemented */}
 
       {/* Filters */}
       {viewMode === 'list' && !bulkSelectMode && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.filterContainer}
-          contentContainerStyle={styles.filterContent}
-        >
-          {(['all', 'overdue', 'todo', 'in_progress', 'completed'] as const).map((status) => (
-            <AppChip
-              key={status}
-              label={status === 'all' ? 'All' : status === 'overdue' ? 'Overdue' : STATUS_LABELS[status]}
-              selected={filterStatus === status}
-              onPress={() => setFilterStatus(status)}
-              style={styles.filterChip}
-            />
-          ))}
-        </ScrollView>
+        <View>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.filterContainer}
+            contentContainerStyle={styles.filterContent}
+          >
+            {(['all', 'overdue', 'todo', 'in_progress', 'completed'] as const).map((status) => (
+              <AppChip
+                key={status}
+                label={status === 'all' ? 'All' : status === 'overdue' ? 'Overdue' : STATUS_LABELS[status]}
+                selected={filterStatus === status}
+                onPress={() => setFilterStatus(status)}
+                style={styles.filterChip}
+              />
+            ))}
+            {activeFilterCount > 0 && (
+              <TouchableOpacity
+                style={[styles.clearFiltersButton, { borderColor: colors.error }]}
+                onPress={() => {
+                  setFilters(filterStore.getDefaultFilters());
+                  announceForAccessibility('All advanced filters cleared');
+                }}
+                {...makeButton('Clear all advanced filters', 'Double tap to reset all filter options')}
+              >
+                <Icon name="filter-remove" size={16} color={colors.error} />
+                <Text style={[styles.clearFiltersText, { color: colors.error }]}>
+                  Clear {activeFilterCount}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </ScrollView>
+          {activeFilterCount > 0 && (
+            <View style={[styles.activeFiltersIndicator, { backgroundColor: `${colors.primary.main}15`, borderColor: `${colors.primary.main}40` }]}>
+              <Icon name="filter-check" size={14} color={colors.primary.main} />
+              <Text style={[styles.activeFiltersText, { color: colors.primary.main }]}>
+                {activeFilterCount} advanced filter{activeFilterCount > 1 ? 's' : ''} active
+              </Text>
+            </View>
+          )}
+        </View>
       )}
 
       {/* Content */}
@@ -645,31 +644,6 @@ export default function TasksScreen() {
                 setShowCreateModal(true);
               }}
             />
-          ) : (
-            <>
-              {viewMode === 'kanban' && (
-                <KanbanView
-                  tasks={filteredTasks}
-                  onStatusChange={handleStatusChange}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  bulkSelectMode={bulkSelectMode}
-                  selectedTaskIds={selectedTaskIds}
-                  onToggleSelect={toggleTaskSelection}
-                />
-              )}
-              {viewMode === 'matrix' && (
-                <MatrixView
-                  tasks={filteredTasks}
-                  onStatusChange={handleStatusChange}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  bulkSelectMode={bulkSelectMode}
-                  selectedTaskIds={selectedTaskIds}
-                  onToggleSelect={toggleTaskSelection}
-                />
-              )}
-            </>
           )}
         </ScrollView>
       )}
@@ -1075,146 +1049,8 @@ const TaskCard: React.FC<TaskCardProps> = React.memo(({
   );
 });
 
-// Kanban View Component
-interface KanbanViewProps {
-  tasks: Task[];
-  onStatusChange: (id: string, status: TaskStatus) => void;
-  onEdit: (task: Task) => void;
-  onDelete: (id: string) => void;
-  bulkSelectMode?: boolean;
-  selectedTaskIds?: Set<string>;
-  onToggleSelect?: (taskId: string) => void;
-}
-
-const KanbanView: React.FC<KanbanViewProps> = ({
-  tasks,
-  onStatusChange,
-  onEdit,
-  onDelete,
-  bulkSelectMode = false,
-  selectedTaskIds = new Set(),
-  onToggleSelect,
-}) => {
-  const { sortTasksByPriority } = require('../../utils/taskSorting');
-  const columns: TaskStatus[] = ['todo', 'in_progress', 'blocked', 'completed'];
-
-  return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-      <View style={styles.kanbanView}>
-        {columns.map((status) => {
-          const columnTasks = tasks.filter((t) => t.status === status);
-          // Sort tasks within each column by priority and due date
-          const sortedColumnTasks = sortTasksByPriority(columnTasks);
-
-          return (
-            <View key={status} style={styles.kanbanColumn}>
-              <View style={styles.kanbanHeader}>
-                <Text style={styles.kanbanHeaderText}>
-                  {STATUS_LABELS[status]}
-                </Text>
-                <View style={styles.kanbanCount}>
-                  <Text style={styles.kanbanCountText}>{sortedColumnTasks.length}</Text>
-                </View>
-              </View>
-              <ScrollView
-                style={styles.kanbanContent}
-                showsVerticalScrollIndicator={false}
-              >
-                {sortedColumnTasks.map((task: Task) => (
-                  <TaskCard
-                    key={task.id}
-                    task={task}
-                    onStatusChange={onStatusChange}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                    compact
-                    bulkSelectMode={bulkSelectMode}
-                    selected={selectedTaskIds.has(task.id)}
-                    onToggleSelect={() => onToggleSelect?.(task.id)}
-                  />
-                ))}
-              </ScrollView>
-            </View>
-          );
-        })}
-      </View>
-    </ScrollView>
-  );
-};
-
-// Matrix View Component
-interface MatrixViewProps {
-  tasks: Task[];
-  onStatusChange: (id: string, status: TaskStatus) => void;
-  onEdit: (task: Task) => void;
-  onDelete: (id: string) => void;
-  bulkSelectMode?: boolean;
-  selectedTaskIds?: Set<string>;
-  onToggleSelect?: (taskId: string) => void;
-}
-
-const MatrixView: React.FC<MatrixViewProps> = ({
-  tasks,
-  onStatusChange,
-  onEdit,
-  onDelete,
-  bulkSelectMode = false,
-  selectedTaskIds = new Set(),
-  onToggleSelect,
-}) => {
-  const { sortTasksByPriority } = require('../../utils/taskSorting');
-
-  const matrix = {
-    urgent: sortTasksByPriority(
-      tasks.filter((t) => t.priority === 'urgent' && t.status !== 'completed')
-    ),
-    high: sortTasksByPriority(
-      tasks.filter((t) => t.priority === 'high' && t.status !== 'completed')
-    ),
-    medium: sortTasksByPriority(
-      tasks.filter((t) => t.priority === 'medium' && t.status !== 'completed')
-    ),
-    low: sortTasksByPriority(
-      tasks.filter((t) => (t.priority === 'low' || !t.priority) && t.status !== 'completed')
-    ),
-  };
-
-  const quadrants = [
-    { key: 'urgent', label: 'Urgent', color: `${colors.error}20` },
-    { key: 'high', label: 'High Priority', color: `${colors.warning}20` },
-    { key: 'medium', label: 'Medium', color: `${colors.info}20` },
-    { key: 'low', label: 'Low Priority', color: `${colors.background.tertiary}` },
-  ];
-
-  return (
-    <View style={styles.matrixView}>
-      {quadrants.map((quadrant) => (
-        <View
-          key={quadrant.key}
-          style={[styles.matrixQuadrant, { backgroundColor: quadrant.color }]}
-        >
-          <Text style={styles.matrixTitle}>{quadrant.label}</Text>
-          <Text style={styles.matrixCount}>
-            {matrix[quadrant.key as keyof typeof matrix].length} tasks
-          </Text>
-          {matrix[quadrant.key as keyof typeof matrix].map((task: Task) => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              onStatusChange={onStatusChange}
-              onEdit={onEdit}
-              onDelete={onDelete}
-              compact
-              bulkSelectMode={bulkSelectMode}
-              selected={selectedTaskIds.has(task.id)}
-              onToggleSelect={() => onToggleSelect?.(task.id)}
-            />
-          ))}
-        </View>
-      ))}
-    </View>
-  );
-};
+// Kanban and Matrix views removed - not implemented
+// TODO: Consider adding these views in a future update
 
 // Task Form Modal
 interface TaskFormModalProps {
@@ -1527,6 +1363,35 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  clearFiltersButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.sm,
+    borderWidth: 1,
+    marginLeft: spacing.sm,
+  },
+  clearFiltersText: {
+    fontSize: typography.size.xs,
+    fontWeight: typography.weight.semibold,
+  },
+  activeFiltersIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.xs,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.xs,
+    borderRadius: borderRadius.sm,
+    borderWidth: 1,
+  },
+  activeFiltersText: {
+    fontSize: typography.size.xs,
+    fontWeight: typography.weight.medium,
+  },
   filterCountText: {
     fontSize: 10,
     fontWeight: typography.weight.bold,
@@ -1793,64 +1658,7 @@ const styles = StyleSheet.create({
   deleteText: {
     color: colors.error,
   },
-  // Kanban styles
-  kanbanView: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    paddingRight: spacing.lg,
-  },
-  kanbanColumn: {
-    width: 280,
-    backgroundColor: colors.background.secondary,
-    borderRadius: borderRadius.lg,
-    overflow: 'hidden',
-  },
-  kanbanHeader: {
-    padding: spacing.md,
-    backgroundColor: colors.background.tertiary,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  kanbanHeaderText: {
-    fontSize: typography.size.sm,
-    fontWeight: typography.weight.semibold,
-    color: colors.text.primary,
-  },
-  kanbanCount: {
-    backgroundColor: colors.background.primary,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: borderRadius.sm,
-  },
-  kanbanCountText: {
-    fontSize: typography.size.xs,
-    fontWeight: typography.weight.medium,
-    color: colors.text.tertiary,
-  },
-  kanbanContent: {
-    padding: spacing.sm,
-    maxHeight: 400,
-  },
-  // Matrix styles
-  matrixView: {
-    gap: spacing.md,
-  },
-  matrixQuadrant: {
-    padding: spacing.base,
-    borderRadius: borderRadius.lg,
-  },
-  matrixTitle: {
-    fontSize: typography.size.md,
-    fontWeight: typography.weight.semibold,
-    color: colors.text.primary,
-    marginBottom: spacing.xs,
-  },
-  matrixCount: {
-    fontSize: typography.size.sm,
-    color: colors.text.tertiary,
-    marginBottom: spacing.md,
-  },
+  // Kanban and Matrix styles removed - views not implemented
   // Modal styles
   modalOverlay: {
     flex: 1,
