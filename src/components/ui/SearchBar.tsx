@@ -13,6 +13,8 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { colors, typography, spacing, borderRadius } from '../../theme';
+import { HIT_SLOP } from '../../constants/ui';
+import { haptic } from '../../utils/haptics';
 
 interface SearchBarProps {
   value: string;
@@ -34,6 +36,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   const [isFocused, setIsFocused] = useState(false);
 
   const handleClear = () => {
+    haptic.light();
     onChangeText('');
   };
 
@@ -63,7 +66,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           <TouchableOpacity
             onPress={handleClear}
             style={styles.clearButton}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            hitSlop={HIT_SLOP}
           >
             <Icon name="close-circle" size={20} color={colors.text.tertiary} />
           </TouchableOpacity>
