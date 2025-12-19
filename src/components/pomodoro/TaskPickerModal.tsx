@@ -209,6 +209,9 @@ export function TaskPickerModal({ visible, onClose, onSelect, currentTaskId }: T
                 <Text style={styles.emptyStateText}>
                   {searchQuery ? 'No tasks found' : 'No active tasks'}
                 </Text>
+                <Text style={[styles.emptyStateText, { fontSize: 12, marginTop: 8 }]}>
+                  DEBUG: tasks.length={tasks.length}, filteredTasks.length={filteredTasks.length}, isLoading={isLoading.toString()}
+                </Text>
               </View>
             ) : (
               filteredTasks.map((task) => (
