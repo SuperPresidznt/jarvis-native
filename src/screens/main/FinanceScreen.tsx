@@ -44,7 +44,7 @@ import {
 } from '../../theme';
 import { useTheme } from '../../theme/ThemeProvider';
 
-type ViewMode = 'overview' | 'assets' | 'liabilities' | 'transactions' | 'budgets';
+type ViewMode = 'overview' | 'transactions' | 'budgets';
 type TimeFilter = 'month' | 'lastMonth' | 'all';
 
 export default function FinanceScreen() {
@@ -262,7 +262,7 @@ export default function FinanceScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.viewSelectorScroll}
         >
-          {(['overview', 'budgets', 'transactions', 'assets', 'liabilities'] as const).map((mode) => (
+          {(['overview', 'transactions', 'budgets'] as const).map((mode) => (
             <TouchableOpacity
               key={mode}
               onPress={() => setViewMode(mode)}
@@ -410,48 +410,50 @@ export default function FinanceScreen() {
               <MonthlyComparisonChart months={6} />
             </View>
 
-            {/* Recent Assets */}
+            {/* Assets & Liabilities Summary */}
             <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <Text style={styles.sectionLabel}>RECENT ASSETS</Text>
-                <TouchableOpacity onPress={() => setViewMode('assets')}>
-                  <Text style={styles.viewAllText}>View All</Text>
-                </TouchableOpacity>
+              <Text style={styles.sectionLabel}>BALANCE SHEET</Text>
+              <View style={styles.balanceSheetCard}>
+                <View style={styles.balanceSheetRow}>
+                  <Text style={styles.balanceSheetLabel}>Total Assets</Text>
+                  <Text style={[styles.balanceSheetValue, { color: colors.success }]}>
+                    {formatCurrency(summary.totalAssets)}
+                  </Text>
+                </View>
+                <View style={styles.balanceSheetRow}>
+                  <Text style={styles.balanceSheetLabel}>Total Liabilities</Text>
+                  <Text style={[styles.balanceSheetValue, { color: colors.error }]}>
+                    {formatCurrency(summary.totalLiabilities)}
+                  </Text>
+                </View>
+                <View style={[styles.balanceSheetRow, styles.balanceSheetRowTotal]}>
+                  <Text style={styles.balanceSheetLabelTotal}>Net Worth</Text>
+                  <Text style={[
+                    styles.balanceSheetValueTotal,
+                    { color: (summary.netWorth || 0) >= 0 ? colors.success : colors.error }
+                  ]}>
+                    {formatCurrency(summary.netWorth)}
+                  </Text>
+                </View>
               </View>
-              {assets.slice(0, 3).map((asset) => (
-                <FinanceItemCard
-                  key={asset.id}
-                  name={asset.name}
-                  value={formatCurrency(asset.value)}
-                  category={asset.type}
-                  type="asset"
-                />
-              ))}
-              {assets.length === 0 && (
-                <Text style={styles.emptyText}>No assets tracked yet</Text>
-              )}
-            </View>
 
-            {/* Recent Liabilities */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <Text style={styles.sectionLabel}>RECENT LIABILITIES</Text>
-                <TouchableOpacity onPress={() => setViewMode('liabilities')}>
-                  <Text style={styles.viewAllText}>View All</Text>
-                </TouchableOpacity>
-              </View>
-              {liabilities.slice(0, 3).map((liability) => (
-                <FinanceItemCard
-                  key={liability.id}
-                  name={liability.name}
-                  value={formatCurrency(liability.amount)}
-                  category={liability.interestRate ? `${liability.type} - ${liability.interestRate}% APR` : liability.type}
-                  type="liability"
+              {/* Quick Actions for Assets/Liabilities */}
+              <View style={styles.quickActionsRow}>
+                <AppButton
+                  title="Add Asset"
+                  onPress={() => setShowAssetModal(true)}
+                  variant="outline"
+                  size="small"
+                  style={styles.quickActionButton}
                 />
-              ))}
-              {liabilities.length === 0 && (
-                <Text style={styles.emptyText}>No liabilities tracked yet</Text>
-              )}
+                <AppButton
+                  title="Add Liability"
+                  onPress={() => setShowLiabilityModal(true)}
+                  variant="outline"
+                  size="small"
+                  style={styles.quickActionButton}
+                />
+              </View>
             </View>
 
             {/* Budget Overview */}
@@ -464,70 +466,6 @@ export default function FinanceScreen() {
                   </TouchableOpacity>
                 </View>
                 <BudgetSummaryCard summary={budgetSummary} compact />
-              </View>
-            )}
-          </>
-        )}
-
-        {viewMode === 'assets' && (
-          <>
-            <AppButton
-              title="Add Asset"
-              onPress={() => setShowAssetModal(true)}
-              fullWidth
-              style={styles.addButton}
-            />
-            {assets.length === 0 ? (
-              <EmptyState
-                icon="💰"
-                title="No assets yet"
-                description="Track your assets to monitor your financial health"
-                actionLabel="Add Asset"
-                onAction={() => setShowAssetModal(true)}
-              />
-            ) : (
-              <View style={styles.itemsList}>
-                {assets.map((asset) => (
-                  <FinanceItemCard
-                    key={asset.id}
-                    name={asset.name}
-                    value={formatCurrency(asset.value)}
-                    category={asset.type}
-                    type="asset"
-                  />
-                ))}
-              </View>
-            )}
-          </>
-        )}
-
-        {viewMode === 'liabilities' && (
-          <>
-            <AppButton
-              title="Add Liability"
-              onPress={() => setShowLiabilityModal(true)}
-              fullWidth
-              style={styles.addButton}
-            />
-            {liabilities.length === 0 ? (
-              <EmptyState
-                icon="📊"
-                title="No liabilities yet"
-                description="Track debts and liabilities for complete financial picture"
-                actionLabel="Add Liability"
-                onAction={() => setShowLiabilityModal(true)}
-              />
-            ) : (
-              <View style={styles.itemsList}>
-                {liabilities.map((liability) => (
-                  <FinanceItemCard
-                    key={liability.id}
-                    name={liability.name}
-                    value={formatCurrency(liability.amount)}
-                    category={liability.interestRate ? `${liability.type} - ${liability.interestRate}% APR` : liability.type}
-                    type="liability"
-                  />
-                ))}
               </View>
             )}
           </>
@@ -1704,5 +1642,48 @@ const styles = StyleSheet.create({
   categoryPlaceholder: {
     fontSize: typography.size.base,
     color: colors.text.placeholder,
+  },
+  balanceSheetCard: {
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.lg,
+    padding: spacing.base,
+    ...shadows.sm,
+  },
+  balanceSheetRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+  },
+  balanceSheetRowTotal: {
+    paddingTop: spacing.md,
+    marginTop: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: colors.border.subtle,
+  },
+  balanceSheetLabel: {
+    fontSize: typography.size.base,
+    color: colors.text.secondary,
+  },
+  balanceSheetValue: {
+    fontSize: typography.size.lg,
+    fontWeight: typography.weight.semibold,
+  },
+  balanceSheetLabelTotal: {
+    fontSize: typography.size.lg,
+    color: colors.text.primary,
+    fontWeight: typography.weight.semibold,
+  },
+  balanceSheetValueTotal: {
+    fontSize: typography.size.xl,
+    fontWeight: typography.weight.bold,
+  },
+  quickActionsRow: {
+    flexDirection: 'row',
+    gap: spacing.md,
+    marginTop: spacing.md,
+  },
+  quickActionButton: {
+    flex: 1,
   },
 });

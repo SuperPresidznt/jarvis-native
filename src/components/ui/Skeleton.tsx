@@ -12,6 +12,7 @@ interface SkeletonProps {
   height?: number;
   borderRadius?: number;
   style?: ViewStyle;
+  variant?: 'pulse' | 'shimmer';
 }
 
 export const Skeleton: React.FC<SkeletonProps> = ({
@@ -19,27 +20,78 @@ export const Skeleton: React.FC<SkeletonProps> = ({
   height = 20,
   borderRadius: radius = 8,
   style,
+  variant = 'shimmer',
 }) => {
   const pulseAnimation = useRef(new Animated.Value(1)).current;
+  const shimmerAnimation = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    const animation = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnimation, {
-          toValue: 0.6,
-          duration: 750,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnimation, {
+    if (variant === 'pulse') {
+      const animation = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnimation, {
+            toValue: 0.6,
+            duration: 750,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnimation, {
+            toValue: 1,
+            duration: 750,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+      animation.start();
+      return () => animation.stop();
+    } else {
+      const animation = Animated.loop(
+        Animated.timing(shimmerAnimation, {
           toValue: 1,
-          duration: 750,
+          duration: 1500,
           useNativeDriver: true,
-        }),
-      ])
+        })
+      );
+      animation.start();
+      return () => animation.stop();
+    }
+  }, [pulseAnimation, shimmerAnimation, variant]);
+
+  const shimmerOpacity = shimmerAnimation.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0.3, 1, 0.3],
+  });
+
+  const shimmerTranslateX = shimmerAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-100, 100],
+  });
+
+  if (variant === 'shimmer') {
+    return (
+      <View
+        style={[
+          styles.skeleton,
+          {
+            width,
+            height,
+            borderRadius: radius,
+            overflow: 'hidden',
+          },
+          style,
+        ]}
+      >
+        <Animated.View
+          style={[
+            styles.shimmerOverlay,
+            {
+              opacity: shimmerOpacity,
+              transform: [{ translateX: shimmerTranslateX }],
+            },
+          ]}
+        />
+      </View>
     );
-    animation.start();
-    return () => animation.stop();
-  }, [pulseAnimation]);
+  }
 
   return (
     <Animated.View
@@ -115,5 +167,13 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     width: '100%',
+  },
+  shimmerOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: colors.background.secondary,
   },
 });
