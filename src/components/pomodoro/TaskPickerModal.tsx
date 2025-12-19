@@ -51,13 +51,13 @@ export function TaskPickerModal({ visible, onClose, onSelect, currentTaskId }: T
 
   const loadTasks = async () => {
     try {
-      // Load ALL tasks first to ensure we get data
-      const allTasks = await tasksDB.getTasks({
-        sortField: 'updatedAt',
-        sortDirection: 'desc',
-      });
+      // Call getTasks with NO parameters - simplest possible call
+      console.log('[TaskPickerModal] Loading tasks...');
+      const allTasks = await tasksDB.getTasks();
 
-      console.log('[TaskPickerModal] All tasks loaded:', allTasks?.length ?? 0);
+      console.log('[TaskPickerModal] Raw result:', allTasks);
+      console.log('[TaskPickerModal] Tasks count:', allTasks?.length ?? 0);
+      console.log('[TaskPickerModal] Tasks array:', JSON.stringify(allTasks, null, 2));
 
       if (!allTasks || allTasks.length === 0) {
         console.log('[TaskPickerModal] No tasks found in database');
@@ -70,13 +70,15 @@ export function TaskPickerModal({ visible, onClose, onSelect, currentTaskId }: T
         ['todo', 'in_progress', 'blocked'].includes(task.status)
       );
 
-      console.log('[TaskPickerModal] Open tasks:', openTasks.length);
+      console.log('[TaskPickerModal] Open tasks filtered:', openTasks.length);
+      console.log('[TaskPickerModal] Open tasks:', JSON.stringify(openTasks.map(t => ({ id: t.id, title: t.title, status: t.status })), null, 2));
 
       // Prefer open tasks, but show all if none are open
       const tasksToShow = openTasks.length > 0 ? openTasks : allTasks;
       setTasks(tasksToShow);
     } catch (error) {
       console.error('[TaskPickerModal] Error loading tasks:', error);
+      console.error('[TaskPickerModal] Error stack:', error);
       setTasks([]);
     } finally {
       setIsLoading(false);
