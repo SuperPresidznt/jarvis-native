@@ -75,10 +75,13 @@ interface Task {
   status: TaskStatus;
   priority?: TaskPriority;
   dueDate?: string;
+  completedAt?: string;
   tags: string[];
   recurrence?: RecurrenceRule;
   projectId?: string;
   project?: { id: string; name: string; color?: string };
+  createdAt: string;
+  updatedAt: string;
 }
 
 const STATUS_LABELS: Record<TaskStatus, string> = {
@@ -528,8 +531,9 @@ export default function TasksScreen() {
             {activeFilterCount > 0 && (
               <TouchableOpacity
                 style={[styles.clearFiltersButton, { borderColor: colors.error }]}
-                onPress={() => {
-                  setFilters(filterStore.getDefaultFilters());
+                onPress={async () => {
+                  const resetFilters = await filterStore.resetFilters();
+                  setFilters(resetFilters);
                   announceForAccessibility('All advanced filters cleared');
                 }}
                 {...makeButton('Clear all advanced filters', 'Double tap to reset all filter options')}

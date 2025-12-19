@@ -23,6 +23,10 @@ interface MetricCardProps {
   trendData?: number[];
   percentageChange?: number;
   onPress?: () => void;
+  accessible?: boolean;
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
+  accessibilityRole?: string;
 }
 
 export const MetricCard: React.FC<MetricCardProps> = ({
@@ -35,6 +39,10 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   trendData,
   percentageChange,
   onPress,
+  accessible,
+  accessibilityLabel,
+  accessibilityHint,
+  accessibilityRole,
 }) => {
   const getAccentColor = () => {
     switch (variant) {
@@ -156,6 +164,10 @@ export const MetricCard: React.FC<MetricCardProps> = ({
         style={[styles.card, compact && styles.cardCompact, style]}
         onPress={onPress}
         activeOpacity={0.7}
+        accessible={accessible}
+        accessibilityLabel={accessibilityLabel}
+        accessibilityHint={accessibilityHint}
+        accessibilityRole={accessibilityRole as any}
       >
         {CardContent}
       </TouchableOpacity>
@@ -163,7 +175,12 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   }
 
   return (
-    <View style={[styles.card, compact && styles.cardCompact, style]}>
+    <View
+      style={[styles.card, compact && styles.cardCompact, style]}
+      accessible={accessible}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole={accessibilityRole as any}
+    >
       {CardContent}
     </View>
   );
