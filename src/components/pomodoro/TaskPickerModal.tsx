@@ -65,10 +65,11 @@ export function TaskPickerModal({ visible, onClose, onSelect, currentTaskId }: T
         sortField: 'dueDate',
         sortDirection: 'asc',
       });
+      console.log('[TaskPickerModal] Loaded tasks:', loadedTasks.length, loadedTasks);
       setTasks(loadedTasks);
       setFilteredTasks(loadedTasks);
     } catch (error) {
-      console.error('Error loading tasks:', error);
+      console.error('[TaskPickerModal] Error loading tasks:', error);
     }
   };
 
