@@ -48,7 +48,7 @@ export default function Tooltip({
             style={[
               styles.tooltip,
               {
-                backgroundColor: isDark ? colors.background.secondary : '#2C2C2E',
+                backgroundColor: colors.background.secondary,
                 shadowColor: colors.text.primary,
               },
             ]}
@@ -60,7 +60,7 @@ export default function Tooltip({
                   styles.arrow,
                   styles.arrowTop,
                   {
-                    borderBottomColor: isDark ? colors.background.secondary : '#2C2C2E',
+                    borderBottomColor: colors.background.secondary,
                   },
                 ]}
               />
@@ -70,7 +70,7 @@ export default function Tooltip({
             <Text
               style={[
                 styles.message,
-                { color: isDark ? colors.text.primary : '#FFFFFF' },
+                { color: colors.text.primary },
               ]}
             >
               {message}
@@ -92,7 +92,7 @@ export default function Tooltip({
                   styles.arrow,
                   styles.arrowBottom,
                   {
-                    borderTopColor: isDark ? colors.background.secondary : '#2C2C2E',
+                    borderTopColor: colors.background.secondary,
                   },
                 ]}
               />
@@ -170,7 +170,6 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
   },
   dismissButtonText: {
-    color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '600',
   },

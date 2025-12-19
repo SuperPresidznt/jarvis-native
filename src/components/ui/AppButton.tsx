@@ -15,7 +15,8 @@ import {
   ViewStyle,
   TextStyle,
 } from 'react-native';
-import { colors, typography, spacing, borderRadius, shadows, animation } from '../../theme';
+import { typography, spacing, borderRadius, shadows, animation } from '../../theme';
+import { useTheme } from '../../theme/ThemeProvider';
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
 type ButtonSize = 'small' | 'medium' | 'large';
@@ -49,6 +50,7 @@ export const AppButton: React.FC<AppButtonProps> = ({
   style,
   textStyle,
 }) => {
+  const { colors } = useTheme();
   // Support both title prop and children
   const buttonText = title || children;
   const [scaleValue] = useState(new Animated.Value(1));
@@ -243,7 +245,7 @@ const styles = StyleSheet.create({
     fontSize: typography.size.md,
   },
   primaryText: {
-    color: '#FFFFFF',
+    color: colors.primary.contrast,
   },
   secondaryText: {
     color: colors.text.primary,
@@ -255,7 +257,7 @@ const styles = StyleSheet.create({
     color: colors.primary.main,
   },
   dangerText: {
-    color: '#FFFFFF',
+    color: colors.primary.contrast,
   },
   disabledText: {
     color: colors.text.disabled,

@@ -7,6 +7,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { BaseToast, BaseToastProps } from 'react-native-toast-message';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { colors } from '../../theme';
 
 /**
  * Custom Undo Toast Component
@@ -19,7 +20,7 @@ export function UndoToast(props: BaseToastProps & { props?: { onUndo?: () => Pro
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <Icon name="delete-outline" size={20} color="#FFFFFF" style={styles.icon} />
+        <Icon name="delete-outline" size={20} color={colors.primary.contrast} style={styles.icon} />
         <Text style={styles.text}>{text1}</Text>
       </View>
       {onUndo && (
@@ -69,7 +70,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#333333',
+    backgroundColor: colors.background.tertiary,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 8,
@@ -90,7 +91,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   text: {
-    color: '#FFFFFF',
+    color: colors.text.primary,
     fontSize: 15,
     fontWeight: '500',
     flex: 1,
@@ -102,7 +103,7 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   undoButtonText: {
-    color: '#007AFF',
+    color: colors.primary.main,
     fontSize: 14,
     fontWeight: '700',
     letterSpacing: 0.5,
@@ -112,7 +113,7 @@ const styles = StyleSheet.create({
   successToast: {
     borderLeftColor: '#34C759',
     borderLeftWidth: 5,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background.secondary,
   },
   successContentContainer: {
     paddingHorizontal: 15,
@@ -120,6 +121,6 @@ const styles = StyleSheet.create({
   successText: {
     fontSize: 15,
     fontWeight: '500',
-    color: '#000000',
+    color: colors.text.primary,
   },
 });
