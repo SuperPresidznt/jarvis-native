@@ -9,54 +9,84 @@
 
 // Dark Theme Colors
 const darkColors = {
-  // Primary Brand Color - Emerald Green
+  // Primary Brand Color - VIBRANT Emerald Green (MORE SATURATED!)
   primary: {
-    main: '#10B981',
-    light: '#34D399',
-    dark: '#059669',
+    main: '#10E87F',      // Brighter, more vibrant green
+    light: '#3CFFAA',     // Neon green for highlights
+    dark: '#06C270',      // Still vibrant dark
     contrast: '#FFFFFF',
   },
 
-  // Dark Mode Backgrounds - Elevated Dark theme with near-black backgrounds
-  background: {
-    primary: '#050A18',    // Near black - main app background for maximum contrast
-    secondary: '#0A1628',  // Cards, elevated surfaces - rich dark blue
-    tertiary: '#141E30',   // Subtle highlights, borders
-    elevated: '#1A2538',   // Modals, dropdowns
+  // NEON Accent Colors - Make things POP!
+  accent: {
+    cyan: '#00E5FF',      // Electric cyan
+    purple: '#B388FF',    // Vibrant purple
+    pink: '#FF4081',      // Hot pink
+    orange: '#FF9100',    // Bright orange
+    blue: '#2196F3',      // Vivid blue
+    yellow: '#FFD600',    // Gold yellow
   },
 
-  // Text Colors (optimized for dark backgrounds)
+  // Dark Mode Backgrounds - DARKER for more contrast
+  background: {
+    primary: '#000000',    // Pure black - maximum contrast
+    secondary: '#0D1117',  // Very dark blue-grey - cards
+    tertiary: '#161B22',   // Slightly lighter - highlights
+    elevated: '#1C2128',   // Modals, dropdowns
+  },
+
+  // Text Colors (HIGH CONTRAST for dark backgrounds)
   text: {
-    primary: '#F8FAFC',    // Primary text - bright white
-    secondary: '#E2E8F0',  // Secondary text - soft white
-    tertiary: '#94A3B8',   // Muted text - slate
-    disabled: '#64748B',   // Disabled state
-    placeholder: '#64748B', // Input placeholders
+    primary: '#FFFFFF',    // Pure white - maximum readability
+    secondary: '#F0F0F0',  // Bright grey
+    tertiary: '#A0A0A0',   // Medium grey (still readable)
+    disabled: '#6E7681',   // Disabled state
+    placeholder: '#6E7681', // Input placeholders
     inverse: '#0F172A',    // Text on light backgrounds
   },
 
-  // Semantic Colors
-  success: '#10B981',      // Green - matches primary
-  warning: '#F59E0B',      // Amber
-  error: '#EF4444',        // Red
-  info: '#3B82F6',         // Blue
+  // Semantic Colors - MORE VIBRANT!
+  success: '#10E87F',      // Vibrant green - matches primary
+  warning: '#FFB020',      // Bright amber/gold
+  error: '#FF3860',        // Vivid red
+  info: '#2196F3',         // Bright blue
 
-  // Border Colors
+  // Border Colors - MORE CONTRAST
   border: {
-    default: '#334155',
-    subtle: '#1E293B',
-    focus: '#10B981',
-    error: '#EF4444',
+    default: '#30363D',
+    subtle: '#21262D',
+    focus: '#10E87F',
+    error: '#FF3860',
   },
 
-  // Gradient definitions - Elevated Dark gradients
+  // Gradient definitions - DRAMATIC GRADIENTS EVERYWHERE!
   gradient: {
-    primary: ['#10B981', '#059669'],       // Emerald gradient for primary actions
-    cyan: ['#06B6D4', '#0891B2'],          // Cyan gradient for accents
-    accent: ['#8B5CF6', '#3B82F6'],        // Purple-to-blue gradient for special elements
-    card: ['#0A1628', '#141E30'],          // Subtle card background gradient
-    overlay: ['rgba(5, 10, 24, 0)', 'rgba(5, 10, 24, 0.95)'], // Updated for new darker background
-    glass: ['rgba(10, 22, 40, 0.6)', 'rgba(20, 30, 48, 0.3)'], // Glass effect overlay
+    // Primary gradients - VIBRANT!
+    primary: ['#10E87F', '#06C270'] as const,           // Vibrant emerald
+    primaryGlow: ['#10E87F', '#3CFFAA', '#10E87F'] as const, // Neon green with glow
+
+    // Neon accent gradients
+    cyan: ['#00E5FF', '#00B8D4'] as const,              // Electric cyan
+    cyanPurple: ['#00E5FF', '#B388FF'] as const,        // Cyan to purple
+    purplePink: ['#B388FF', '#FF4081'] as const,        // Purple to pink
+    pinkOrange: ['#FF4081', '#FF9100'] as const,        // Pink to orange
+    rainbow: ['#10E87F', '#00E5FF', '#B388FF', '#FF4081'] as const, // Multi-color rainbow
+
+    // Hero gradients - FOR BIG MOMENTS
+    hero: ['#10E87F', '#00E5FF', '#B388FF'] as const,   // Green > Cyan > Purple
+    heroReverse: ['#B388FF', '#00E5FF', '#10E87F'] as const, // Purple > Cyan > Green
+
+    // Card gradients - STRONGER
+    card: ['#0D1117', '#161B22'] as const,              // Dark gradient
+    cardElevated: ['#161B22', '#1C2128'] as const,      // Elevated gradient
+
+    // Glass effects - MORE DRAMATIC
+    glass: ['rgba(13, 17, 23, 0.8)', 'rgba(22, 27, 34, 0.4)'] as const, // Stronger glass
+    glassVibrant: ['rgba(16, 232, 127, 0.15)', 'rgba(0, 229, 255, 0.1)'] as const, // Colored glass
+
+    // Overlays
+    overlay: ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.95)'] as const,
+    shimmer: ['transparent', 'rgba(255, 255, 255, 0.1)', 'transparent'] as const, // Shimmer effect
   },
 };
 
@@ -102,11 +132,33 @@ const lightColors = {
     error: '#EF4444',
   },
 
-  // Gradient definitions
+  // Gradient definitions - Light theme (simplified version of dark theme)
   gradient: {
-    primary: ['#10B981', '#059669'],
-    card: ['#F8FAFC', '#F1F5F9'],
-    overlay: ['rgba(255, 255, 255, 0)', 'rgba(255, 255, 255, 0.9)'],
+    primary: ['#10E87F', '#06C270'] as const,
+    primaryGlow: ['#10E87F', '#3CFFAA', '#10E87F'] as const,
+    cyan: ['#00E5FF', '#00B8D4'] as const,
+    cyanPurple: ['#00E5FF', '#B388FF'] as const,
+    purplePink: ['#B388FF', '#FF4081'] as const,
+    pinkOrange: ['#FF4081', '#FF9100'] as const,
+    rainbow: ['#10E87F', '#00E5FF', '#B388FF', '#FF4081'] as const,
+    hero: ['#10E87F', '#00E5FF', '#B388FF'] as const,
+    heroReverse: ['#B388FF', '#00E5FF', '#10E87F'] as const,
+    card: ['#F8FAFC', '#F1F5F9'] as const,
+    cardElevated: ['#FFFFFF', '#F8FAFC'] as const,
+    glass: ['rgba(248, 250, 252, 0.8)', 'rgba(241, 245, 249, 0.4)'] as const,
+    glassVibrant: ['rgba(16, 232, 127, 0.1)', 'rgba(0, 229, 255, 0.05)'] as const,
+    overlay: ['rgba(255, 255, 255, 0)', 'rgba(255, 255, 255, 0.9)'] as const,
+    shimmer: ['transparent', 'rgba(0, 0, 0, 0.05)', 'transparent'] as const,
+  },
+
+  // Accent colors (same as dark theme)
+  accent: {
+    cyan: '#00E5FF',
+    purple: '#B388FF',
+    pink: '#FF4081',
+    orange: '#FF9100',
+    blue: '#2196F3',
+    yellow: '#FFD600',
   },
 };
 
@@ -135,35 +187,37 @@ export const typography = {
     bold: 'System',
   },
 
-  // Font weights
+  // Font weights - USE BOLDER BY DEFAULT
   weight: {
     regular: '400' as const,
-    medium: '500' as const,
-    semibold: '600' as const,
-    bold: '700' as const,
+    medium: '600' as const,    // Bumped from 500
+    semibold: '700' as const,  // Bumped from 600
+    bold: '800' as const,      // Bumped from 700
+    black: '900' as const,     // NEW - for hero text
   },
 
-  // Type scale (harmonious progression)
+  // Type scale - Balanced sizes for readability and hierarchy
   size: {
-    xs: 11,      // Fine print
-    sm: 13,      // Captions, labels
-    base: 15,    // Body text
-    md: 16,      // Slightly larger body
-    lg: 18,      // Subheadings
-    xl: 20,      // Section headers
-    '2xl': 24,   // Screen titles
-    '3xl': 28,   // Large titles
-    '4xl': 32,   // Hero text
-    '5xl': 40,   // Display
+    xs: 12,      // Fine print, labels
+    sm: 14,      // Captions, helper text
+    base: 16,    // Body text
+    md: 18,      // Slightly larger body
+    lg: 20,      // Subheadings
+    xl: 24,      // Section headers
+    '2xl': 28,   // Screen titles
+    '3xl': 32,   // Large titles
+    '4xl': 36,   // Hero text
+    '5xl': 40,   // Display (prominent but not overwhelming)
+    '6xl': 48,   // Large display text
   },
 
-  // Line heights for readability
+  // Line heights for readability - MORE GENEROUS
   lineHeight: {
     none: 1,
-    tight: 1.25,
-    snug: 1.375,
-    normal: 1.5,
-    relaxed: 1.625,
+    tight: 1.2,     // Tighter for big headlines
+    snug: 1.4,      // Adjusted
+    normal: 1.6,    // More breathing room
+    relaxed: 1.75,  // More relaxed
     loose: 2,
   },
 
@@ -181,7 +235,7 @@ export const typography = {
 // ============================================================================
 // SPACING
 // ============================================================================
-// 4-point grid system for consistent spacing
+// Balanced spacing system for comfortable layouts
 
 export const spacing = {
   none: 0,
@@ -195,21 +249,23 @@ export const spacing = {
   '3xl': 40,   // Page margins
   '4xl': 48,   // Large page margins
   '5xl': 64,   // Hero sections
+  '6xl': 80,   // Massive sections
 };
 
 // ============================================================================
 // BORDER RADIUS
 // ============================================================================
+// Modern, balanced border radius system
 
 export const borderRadius = {
   none: 0,
-  xs: 6,       // Slightly increased for modern feel
-  sm: 10,      // Increased
-  md: 14,      // Increased
-  lg: 22,      // Elevated Dark default - more rounded for modern cards
-  xl: 26,      // Increased
-  '2xl': 32,   // Kept for large modals
-  '3xl': 40,   // Increased for hero elements
+  xs: 6,       // Subtle rounding
+  sm: 10,      // Small rounded corners
+  md: 14,      // Medium rounded corners
+  lg: 18,      // Large rounded corners
+  xl: 22,      // Extra large rounded corners
+  '2xl': 28,   // Very large rounded corners
+  '3xl': 36,   // Maximum rounded corners
   full: 9999,  // Full circle
 };
 
@@ -261,41 +317,62 @@ export const shadows = {
     shadowRadius: 24,
     elevation: 12,
   },
-  // Colored glow shadows for modern UI effects
+  // DRAMATIC COLORED GLOW SHADOWS - Make everything POP!
   glow: {
-    shadowColor: '#10B981',
+    shadowColor: '#10E87F',
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    elevation: 6,
+    shadowOpacity: 0.6,      // Stronger (was 0.35)
+    shadowRadius: 20,        // Bigger (was 12)
+    elevation: 8,
   },
   glowPrimary: {
-    shadowColor: '#10B981',  // Emerald glow
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowColor: '#10E87F',  // Vibrant emerald glow
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.7,      // Much stronger (was 0.5)
+    shadowRadius: 24,        // Much bigger (was 16)
+    elevation: 12,
   },
   glowCyan: {
-    shadowColor: '#06B6D4',  // Cyan glow
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.45,
-    shadowRadius: 14,
-    elevation: 8,
+    shadowColor: '#00E5FF',  // Electric cyan glow
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.65,     // Stronger (was 0.45)
+    shadowRadius: 24,        // Bigger (was 14)
+    elevation: 12,
   },
   glowPurple: {
-    shadowColor: '#8B5CF6',  // Purple glow
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 14,
-    elevation: 8,
+    shadowColor: '#B388FF',  // Vibrant purple glow
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.6,      // Stronger (was 0.4)
+    shadowRadius: 24,        // Bigger (was 14)
+    elevation: 12,
+  },
+  glowPink: {
+    shadowColor: '#FF4081',  // NEW - Hot pink glow
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.65,
+    shadowRadius: 24,
+    elevation: 12,
+  },
+  glowOrange: {
+    shadowColor: '#FF9100',  // NEW - Bright orange glow
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.65,
+    shadowRadius: 24,
+    elevation: 12,
   },
   glowAccent: {
-    shadowColor: '#3B82F6',  // Blue glow for special elements
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.45,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowColor: '#2196F3',  // Blue glow for special elements
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.65,     // Stronger (was 0.45)
+    shadowRadius: 24,        // Bigger (was 16)
+    elevation: 12,
+  },
+  glowHero: {
+    shadowColor: '#10E87F',  // NEW - MASSIVE hero glow
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.8,
+    shadowRadius: 32,
+    elevation: 16,
   },
 };
 
@@ -323,9 +400,17 @@ export const animation = {
 // COMPONENT PRESETS
 // ============================================================================
 
-// Pre-built text styles for consistency
+// Pre-built text styles for consistency - Balanced hierarchy
 export const textStyles = {
-  // Display text - large hero headers
+  // HERO text - Large display headers (for special occasions)
+  hero: {
+    fontSize: typography.size['6xl'],
+    fontWeight: typography.weight.black,
+    color: colors.text.primary,
+    lineHeight: typography.size['6xl'] * typography.lineHeight.tight,
+    letterSpacing: typography.letterSpacing.tighter,
+  },
+  // Display text - Prominent headers
   display: {
     fontSize: typography.size['5xl'],
     fontWeight: typography.weight.bold,

@@ -420,6 +420,9 @@ export default function TasksScreen() {
     );
   }
 
+  // Create styles based on current theme colors
+  const styles = createStyles(colors);
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -1306,9 +1309,7 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
   );
 };
 
-const colors = getColors();
-
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof getColors>) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.primary,

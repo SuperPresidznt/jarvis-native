@@ -18,6 +18,8 @@ import {
 import { ActivityIndicator, Snackbar, IconButton } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
+import MaskedView from '@react-native-masked-view/masked-view';
 import * as dashboardDB from '../../database/dashboard';
 import * as tasksDB from '../../database/tasks';
 import * as financeDB from '../../database/finance';
@@ -211,6 +213,9 @@ export default function DashboardScreen() {
     return calculatePercentageChange(current, previous);
   };
 
+  // Create styles based on current theme colors
+  const styles = createStyles(colors);
+
   if (isLoading && !metrics) {
     return (
       <ScrollView
@@ -263,19 +268,32 @@ export default function DashboardScreen() {
       showsVerticalScrollIndicator={false}
     >
       <View style={[styles.content, { paddingTop: insets.top + spacing.base }]}>
-        {/* Header Section */}
+        {/* HERO Header Section - MASSIVE Greeting */}
         <View style={styles.header}>
           <View style={styles.headerContent}>
-            <View>
-              <Text style={styles.dateLabel}>TODAY</Text>
+            <View style={styles.headerTextContainer}>
+              {/* MASSIVE GRADIENT GREETING */}
+              <MaskedView
+                maskElement={
+                  <Text style={styles.greeting}>{getGreeting()}</Text>
+                }
+              >
+                <LinearGradient
+                  colors={colors.gradient.hero as any}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.gradientContainer}
+                >
+                  <Text style={[styles.greeting, { opacity: 0 }]}>{getGreeting()}</Text>
+                </LinearGradient>
+              </MaskedView>
               <Text style={styles.dateText}>{getFormattedDate()}</Text>
-              <Text style={styles.greeting}>{getGreeting()}</Text>
               <LastUpdated date={lastUpdated} style={styles.lastUpdated} />
             </View>
             <IconButton
               icon="magnify"
               iconColor={colors.text.secondary}
-              size={24}
+              size={28}
               onPress={() => navigation.navigate('Search' as never)}
               style={styles.searchButton}
               {...makeButton('Search', 'Double tap to search tasks, habits, and finances')}
@@ -472,9 +490,7 @@ export default function DashboardScreen() {
   );
 }
 
-const colors = getColors();
-
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof getColors>) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.primary,
@@ -485,36 +501,44 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: spacing.lg,
   },
-  // Header styles
+  // Header styles - HERO SECTION
   header: {
-    marginBottom: spacing['2xl'],
+    marginBottom: spacing['3xl'],         // MUCH more space (was 2xl)
   },
   headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
   },
+  headerTextContainer: {
+    flex: 1,
+  },
+  gradientContainer: {
+    // Container for gradient text effect
+  },
   searchButton: {
     margin: 0,
   },
   dateLabel: {
-    fontSize: typography.size.xs,
-    fontWeight: typography.weight.semibold,
+    fontSize: typography.size.sm,          // BIGGER (was xs)
+    fontWeight: typography.weight.bold,    // Bolder (was semibold)
     color: colors.primary.main,
     letterSpacing: typography.letterSpacing.widest,
-    marginBottom: spacing.xs,
+    marginBottom: spacing.sm,              // More space (was xs)
   },
   dateText: {
-    fontSize: typography.size['3xl'],
-    fontWeight: typography.weight.bold,
-    color: colors.text.primary,
+    fontSize: typography.size['2xl'],      // Slightly smaller to make room for greeting (was 3xl)
+    fontWeight: typography.weight.semibold,
+    color: colors.text.secondary,          // Less prominent (was primary)
     letterSpacing: typography.letterSpacing.tight,
     marginBottom: spacing.xs,
   },
   greeting: {
-    fontSize: typography.size.lg,
-    fontWeight: typography.weight.regular,
-    color: colors.text.tertiary,
+    fontSize: typography.size['5xl'],      // MASSIVE! (was lg)
+    fontWeight: typography.weight.black,   // BOLDEST (was regular)
+    color: colors.text.primary,            // Bright (was tertiary)
+    letterSpacing: typography.letterSpacing.tighter,
+    marginBottom: spacing.sm,              // Add space below
   },
   lastUpdated: {
     marginTop: spacing.xs,
@@ -524,11 +548,11 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   sectionLabel: {
-    fontSize: typography.size.xs,
-    fontWeight: typography.weight.semibold,
-    color: colors.text.tertiary,
+    fontSize: typography.size.base,        // BIGGER (was xs)
+    fontWeight: typography.weight.bold,    // Bolder (was semibold)
+    color: colors.text.secondary,          // Brighter (was tertiary)
     letterSpacing: typography.letterSpacing.widest,
-    marginBottom: spacing.md,
+    marginBottom: spacing.lg,              // More space (was md)
   },
   // Metrics styles
   metricsSection: {

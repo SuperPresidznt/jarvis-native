@@ -221,6 +221,9 @@ export default function FinanceScreen() {
     );
   }
 
+  // Create styles based on current theme colors
+  const styles = createStyles(colors);
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -1210,9 +1213,7 @@ const LiabilityFormModal: React.FC<LiabilityFormModalProps> = ({
   );
 };
 
-const colors = getColors();
-
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof getColors>) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.primary,

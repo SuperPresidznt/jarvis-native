@@ -173,7 +173,7 @@ export const TodaysFocusCard: React.FC<TodaysFocusCardProps> = ({
         <View style={[styles.topIconContainer, { backgroundColor: priorityColor + '20' }]}>
           <IconButton
             icon={icon}
-            size={32}
+            size={40}              // BIGGER icon! (was 32)
             iconColor={priorityColor}
             style={styles.topIcon}
           />
@@ -216,43 +216,43 @@ export const TodaysFocusCard: React.FC<TodaysFocusCardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    marginBottom: spacing.md,
+    marginBottom: spacing.lg,       // More space (was md)
   },
-  // New single focus design
+  // HERO FOCUS DESIGN - Make it MASSIVE and beautiful!
   focusHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.base,
+    marginBottom: spacing.lg,       // More space (was base)
   },
   focusLabel: {
-    fontSize: typography.size.xs,
+    fontSize: typography.size.sm,   // BIGGER (was xs)
     fontWeight: typography.weight.bold,
     color: colors.text.tertiary,
-    letterSpacing: 1.5,
+    letterSpacing: 2.5,             // More spacing (was 1.5)
     textTransform: 'uppercase',
   },
   itemCount: {
-    fontSize: typography.size.sm,
+    fontSize: typography.size.base, // BIGGER (was sm)
     color: colors.primary.main,
-    fontWeight: typography.weight.semibold,
+    fontWeight: typography.weight.bold, // Bolder (was semibold)
   },
   topFocusItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: spacing.base,
+    padding: spacing.xl,            // Much more padding! (was base)
     backgroundColor: colors.background.primary + '40',
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: borderRadius.xl,  // More rounded (was lg)
+    borderWidth: 2,                 // Thicker border (was 1)
+    borderColor: 'rgba(16, 232, 127, 0.3)', // Vibrant green tint (was white 0.05)
   },
   topIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: borderRadius.lg,
+    width: 80,                      // BIGGER (was 64)
+    height: 80,                     // BIGGER (was 64)
+    borderRadius: borderRadius.xl,  // More rounded (was lg)
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: spacing.base,
+    marginRight: spacing.lg,        // More space (was base)
   },
   topIcon: {
     margin: 0,
@@ -261,39 +261,39 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   topTitle: {
-    fontSize: typography.size.lg,
+    fontSize: typography.size['2xl'], // MUCH BIGGER! (was lg)
     fontWeight: typography.weight.bold,
     color: colors.text.primary,
-    lineHeight: typography.size.lg * 1.3,
-    marginBottom: spacing.xs,
+    lineHeight: typography.size['2xl'] * 1.3,
+    marginBottom: spacing.sm,       // More space (was xs)
   },
   topMeta: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: spacing.sm,
+    gap: spacing.md,                // More space (was sm)
     alignItems: 'center',
   },
   topTime: {
-    fontSize: typography.size.sm,
+    fontSize: typography.size.base,  // BIGGER (was sm)
     color: colors.text.secondary,
-    fontWeight: typography.weight.medium,
+    fontWeight: typography.weight.semibold, // Bolder (was medium)
   },
   topOverdueBadge: {
     backgroundColor: colors.error,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-    borderRadius: borderRadius.sm,
+    paddingHorizontal: spacing.md,   // More padding (was sm)
+    paddingVertical: 4,              // More padding (was 2)
+    borderRadius: borderRadius.md,   // More rounded (was sm)
   },
   topOverdueText: {
-    fontSize: typography.size.xs,
+    fontSize: typography.size.sm,    // BIGGER (was xs)
     color: colors.text.primary,
     fontWeight: typography.weight.bold,
-    letterSpacing: 0.5,
+    letterSpacing: 1,                // More spacing (was 0.5)
   },
   topProject: {
-    fontSize: typography.size.sm,
+    fontSize: typography.size.base,  // BIGGER (was sm)
     color: colors.primary.main,
-    fontWeight: typography.weight.medium,
+    fontWeight: typography.weight.semibold, // Bolder (was medium)
   },
   focusItem: {
     flexDirection: 'row',
@@ -371,21 +371,21 @@ const styles = StyleSheet.create({
   },
   emptyState: {
     alignItems: 'center',
-    paddingVertical: spacing['3xl'],
+    paddingVertical: spacing['4xl'],  // More space (was 3xl)
   },
   emptyIcon: {
-    fontSize: 64,
-    marginBottom: spacing.lg,
+    fontSize: 80,                     // BIGGER! (was 64)
+    marginBottom: spacing.xl,         // More space (was lg)
   },
   emptyTitle: {
-    fontSize: typography.size['2xl'],
+    fontSize: typography.size['3xl'], // BIGGER! (was 2xl)
     fontWeight: typography.weight.bold,
     color: colors.text.primary,
-    marginBottom: spacing.sm,
+    marginBottom: spacing.md,         // More space (was sm)
   },
   emptyText: {
-    fontSize: typography.size.base,
-    color: colors.text.tertiary,
+    fontSize: typography.size.lg,     // BIGGER! (was base)
+    color: colors.text.secondary,     // Brighter (was tertiary)
     textAlign: 'center',
   },
 });

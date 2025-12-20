@@ -72,10 +72,9 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
     }
   };
 
-  const gradientColors =
-    variant === 'primary'
+  const gradientColors = (variant === 'primary'
       ? colors.gradient.primary
-      : colors.gradient.cyan;
+      : colors.gradient.cyan) as any;
 
   return (
     <Animated.View

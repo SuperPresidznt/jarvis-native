@@ -3,17 +3,14 @@
  * Wraps TaskCard with swipe gestures for quick actions
  * - Swipe right: Complete/Uncomplete toggle
  * - Swipe left: Delete with confirmation
- *
- * TEMPORARILY DISABLED: expo-haptics breaks release builds
  */
 
 import React, { useRef } from 'react';
 import { View, StyleSheet, Animated, Text, Alert, Platform } from 'react-native';
 import { Swipeable, RectButton } from 'react-native-gesture-handler';
-// TEMPORARILY DISABLED
-// import * as Haptics from 'expo-haptics';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { colors, spacing, borderRadius, typography } from '../../theme';
+import { haptic } from '../../utils/haptics';
 
 interface SwipeableTaskItemProps {
   children: React.ReactNode;
@@ -38,25 +35,9 @@ export const SwipeableTaskItem: React.FC<SwipeableTaskItemProps> = ({
 }) => {
   const swipeableRef = useRef<Swipeable>(null);
 
-  // Haptic feedback helper
-  // TEMPORARILY DISABLED
-  const triggerHaptic = async () => {
-    // TEMPORARILY DISABLED
-    // try {
-    //   if (Platform.OS === 'ios') {
-    //     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    //   } else {
-    //     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    //   }
-    // } catch (error) {
-    //   // Haptics not available or permission denied - fail silently
-    //   console.log('[SwipeableTaskItem] Haptics not available:', error);
-    // }
-  };
-
   // Right swipe action: Complete/Uncomplete
-  const handleRightSwipe = async () => {
-    await triggerHaptic();
+  const handleRightSwipe = () => {
+    haptic.swipeAction();
     swipeableRef.current?.close();
 
     if (isCompleted) {
@@ -67,8 +48,8 @@ export const SwipeableTaskItem: React.FC<SwipeableTaskItemProps> = ({
   };
 
   // Left swipe action: Delete with confirmation
-  const handleLeftSwipe = async () => {
-    await triggerHaptic();
+  const handleLeftSwipe = () => {
+    haptic.swipeAction();
     swipeableRef.current?.close();
 
     Alert.alert(
@@ -83,7 +64,7 @@ export const SwipeableTaskItem: React.FC<SwipeableTaskItemProps> = ({
           text: 'Delete',
           style: 'destructive',
           onPress: () => {
-            triggerHaptic();
+            haptic.taskDelete();
             onDelete();
           },
         },

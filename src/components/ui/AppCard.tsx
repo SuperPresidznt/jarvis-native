@@ -100,7 +100,7 @@ export const AppCard: React.FC<AppCardProps> = ({
     if (variant === 'glass') {
       return (
         <LinearGradient
-          colors={colors.gradient.glass}
+          colors={colors.gradient.glass as any}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={getCardStyles()}
@@ -150,45 +150,50 @@ const styles = StyleSheet.create({
   },
   defaultCard: {
     backgroundColor: colors.background.secondary,
-    borderWidth: 1,
+    borderWidth: 1.5,       // Thicker border
     borderColor: colors.border.subtle,
-    ...shadows.sm,
+    ...shadows.md,          // Stronger shadow
   },
   elevatedCard: {
     backgroundColor: colors.background.secondary,
-    ...shadows.md,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
+    ...shadows.lg,          // MUCH stronger shadow
   },
   outlinedCard: {
     backgroundColor: 'transparent',
-    borderWidth: 1.5,
+    borderWidth: 2,         // Thicker border
     borderColor: colors.border.default,
   },
   filledCard: {
     backgroundColor: colors.background.tertiary,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
+    ...shadows.sm,
   },
   glassCard: {
-    // Glass effect - gradient background with border and shadow
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)', // Subtle white border for glass effect
-    ...shadows.md,
+    // PREMIUM glass effect - gradient background with gradient border and glow
+    borderWidth: 2,         // Thicker border (was 1)
+    borderColor: 'rgba(16, 232, 127, 0.2)', // Green tint border for glass effect
+    ...shadows.lg,          // Stronger shadow (was md)
   },
   header: {
-    paddingHorizontal: spacing.base,
-    paddingTop: spacing.base,
-    paddingBottom: spacing.sm,
+    paddingHorizontal: spacing.lg,     // More generous (was base)
+    paddingTop: spacing.lg,            // More generous (was base)
+    paddingBottom: spacing.md,         // More generous (was sm)
     borderBottomWidth: 1,
     borderBottomColor: colors.border.subtle,
   },
   content: {
-    padding: spacing.base,
+    padding: spacing.lg,               // More generous (was base)
   },
   noPadding: {
     padding: 0,
   },
   footer: {
-    paddingHorizontal: spacing.base,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.base,
+    paddingHorizontal: spacing.lg,     // More generous (was base)
+    paddingTop: spacing.md,            // More generous (was sm)
+    paddingBottom: spacing.lg,         // More generous (was base)
     borderTopWidth: 1,
     borderTopColor: colors.border.subtle,
   },

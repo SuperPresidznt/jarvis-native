@@ -143,6 +143,9 @@ export default function AIChatScreen() {
     );
   };
 
+  // Create styles based on current theme colors
+  const styles = createStyles(colors);
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -238,9 +241,7 @@ export default function AIChatScreen() {
   );
 }
 
-const colors = getColors();
-
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof getColors>) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.primary,

@@ -30,6 +30,7 @@ import {
   borderRadius,
   shadows,
 } from '../../theme';
+import { themePresets } from '../../theme/presets';
 import * as storage from '../../services/storage';
 import { getTasks } from '../../database/tasks';
 import { getHabits } from '../../database/habits';
@@ -60,7 +61,7 @@ interface SettingItemProps {
 
 export default function SettingsScreen() {
   const { user, logout } = useAuthStore();
-  const { mode: themeMode, setMode: setThemeMode } = useThemeStore();
+  const { mode: themeMode, setMode: setThemeMode, presetId, setPreset } = useThemeStore();
   const { colors } = useTheme();
   const navigation = useNavigation<NativeStackNavigationProp<SettingsStackParamList>>();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
@@ -347,49 +348,49 @@ export default function SettingsScreen() {
 
       {/* Appearance Section */}
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>APPEARANCE</Text>
-        <View style={styles.sectionContent}>
-          <TouchableOpacity
-            style={styles.themeOption}
-            onPress={() => setThemeMode('dark')}
-            activeOpacity={0.7}
-          >
-            <View style={styles.themeInfo}>
-              <Text style={styles.themeIcon}>🌙</Text>
-              <View style={styles.themeText}>
-                <Text style={styles.themeTitle}>Dark Mode</Text>
-                <Text style={styles.themeSubtitle}>Deep blacks with emerald accents</Text>
-              </View>
-            </View>
-            <View style={[
-              styles.radioButton,
-              themeMode === 'dark' && styles.radioButtonSelected
-            ]}>
-              {themeMode === 'dark' && <View style={styles.radioButtonInner} />}
-            </View>
-          </TouchableOpacity>
+        <Text style={styles.sectionLabel}>THEME</Text>
+        <View style={styles.themesGrid}>
+          {themePresets.map((preset) => (
+            <TouchableOpacity
+              key={preset.id}
+              style={[
+                styles.themePresetCard,
+                presetId === preset.id && styles.themePresetCardSelected,
+                {
+                  backgroundColor: preset.colors.background.secondary,
+                  borderColor: presetId === preset.id ? preset.colors.primary.main : preset.colors.border.default,
+                }
+              ]}
+              onPress={() => setPreset(preset.id)}
+              activeOpacity={0.7}
+            >
+              {/* Selected indicator */}
+              {presetId === preset.id && (
+                <View style={[styles.selectedBadge, { backgroundColor: preset.colors.primary.main }]}>
+                  <Text style={styles.selectedBadgeText}>✓</Text>
+                </View>
+              )}
 
-          <View style={styles.divider} />
-
-          <TouchableOpacity
-            style={styles.themeOption}
-            onPress={() => setThemeMode('light')}
-            activeOpacity={0.7}
-          >
-            <View style={styles.themeInfo}>
-              <Text style={styles.themeIcon}>☀️</Text>
-              <View style={styles.themeText}>
-                <Text style={styles.themeTitle}>Light Mode</Text>
-                <Text style={styles.themeSubtitle}>Clean whites with vibrant colors</Text>
+              {/* Theme preview colors */}
+              <View style={styles.themePreviewColors}>
+                <View style={[styles.colorCircle, { backgroundColor: preset.colors.primary.main }]} />
+                <View style={[styles.colorCircle, { backgroundColor: preset.colors.accent.cyan }]} />
+                <View style={[styles.colorCircle, { backgroundColor: preset.colors.accent.purple }]} />
+                <View style={[styles.colorCircle, { backgroundColor: preset.colors.accent.pink }]} />
               </View>
-            </View>
-            <View style={[
-              styles.radioButton,
-              themeMode === 'light' && styles.radioButtonSelected
-            ]}>
-              {themeMode === 'light' && <View style={styles.radioButtonInner} />}
-            </View>
-          </TouchableOpacity>
+
+              {/* Theme info */}
+              <View style={styles.themePresetInfo}>
+                <Text style={styles.themePresetIcon}>{preset.icon}</Text>
+                <Text style={[styles.themePresetName, { color: preset.colors.text.primary }]}>
+                  {preset.name}
+                </Text>
+                <Text style={[styles.themePresetDescription, { color: preset.colors.text.tertiary }]}>
+                  {preset.description}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          ))}
         </View>
       </View>
 
@@ -708,5 +709,69 @@ const createStyles = (colors: ReturnType<typeof import('../../theme').getColors>
     height: 12,
     borderRadius: 6,
     backgroundColor: colors.primary.main,
+  },
+  themesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.md,
+    paddingHorizontal: spacing.lg,
+  },
+  themePresetCard: {
+    width: '47%',
+    borderRadius: borderRadius.lg,
+    borderWidth: 2,
+    padding: spacing.base,
+    marginBottom: spacing.md,
+    ...shadows.sm,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  themePresetCardSelected: {
+    borderWidth: 3,
+    ...shadows.md,
+  },
+  selectedBadge: {
+    position: 'absolute',
+    top: spacing.sm,
+    right: spacing.sm,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadows.sm,
+  },
+  selectedBadgeText: {
+    color: '#FFFFFF',
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.bold,
+  },
+  themePreviewColors: {
+    flexDirection: 'row',
+    gap: spacing.xs,
+    marginBottom: spacing.md,
+  },
+  colorCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+  },
+  themePresetInfo: {
+    alignItems: 'center',
+  },
+  themePresetIcon: {
+    fontSize: 32,
+    marginBottom: spacing.xs,
+  },
+  themePresetName: {
+    fontSize: typography.size.base,
+    fontWeight: typography.weight.semibold,
+    marginBottom: spacing.xs,
+    textAlign: 'center',
+  },
+  themePresetDescription: {
+    fontSize: typography.size.xs,
+    textAlign: 'center',
+    lineHeight: typography.size.xs * 1.4,
   },
 });

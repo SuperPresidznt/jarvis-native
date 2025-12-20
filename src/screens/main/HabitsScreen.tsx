@@ -210,7 +210,7 @@ export default function HabitsScreen() {
     await updateOptimistically(
       () => {
         setHabits(updatedHabits);
-        hapticUtils.hapticSuccess(); // Success haptic
+        hapticUtils.success(); // Success haptic
         announceForAccessibility(`${habit.name} completed`);
       },
       async () => {
@@ -239,9 +239,9 @@ export default function HabitsScreen() {
             setCelebrationMessage(message);
             announceForAccessibility(message);
             // Haptic burst pattern for milestone celebration
-            hapticUtils.hapticSuccess();
-            setTimeout(() => hapticUtils.hapticLight(), 100);
-            setTimeout(() => hapticUtils.hapticSuccess(), 200);
+            hapticUtils.success();
+            setTimeout(() => hapticUtils.light(), 100);
+            setTimeout(() => hapticUtils.success(), 200);
           }
 
           // Show tooltip on first habit completion
@@ -412,6 +412,9 @@ export default function HabitsScreen() {
       </View>
     );
   }
+
+  // Create styles based on current theme colors
+  const styles = createStyles(colors);
 
   return (
     <View style={styles.container}>
@@ -1093,9 +1096,7 @@ const HabitFormModal: React.FC<HabitFormModalProps> = ({
   );
 };
 
-const colors = getColors();
-
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof getColors>) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.primary,

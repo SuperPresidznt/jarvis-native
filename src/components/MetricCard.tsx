@@ -189,55 +189,57 @@ export const MetricCard: React.FC<MetricCardProps> = ({
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.background.secondary,
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.xl,      // More rounded (was lg)
     overflow: 'hidden',
     flexDirection: 'row',
-    ...shadows.sm,
+    borderWidth: 1.5,                   // Add border
+    borderColor: 'rgba(255, 255, 255, 0.05)',
+    ...shadows.md,                      // Stronger shadow (was sm)
   },
   cardCompact: {
-    borderRadius: borderRadius.md,
+    borderRadius: borderRadius.lg,      // More rounded (was md)
   },
   accentBar: {
-    width: 4,
+    width: 6,                           // THICKER! (was 4)
   },
   content: {
     flex: 1,
-    padding: spacing.base,
+    padding: spacing.lg,                // More generous (was base)
   },
   label: {
-    fontSize: typography.size.xs,
-    fontWeight: typography.weight.semibold,
+    fontSize: typography.size.sm,       // BIGGER (was xs)
+    fontWeight: typography.weight.bold, // Bolder (was semibold)
     color: colors.text.tertiary,
     letterSpacing: typography.letterSpacing.widest,
-    marginBottom: spacing.sm,
+    marginBottom: spacing.md,           // More space (was sm)
   },
   valueContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: spacing.xs,
+    marginBottom: spacing.sm,           // More space (was xs)
   },
   value: {
-    fontSize: typography.size['2xl'],
+    fontSize: typography.size['4xl'],   // MUCH BIGGER! (was 2xl)
     fontWeight: typography.weight.bold,
-    letterSpacing: typography.letterSpacing.tight,
+    letterSpacing: typography.letterSpacing.tighter, // Tighter (was tight)
   },
   valueCompact: {
-    fontSize: typography.size.xl,
+    fontSize: typography.size['3xl'],   // BIGGER (was xl)
   },
   badge: {
-    marginLeft: spacing.sm,
-    padding: spacing.xs,
+    marginLeft: spacing.md,             // More space (was sm)
+    padding: spacing.sm,                // More padding (was xs)
     borderRadius: borderRadius.full,
   },
   badgeDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 10,                          // BIGGER (was 8)
+    height: 10,                         // BIGGER (was 8)
+    borderRadius: 5,
   },
   helper: {
-    fontSize: typography.size.sm,
-    color: colors.text.tertiary,
-    lineHeight: typography.size.sm * typography.lineHeight.relaxed,
+    fontSize: typography.size.base,     // BIGGER (was sm)
+    color: colors.text.secondary,       // Brighter (was tertiary)
+    lineHeight: typography.size.base * typography.lineHeight.relaxed,
   },
   trendContainer: {
     flexDirection: 'row',

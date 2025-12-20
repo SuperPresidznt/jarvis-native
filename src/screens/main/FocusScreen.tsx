@@ -25,11 +25,14 @@ import { FocusBlock, CreateFocusBlockData } from '../../database/focusBlocks';
 import { Task } from '../../database/tasks';
 import { FocusBlockCard } from '../../components/focus/FocusBlockCard';
 import { FocusTimer } from '../../components/focus/FocusTimer';
+import { ImmersiveTimer } from '../../components/focus/ImmersiveTimer';
+import { SessionCompleteOverlay } from '../../components/focus/SessionCompleteOverlay';
 import { PhoneInModal } from '../../components/focus/PhoneInModal';
 import { FocusBlockForm } from '../../components/focus/FocusBlockForm';
 import { FocusAnalytics } from '../../components/focus/FocusAnalytics';
 import { EmptyState, LoadingState } from '../../components/ui';
 import { typography, spacing, borderRadius, shadows } from '../../theme';
+import { haptic } from '../../utils/haptics';
 
 type ViewMode = 'current' | 'list' | 'analytics';
 
@@ -52,6 +55,12 @@ export default function FocusScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showPhoneInModal, setShowPhoneInModal] = useState(false);
+  const [showImmersiveTimer, setShowImmersiveTimer] = useState(false);
+  const [showSessionComplete, setShowSessionComplete] = useState(false);
+  const [completedSessionData, setCompletedSessionData] = useState<{
+    minutes: number;
+    title: string;
+  } | null>(null);
   const [editingBlock, setEditingBlock] = useState<FocusBlock | null>(null);
 
   // Analytics data
@@ -241,12 +250,21 @@ export default function FocusScreen() {
       const actualMinutes = Math.floor((now.getTime() - startTime.getTime()) / 60000);
 
       await focusBlocksDB.completeFocusBlock(activeBlock.id, actualMinutes);
+
+      // Store session data for celebration overlay
+      setCompletedSessionData({
+        minutes: actualMinutes,
+        title: activeBlock.title,
+      });
+
       setActiveBlock(null);
       setShowPhoneInModal(false);
+      setShowImmersiveTimer(false);
       await disablePhoneIn();
       await loadData();
 
-      Alert.alert('Completed', 'Focus session completed successfully!');
+      // Show celebration instead of alert
+      setShowSessionComplete(true);
     } catch (error) {
       console.error('Error completing focus block:', error);
       Alert.alert('Error', 'Failed to complete focus block');
@@ -325,6 +343,27 @@ export default function FocusScreen() {
               />
             }
           >
+            {/* Streak display */}
+            {stats.currentStreak > 0 && (
+              <View
+                style={[
+                  styles.streakCard,
+                  {
+                    backgroundColor: colors.background.secondary,
+                    borderColor: colors.primary.main,
+                  },
+                ]}
+              >
+                <Text style={styles.streakEmoji}>🔥</Text>
+                <Text style={[styles.streakMessage, { color: colors.text.primary }]}>
+                  Day {stats.currentStreak} of focusing!
+                </Text>
+                <Text style={[styles.streakSubtext, { color: colors.text.tertiary }]}>
+                  Keep your streak alive
+                </Text>
+              </View>
+            )}
+
             <FocusTimer
               focusBlock={activeBlock}
               onPause={() => {}}
@@ -474,12 +513,23 @@ export default function FocusScreen() {
         </Text>
         <View style={styles.headerActions}>
           {activeBlock && (
-            <IconButton
-              icon="fullscreen"
-              iconColor={colors.primary.main}
-              size={24}
-              onPress={() => setShowPhoneInModal(true)}
-            />
+            <>
+              <IconButton
+                icon="fullscreen"
+                iconColor={colors.primary.main}
+                size={24}
+                onPress={() => {
+                  haptic.buttonPress();
+                  setShowImmersiveTimer(true);
+                }}
+              />
+              <IconButton
+                icon="cellphone-off"
+                iconColor={colors.primary.main}
+                size={24}
+                onPress={() => setShowPhoneInModal(true)}
+              />
+            </>
           )}
         </View>
       </View>
@@ -550,6 +600,47 @@ export default function FocusScreen() {
           onEmergencyExit={() => handleStop(activeBlock.id)}
         />
       )}
+
+      {/* Immersive Timer Modal */}
+      {activeBlock && showImmersiveTimer && (
+        <View style={styles.immersiveContainer}>
+          <ImmersiveTimer
+            focusBlock={activeBlock}
+            streak={stats.currentStreak}
+            onExit={() => {
+              haptic.light();
+              setShowImmersiveTimer(false);
+            }}
+            onPause={() => {}}
+            onResume={() => {}}
+            onStop={() => {
+              setShowImmersiveTimer(false);
+              handleStop(activeBlock.id);
+            }}
+            onComplete={handleComplete}
+          />
+        </View>
+      )}
+
+      {/* Session Complete Celebration */}
+      {completedSessionData && (
+        <SessionCompleteOverlay
+          visible={showSessionComplete}
+          sessionMinutes={completedSessionData.minutes}
+          sessionTitle={completedSessionData.title}
+          streak={stats.currentStreak}
+          onStartAnother={() => {
+            setShowCreateModal(true);
+          }}
+          onTakeBreak={() => {
+            // Just dismiss - user can relax
+          }}
+          onDismiss={() => {
+            setShowSessionComplete(false);
+            setCompletedSessionData(null);
+          }}
+        />
+      )}
     </View>
   );
 }
@@ -611,5 +702,31 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 16,
     ...shadows.lg,
+  },
+  immersiveContainer: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 999,
+  },
+  streakCard: {
+    borderRadius: borderRadius.lg,
+    borderWidth: 2,
+    padding: spacing.lg,
+    marginBottom: spacing.lg,
+    alignItems: 'center',
+    ...shadows.md,
+  },
+  streakEmoji: {
+    fontSize: 48,
+    marginBottom: spacing.sm,
+  },
+  streakMessage: {
+    fontSize: typography.size.lg,
+    fontWeight: typography.weight.bold,
+    marginBottom: spacing.xs,
+    textAlign: 'center',
+  },
+  streakSubtext: {
+    fontSize: typography.size.sm,
+    textAlign: 'center',
   },
 });
