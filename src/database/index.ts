@@ -104,6 +104,35 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
     console.error('[DB] Migration: Error adding habit reminder fields:', error);
   }
 
+  // Migration 5: Add sort_order to tasks for drag-to-reorder
+  try {
+    const tableInfo = await db.getAllAsync<{ name: string }>(
+      'PRAGMA table_info(tasks)'
+    );
+
+    const hasSortOrder = tableInfo.some(col => col.name === 'sort_order');
+
+    if (!hasSortOrder) {
+      await db.execAsync('ALTER TABLE tasks ADD COLUMN sort_order INTEGER DEFAULT 0;');
+      console.log('[DB] Migration: Added sort_order column to tasks');
+
+      // Initialize sort_order for existing tasks based on created_at
+      await db.execAsync(`
+        UPDATE tasks
+        SET sort_order = (
+          SELECT COUNT(*)
+          FROM tasks t2
+          WHERE t2.created_at <= tasks.created_at
+        )
+      `);
+      console.log('[DB] Migration: Initialized sort_order for existing tasks');
+    } else {
+      console.log('[DB] Migration: sort_order column already exists');
+    }
+  } catch (error) {
+    console.error('[DB] Migration: Error adding sort_order to tasks:', error);
+  }
+
   console.log('[DB] Migrations complete');
 }
 

@@ -9,6 +9,7 @@ import {
   executeQuery,
   executeQuerySingle,
   executeWrite,
+  executeTransaction,
 } from './index';
 import type { RecurrenceRule } from '../types';
 import type { TaskFilters } from '../store/taskFilterStore';
@@ -29,6 +30,7 @@ export interface Task {
   projectId?: string;
   tags: string[];
   recurrence?: RecurrenceRule;
+  sortOrder?: number;
   createdAt: string;
   updatedAt: string;
   synced: boolean;
@@ -52,6 +54,7 @@ interface TaskRow {
   project_id?: string;
   tags: string;
   recurrence_rule?: string;
+  sort_order?: number;
   created_at: string;
   updated_at: string;
   synced: number;
@@ -102,6 +105,7 @@ function rowToTask(row: TaskRow): Task {
     projectId: row.project_id,
     tags: safeParseJson<string[]>(row.tags, []),
     recurrence: safeParseJson<RecurrenceRule | undefined>(row.recurrence_rule, undefined),
+    sortOrder: row.sort_order,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     synced: row.synced === 1,
@@ -218,14 +222,18 @@ export async function getTasks(filters?: TaskFilters): Promise<Task[]> {
           ELSE 6
         END`;
         break;
+      case 'sortOrder':
+      case 'order':
+        orderBy = 't.sort_order';
+        break;
       default:
         orderBy = 't.created_at';
     }
 
     sql += ` ORDER BY ${orderBy} ${sortDirection.toUpperCase()}`;
   } else {
-    // Default sorting
-    sql += ' ORDER BY t.created_at DESC';
+    // Default sorting by sort_order (for manual ordering), then created_at
+    sql += ' ORDER BY t.sort_order ASC, t.created_at DESC';
   }
 
   const rows = await executeQuery<TaskRow>(sql, params);
@@ -774,6 +782,18 @@ export async function getLatencyTrendSparkline(): Promise<number[]> {
   return last7Days;
 }
 
+/**
+ * Reorder tasks - update sort_order for multiple tasks
+ */
+export async function reorderTasks(taskIds: string[]): Promise<void> {
+  const queries = taskIds.map((taskId, index) => ({
+    sql: 'UPDATE tasks SET sort_order = ?, updated_at = ? WHERE id = ?',
+    params: [index, getCurrentTimestamp(), taskId],
+  }));
+
+  await executeTransaction(queries);
+}
+
 export default {
   getTasks,
   getTask,
@@ -794,4 +814,5 @@ export default {
   getLatencyTrend,
   getCompletionLatencyStats,
   getLatencyTrendSparkline,
+  reorderTasks,
 };

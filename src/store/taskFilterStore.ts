@@ -5,7 +5,7 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export type SortField = 'priority' | 'dueDate' | 'createdAt' | 'updatedAt' | 'title' | 'status';
+export type SortField = 'priority' | 'dueDate' | 'createdAt' | 'updatedAt' | 'title' | 'status' | 'sortOrder' | 'order';
 export type SortDirection = 'asc' | 'desc';
 export type TaskStatus = 'todo' | 'in_progress' | 'blocked' | 'completed' | 'cancelled';
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
