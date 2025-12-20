@@ -12,3 +12,4 @@ export { LoadingState, CardSkeleton } from './LoadingState';
 export { Skeleton, SkeletonCircle, SkeletonText } from './Skeleton';
 export { SearchBar } from './SearchBar';
 export { LastUpdated } from './LastUpdated';
+export { AnimatedListItem } from './AnimatedListItem';

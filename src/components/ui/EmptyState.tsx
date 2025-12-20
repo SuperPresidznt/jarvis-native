@@ -1,10 +1,10 @@
 /**
- * EmptyState - Beautiful empty state component
- * Features: icon/emoji, title, description, action button
+ * EmptyState - Beautiful empty state component with animations
+ * Features: icon/emoji, title, description, action button, bounce animation
  */
 
-import React from 'react';
-import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, ViewStyle, Animated } from 'react-native';
 import { colors, typography, spacing } from '../../theme';
 import { AppButton } from './AppButton';
 
@@ -27,9 +27,45 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   style,
   compact = false,
 }) => {
+  const bounceAnim = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.sequence([
+      Animated.parallel([
+        Animated.spring(bounceAnim, {
+          toValue: 1,
+          tension: 50,
+          friction: 7,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+      ]),
+    ]).start();
+  }, [bounceAnim, fadeAnim]);
+
+  const iconScale = bounceAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.5, 1],
+  });
+
   return (
-    <View style={[styles.container, compact && styles.compact, style]}>
-      {icon && <Text style={[styles.icon, compact && styles.compactIcon]}>{icon}</Text>}
+    <Animated.View style={[styles.container, compact && styles.compact, style, { opacity: fadeAnim }]}>
+      {icon && (
+        <Animated.Text
+          style={[
+            styles.icon,
+            compact && styles.compactIcon,
+            { transform: [{ scale: iconScale }] }
+          ]}
+        >
+          {icon}
+        </Animated.Text>
+      )}
       <Text style={[styles.title, compact && styles.compactTitle]}>{title}</Text>
       {description && (
         <Text style={[styles.description, compact && styles.compactDescription]}>
@@ -45,7 +81,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           style={styles.button}
         />
       )}
-    </View>
+    </Animated.View>
   );
 };
 
