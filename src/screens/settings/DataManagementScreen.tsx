@@ -31,6 +31,8 @@ import {
   getLiabilities,
 } from '../../database/finance';
 import { dropAllTables, initDatabase } from '../../database';
+import { alertSuccess, alertError } from '../../utils/dialogs';
+import { haptic } from '../../utils/haptics';
 
 type DataManagementScreenProps = {
   navigation: NativeStackNavigationProp<SettingsStackParamList, 'DataManagement'>;
@@ -91,22 +93,19 @@ export default function DataManagementScreen({ navigation }: DataManagementScree
 
   const handleClearAllData = async () => {
     try {
+      haptic.heavy();
       await dropAllTables();
       await initDatabase();
       await loadStats();
 
-      Alert.alert(
+      alertSuccess(
         'Success',
-        'All data has been cleared successfully.',
-        [
-          {
-            text: 'OK',
-            onPress: () => navigation.goBack(),
-          },
-        ]
+        'All data has been cleared successfully.'
       );
+      navigation.goBack();
     } catch (error) {
       console.error('Failed to clear data:', error);
+      alertError('Error', 'Failed to clear data. Please try again.');
       throw error; // Re-throw to be caught by dialog
     }
   };

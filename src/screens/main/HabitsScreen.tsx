@@ -51,6 +51,9 @@ import {
   makeHabitLabel,
   announceForAccessibility,
 } from '../../utils/accessibility';
+import { haptic as hapticUtils } from '../../utils/haptics';
+import { confirmations, alertSuccess, alertError } from '../../utils/dialogs';
+import { HIT_SLOP, HIT_SLOP_LARGE } from '../../constants/ui';
 
 type HabitCadence = 'daily' | 'weekly' | 'monthly';
 
@@ -113,7 +116,7 @@ export default function HabitsScreen() {
       setHabits(mappedHabits);
     } catch (error) {
       console.error('Error loading habits:', error);
-      Alert.alert('Error', 'Failed to load habits');
+      alertError('Error', 'Failed to load habits');
     } finally {
       setIsLoading(false);
     }
@@ -186,7 +189,7 @@ export default function HabitsScreen() {
       }
     } catch (error) {
       console.error('Error logging habit:', error);
-      Alert.alert('Error', 'Failed to log habit completion');
+      alertError('Error', 'Failed to log habit completion');
     }
   };
 
@@ -282,41 +285,46 @@ export default function HabitsScreen() {
   };
 
   const handleDelete = async (habitId: string) => {
-    try {
-      // Get full habit data before deletion
-      const habit = await habitsDB.getHabit(habitId);
-      if (!habit) return;
+    const habit = habits.find(h => h.id === habitId);
+    if (!habit) return;
 
-      // Cancel notification if it exists
-      if (habit.notificationId) {
-        try {
-          await notificationService.cancelNotification(habit.notificationId);
-        } catch (error) {
-          console.warn('[HabitsScreen] Error canceling notification:', error);
+    confirmations.deleteHabit(habit.name, async () => {
+      try {
+        // Get full habit data before deletion
+        const fullHabit = await habitsDB.getHabit(habitId);
+        if (!fullHabit) return;
+
+        // Cancel notification if it exists
+        if (fullHabit.notificationId) {
+          try {
+            await notificationService.cancelNotification(fullHabit.notificationId);
+          } catch (error) {
+            console.warn('[HabitsScreen] Error canceling notification:', error);
+          }
         }
+
+        // Optimistically remove from UI
+        setHabits(habits.filter(h => h.id !== habitId));
+
+        // Delete with undo capability
+        await undoService.deleteHabit(
+          fullHabit,
+          // onDeleted callback
+          () => {
+            console.log('[HabitsScreen] Habit deleted successfully');
+          },
+          // onUndone callback
+          async () => {
+            console.log('[HabitsScreen] Habit undo requested, reloading...');
+            await loadHabits();
+          }
+        );
+      } catch (error) {
+        console.error('[HabitsScreen] Error deleting habit:', error);
+        await loadHabits();
+        alertError('Error', 'Failed to delete habit. Please try again.');
       }
-
-      // Optimistically remove from UI
-      setHabits(habits.filter(h => h.id !== habitId));
-
-      // Delete with undo capability
-      await undoService.deleteHabit(
-        habit,
-        // onDeleted callback
-        () => {
-          console.log('[HabitsScreen] Habit deleted successfully');
-        },
-        // onUndone callback
-        async () => {
-          console.log('[HabitsScreen] Habit undo requested, reloading...');
-          await loadHabits();
-        }
-      );
-    } catch (error) {
-      console.error('[HabitsScreen] Error deleting habit:', error);
-      await loadHabits();
-      Alert.alert('Error', 'Failed to delete habit. Please try again.');
-    }
+    });
   };
 
   const handleToggleActive = async (habitId: string, isActive: boolean) => {
@@ -340,7 +348,7 @@ export default function HabitsScreen() {
       setShowInsightsModal(true);
     } catch (error) {
       console.error('[HabitsScreen] Error loading insights:', error);
-      Alert.alert('Error', 'Failed to load habit insights. Please try again.');
+      alertError('Error', 'Failed to load habit insights. Please try again.');
     }
   };
 
@@ -566,6 +574,7 @@ export default function HabitsScreen() {
                 icon="close"
                 onPress={() => setShowHeatmap(false)}
                 iconColor={colors.text.tertiary}
+                hitSlop={HIT_SLOP}
                 {...makeButton('Close heatmap', 'Double tap to close heatmap view')}
               />
             </View>
@@ -612,6 +621,7 @@ export default function HabitsScreen() {
               icon="close"
               onPress={() => setShowInsightsModal(false)}
               iconColor={colors.text.tertiary}
+              hitSlop={HIT_SLOP}
               {...makeButton('Close insights', 'Double tap to close insights view')}
             />
           </View>
@@ -961,10 +971,9 @@ const HabitFormModal: React.FC<HabitFormModalProps> = ({
             await habitsDB.updateHabit(savedHabit.id, { notificationId });
           } catch (error) {
             console.warn('[HabitsScreen] Error scheduling notification:', error);
-            Alert.alert(
+            alertError(
               'Reminder Not Set',
-              'Failed to schedule reminder notification. Please check notification permissions.',
-              [{ text: 'OK' }]
+              'Failed to schedule reminder notification. Please check notification permissions.'
             );
           }
         } else {
@@ -986,10 +995,9 @@ const HabitFormModal: React.FC<HabitFormModalProps> = ({
             await habitsDB.updateHabit(savedHabit.id, { notificationId });
           } catch (error) {
             console.warn('[HabitsScreen] Error scheduling notification:', error);
-            Alert.alert(
+            alertError(
               'Reminder Not Set',
-              'Failed to schedule reminder notification. Please check notification permissions.',
-              [{ text: 'OK' }]
+              'Failed to schedule reminder notification. Please check notification permissions.'
             );
           }
         }
@@ -999,7 +1007,7 @@ const HabitFormModal: React.FC<HabitFormModalProps> = ({
       onClose();
     } catch (error) {
       console.error('Error saving habit:', error);
-      Alert.alert('Error', 'Failed to save habit');
+      alertError('Error', 'Failed to save habit');
     } finally {
       setIsSubmitting(false);
     }
@@ -1027,6 +1035,7 @@ const HabitFormModal: React.FC<HabitFormModalProps> = ({
               icon="close"
               onPress={onClose}
               iconColor={colors.text.tertiary}
+              hitSlop={HIT_SLOP}
             />
           </View>
 

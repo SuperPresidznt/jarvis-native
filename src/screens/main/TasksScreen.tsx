@@ -63,6 +63,9 @@ import {
 import { useTheme } from '../../theme/ThemeProvider';
 import { PRIORITY_COLORS, PRIORITY_LABELS, PRIORITY_ICONS } from '../../constants/priorities';
 import { sortTasks, isOverdue } from '../../utils/taskSorting';
+import { haptic } from '../../utils/haptics';
+import { confirmations, alertSuccess, alertError } from '../../utils/dialogs';
+import { HIT_SLOP, HIT_SLOP_LARGE } from '../../constants/ui';
 
 type ViewMode = 'list';
 type TaskStatus = 'todo' | 'in_progress' | 'blocked' | 'completed' | 'cancelled';
@@ -131,7 +134,7 @@ export default function TasksScreen() {
       setTasks(sortedTasks);
     } catch (error) {
       console.error('Error loading tasks:', error);
-      Alert.alert('Error', 'Failed to load tasks');
+      alertError('Error', 'Failed to load tasks');
     } finally {
       setIsLoading(false);
     }
@@ -148,6 +151,13 @@ export default function TasksScreen() {
   });
 
   const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
+    // Haptic feedback based on status
+    if (newStatus === 'completed') {
+      haptic.taskComplete();
+    } else {
+      haptic.taskStatusChange();
+    }
+
     const previousTasks = [...tasks];
     const updatedTasks = tasks.map(t =>
       t.id === taskId
@@ -172,6 +182,7 @@ export default function TasksScreen() {
         onError: (error) => {
           console.error('[TasksScreen] Error updating task:', error);
           setTasks(previousTasks); // Rollback
+          haptic.error();
         },
       }
     );
@@ -181,30 +192,32 @@ export default function TasksScreen() {
     const task = tasks.find(t => t.id === taskId);
     if (!task) return;
 
-    try {
-      // Optimistically remove from UI
-      const previousTasks = [...tasks];
-      setTasks(tasks.filter(t => t.id !== taskId));
+    confirmations.deleteTask(task.title, async () => {
+      try {
+        // Optimistically remove from UI
+        const previousTasks = [...tasks];
+        setTasks(tasks.filter(t => t.id !== taskId));
 
-      // Delete with undo capability
-      await undoService.deleteTask(
-        task as tasksDB.Task,
-        // onDeleted callback
-        () => {
-          console.log('[TasksScreen] Task deleted successfully');
-        },
-        // onUndone callback
-        async () => {
-          console.log('[TasksScreen] Task undo requested, reloading...');
-          await loadTasks();
-        }
-      );
-    } catch (error) {
-      console.error('[TasksScreen] Error deleting task:', error);
-      // Reload tasks to restore state
-      await loadTasks();
-      Alert.alert('Error', 'Failed to delete task. Please try again.');
-    }
+        // Delete with undo capability
+        await undoService.deleteTask(
+          task as tasksDB.Task,
+          // onDeleted callback
+          () => {
+            console.log('[TasksScreen] Task deleted successfully');
+          },
+          // onUndone callback
+          async () => {
+            console.log('[TasksScreen] Task undo requested, reloading...');
+            await loadTasks();
+          }
+        );
+      } catch (error) {
+        console.error('[TasksScreen] Error deleting task:', error);
+        // Reload tasks to restore state
+        await loadTasks();
+        alertError('Error', 'Failed to delete task. Please try again.');
+      }
+    });
   };
 
   const handleEdit = (task: Task) => {
@@ -245,50 +258,54 @@ export default function TasksScreen() {
   const handleBulkComplete = async () => {
     try {
       const taskIdsArray = Array.from(selectedTaskIds);
+      haptic.taskComplete();
       await tasksDB.bulkCompleteTasks(taskIdsArray);
       await loadTasks();
       setBulkSelectMode(false);
       setSelectedTaskIds(new Set());
-      Alert.alert('Success', `Completed ${taskIdsArray.length} task(s)`);
+      alertSuccess('Success', `Completed ${taskIdsArray.length} task(s)`);
     } catch (error) {
       console.error('[TasksScreen] Bulk complete error:', error);
-      Alert.alert('Error', 'Failed to complete tasks. Please try again.');
+      alertError('Error', 'Failed to complete tasks. Please try again.');
     }
   };
 
   const handleBulkDelete = async () => {
-    try {
-      const taskIdsArray = Array.from(selectedTaskIds);
-      const tasksToDelete = tasks.filter(t => taskIdsArray.includes(t.id));
+    const taskIdsArray = Array.from(selectedTaskIds);
+    confirmations.deleteBulk(taskIdsArray.length, 'task', async () => {
+      try {
+        const tasksToDelete = tasks.filter(t => taskIdsArray.includes(t.id));
 
-      // Optimistically remove from UI
-      setTasks(tasks.filter(t => !taskIdsArray.includes(t.id)));
-      setBulkSelectMode(false);
-      setSelectedTaskIds(new Set());
+        // Optimistically remove from UI
+        setTasks(tasks.filter(t => !taskIdsArray.includes(t.id)));
+        setBulkSelectMode(false);
+        setSelectedTaskIds(new Set());
 
-      // Delete with undo capability
-      await undoService.deleteTasks(
-        tasksToDelete as tasksDB.Task[],
-        // onDeleted callback
-        () => {
-          console.log(`[TasksScreen] ${tasksToDelete.length} tasks deleted successfully`);
-        },
-        // onUndone callback
-        async () => {
-          console.log('[TasksScreen] Bulk delete undo requested, reloading...');
-          await loadTasks();
-        }
-      );
-    } catch (error) {
-      console.error('[TasksScreen] Bulk delete error:', error);
-      await loadTasks();
-      Alert.alert('Error', 'Failed to delete tasks. Please try again.');
-    }
+        // Delete with undo capability
+        await undoService.deleteTasks(
+          tasksToDelete as tasksDB.Task[],
+          // onDeleted callback
+          () => {
+            console.log(`[TasksScreen] ${tasksToDelete.length} tasks deleted successfully`);
+          },
+          // onUndone callback
+          async () => {
+            console.log('[TasksScreen] Bulk delete undo requested, reloading...');
+            await loadTasks();
+          }
+        );
+      } catch (error) {
+        console.error('[TasksScreen] Bulk delete error:', error);
+        await loadTasks();
+        alertError('Error', 'Failed to delete tasks. Please try again.');
+      }
+    });
   };
 
   const handleBulkChangeStatus = async (status: TaskStatus) => {
     try {
       const taskIdsArray = Array.from(selectedTaskIds);
+      haptic.taskStatusChange();
       await tasksDB.bulkUpdateTasks(taskIdsArray, {
         status,
         completedAt: status === 'completed' ? new Date().toISOString() : undefined,
@@ -296,30 +313,32 @@ export default function TasksScreen() {
       await loadTasks();
       setBulkSelectMode(false);
       setSelectedTaskIds(new Set());
-      Alert.alert('Success', `Updated ${taskIdsArray.length} task(s) to ${status}`);
+      alertSuccess('Success', `Updated ${taskIdsArray.length} task(s) to ${status}`);
     } catch (error) {
       console.error('[TasksScreen] Bulk status change error:', error);
-      Alert.alert('Error', 'Failed to update task status. Please try again.');
+      alertError('Error', 'Failed to update task status. Please try again.');
     }
   };
 
   const handleBulkChangePriority = async (priority: TaskPriority) => {
     try {
       const taskIdsArray = Array.from(selectedTaskIds);
+      haptic.selection();
       await tasksDB.bulkUpdateTasks(taskIdsArray, { priority });
       await loadTasks();
       setBulkSelectMode(false);
       setSelectedTaskIds(new Set());
-      Alert.alert('Success', `Updated ${taskIdsArray.length} task(s) to ${priority} priority`);
+      alertSuccess('Success', `Updated ${taskIdsArray.length} task(s) to ${priority} priority`);
     } catch (error) {
       console.error('[TasksScreen] Bulk priority change error:', error);
-      Alert.alert('Error', 'Failed to update task priority. Please try again.');
+      alertError('Error', 'Failed to update task priority. Please try again.');
     }
   };
 
   const handleBulkMoveToProject = async (projectId: string | null) => {
     try {
       const taskIdsArray = Array.from(selectedTaskIds);
+      haptic.medium();
       await tasksDB.bulkUpdateTasks(taskIdsArray, { projectId: projectId || undefined });
       await loadTasks();
       setBulkSelectMode(false);
@@ -328,10 +347,10 @@ export default function TasksScreen() {
       const projectName = projectId
         ? availableProjects.find(p => p.id === projectId)?.name || 'project'
         : 'No Project';
-      Alert.alert('Success', `Moved ${taskIdsArray.length} task(s) to ${projectName}`);
+      alertSuccess('Success', `Moved ${taskIdsArray.length} task(s) to ${projectName}`);
     } catch (error) {
       console.error('[TasksScreen] Bulk move error:', error);
-      Alert.alert('Error', 'Failed to move tasks. Please try again.');
+      alertError('Error', 'Failed to move tasks. Please try again.');
     }
   };
 
@@ -433,6 +452,7 @@ export default function TasksScreen() {
               size={24}
               onPress={toggleBulkSelectMode}
               iconColor={colors.text.primary}
+              hitSlop={HIT_SLOP}
               {...makeButton('Exit bulk select mode', 'Double tap to exit selection mode')}
             />
           ) : (
@@ -442,6 +462,7 @@ export default function TasksScreen() {
                 size={24}
                 onPress={toggleBulkSelectMode}
                 iconColor={colors.text.secondary}
+                hitSlop={HIT_SLOP}
                 {...makeButton('Bulk select mode', 'Double tap to select multiple tasks')}
               />
               <View style={styles.filterButtonContainer}>
@@ -451,6 +472,7 @@ export default function TasksScreen() {
                   onPress={() => setShowFilterModal(true)}
                   iconColor={activeFilterCount > 0 ? colors.primary.main : colors.text.secondary}
                   style={styles.filterButton}
+                  hitSlop={HIT_SLOP}
                   {...makeButton(
                     activeFilterCount > 0 ? `Filters, ${activeFilterCount} active` : 'Filters',
                     'Double tap to open filter options'
@@ -1131,7 +1153,7 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
       onClose();
     } catch (error) {
       console.error('Error saving task:', error);
-      Alert.alert('Error', 'Failed to save task');
+      alertError('Error', 'Failed to save task');
     } finally {
       setIsSubmitting(false);
     }
@@ -1163,6 +1185,7 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 icon="close"
                 onPress={onClose}
                 iconColor={colors.text.tertiary}
+                hitSlop={HIT_SLOP}
                 {...makeButton('Close', 'Double tap to close and discard changes')}
               />
             </View>
@@ -1242,6 +1265,7 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
                     icon="chevron-right"
                     size={20}
                     iconColor={colors.text.tertiary}
+                    hitSlop={HIT_SLOP}
                   />
                 </TouchableOpacity>
               </View>

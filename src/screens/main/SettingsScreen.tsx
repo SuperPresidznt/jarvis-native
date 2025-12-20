@@ -41,6 +41,8 @@ import {
 } from '../../database/finance';
 import { useFocusEffect } from '@react-navigation/native';
 import * as notificationService from '../../services/notifications';
+import { haptic } from '../../utils/haptics';
+import { confirmations, alertSuccess, alertError } from '../../utils/dialogs';
 
 // Import version from package.json
 const packageJson = require('../../../package.json');
@@ -175,14 +177,13 @@ export default function SettingsScreen() {
       const jsonString = JSON.stringify(exportData, null, 2);
       Clipboard.setString(jsonString);
 
-      Alert.alert(
+      alertSuccess(
         'Success!',
-        'All data copied to clipboard!\n\nYou can paste it into a text file to save your backup.',
-        [{ text: 'OK' }]
+        'All data copied to clipboard!\n\nYou can paste it into a text file to save your backup.'
       );
     } catch (error) {
       console.error('Failed to export data:', error);
-      Alert.alert('Error', 'Failed to export data. Please try again.');
+      alertError('Error', 'Failed to export data. Please try again.');
     } finally {
       setExporting(false);
     }
@@ -197,7 +198,7 @@ export default function SettingsScreen() {
         if (granted) {
           setNotificationsEnabled(true);
           setNotificationsPermissionStatus('granted');
-          Alert.alert(
+          alertSuccess(
             'Notifications Enabled',
             'You will now receive reminders for habits and calendar events.'
           );
@@ -251,7 +252,7 @@ export default function SettingsScreen() {
       }
     } catch (error) {
       console.error('Error toggling notifications:', error);
-      Alert.alert('Error', 'Failed to update notification settings. Please try again.');
+      alertError('Error', 'Failed to update notification settings. Please try again.');
       setNotificationsEnabled(false);
     }
   };
@@ -262,16 +263,9 @@ export default function SettingsScreen() {
   };
 
   const handleLogout = () => {
-    Alert.alert('Logout?', 'Are you sure you want to logout?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Logout',
-        style: 'destructive',
-        onPress: async () => {
-          await logout();
-        },
-      },
-    ]);
+    confirmations.logout(async () => {
+      await logout();
+    });
   };
 
   const styles = createStyles(colors);

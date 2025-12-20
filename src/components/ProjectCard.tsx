@@ -8,6 +8,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { IconButton } from 'react-native-paper';
 import type { Project } from '../database/projects';
 import { colors, typography, spacing, borderRadius, shadows } from '../theme';
+import { HIT_SLOP } from '../constants/ui';
 
 interface ProjectCardProps {
   project: Project;
@@ -55,6 +56,7 @@ export function ProjectCard({ project, onPress, onEdit, compact = false }: Proje
               size={20}
               onPress={onEdit}
               iconColor={colors.text.tertiary}
+              hitSlop={HIT_SLOP}
             />
           )}
         </View>

@@ -22,6 +22,9 @@ import type { Project } from '../../database/projects';
 import { ProjectCard } from '../../components/ProjectCard';
 import { ProjectFormModal } from '../../components/ProjectFormModal';
 import { colors, typography, spacing, borderRadius } from '../../theme';
+import { haptic } from '../../utils/haptics';
+import { confirmations, alertSuccess, alertError } from '../../utils/dialogs';
+import { HIT_SLOP, HIT_SLOP_LARGE } from '../../constants/ui';
 
 type RootStackParamList = {
   ProjectDetail: { projectId: string };
@@ -53,6 +56,7 @@ export default function ProjectsScreen() {
       setProjects(loadedProjects);
     } catch (error) {
       console.error('Error loading projects:', error);
+      alertError('Error', 'Failed to load projects');
     }
   };
 
@@ -78,16 +82,19 @@ export default function ProjectsScreen() {
   };
 
   const handleCreateProject = () => {
+    haptic.buttonPress();
     setSelectedProject(null);
     setShowFormModal(true);
   };
 
   const handleEditProject = (project: Project) => {
+    haptic.buttonPress();
     setSelectedProject(project);
     setShowFormModal(true);
   };
 
   const handleProjectPress = (project: Project) => {
+    haptic.light();
     navigation.navigate('ProjectDetail', { projectId: project.id });
   };
 
@@ -101,6 +108,7 @@ export default function ProjectsScreen() {
   };
 
   const toggleArchived = () => {
+    haptic.selection();
     setShowArchived(!showArchived);
   };
 
@@ -118,6 +126,7 @@ export default function ProjectsScreen() {
               icon={showArchived ? 'archive' : 'archive-outline'}
               size={24}
               iconColor={showArchived ? colors.primary.main : colors.text.tertiary}
+              hitSlop={HIT_SLOP}
             />
           </TouchableOpacity>
         </View>
@@ -125,7 +134,7 @@ export default function ProjectsScreen() {
 
       {/* Search Bar */}
       <View style={styles.searchContainer}>
-        <IconButton icon="magnify" size={20} iconColor={colors.text.tertiary} />
+        <IconButton icon="magnify" size={20} iconColor={colors.text.tertiary} hitSlop={HIT_SLOP} />
         <TextInput
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -134,8 +143,8 @@ export default function ProjectsScreen() {
           style={styles.searchInput}
         />
         {searchQuery.length > 0 && (
-          <TouchableOpacity onPress={() => setSearchQuery('')}>
-            <IconButton icon="close-circle" size={20} iconColor={colors.text.tertiary} />
+          <TouchableOpacity onPress={() => { haptic.light(); setSearchQuery(''); }}>
+            <IconButton icon="close-circle" size={20} iconColor={colors.text.tertiary} hitSlop={HIT_SLOP} />
           </TouchableOpacity>
         )}
       </View>
