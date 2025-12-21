@@ -1,8 +1,6 @@
 /**
- * CelebrationOverlay Component
- * In-place celebration animation with confetti particles
- * Based on UX improvements plan - Phase 2
- * Enhanced with react-native-confetti-cannon for improved visuals
+ * TaskCelebration Component
+ * Celebration animation for task completion milestones
  */
 
 import React, { useEffect, useRef } from 'react';
@@ -10,7 +8,7 @@ import { Text, StyleSheet, Animated, Dimensions } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { getColors, typography, spacing, borderRadius, shadows } from '../../theme';
 
-interface CelebrationOverlayProps {
+interface TaskCelebrationProps {
   visible: boolean;
   message: string;
   onDismiss: () => void;
@@ -18,7 +16,7 @@ interface CelebrationOverlayProps {
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-export const CelebrationOverlay: React.FC<CelebrationOverlayProps> = ({
+export const TaskCelebration: React.FC<TaskCelebrationProps> = ({
   visible,
   message,
   onDismiss,
@@ -56,7 +54,7 @@ export const CelebrationOverlay: React.FC<CelebrationOverlayProps> = ({
         confettiRef.current.start();
       }
 
-      // Auto-dismiss after 2.5 seconds
+      // Auto-dismiss after 2 seconds (shorter than habit celebrations)
       const dismissTimer = setTimeout(() => {
         Animated.parallel([
           Animated.timing(fadeAnim, {
@@ -72,7 +70,7 @@ export const CelebrationOverlay: React.FC<CelebrationOverlayProps> = ({
         ]).start(() => {
           onDismiss();
         });
-      }, 2500);
+      }, 2000);
 
       return () => clearTimeout(dismissTimer);
     }
@@ -83,10 +81,10 @@ export const CelebrationOverlay: React.FC<CelebrationOverlayProps> = ({
   const confettiColors = [
     colors.primary.main,
     colors.primary.light,
+    colors.success,
     colors.info,
-    colors.warning,
-    '#8B5CF6', // Purple
-    '#EC4899', // Pink
+    '#10B981', // Green
+    '#3B82F6', // Blue
   ];
 
   return (
@@ -102,7 +100,7 @@ export const CelebrationOverlay: React.FC<CelebrationOverlayProps> = ({
       {/* Confetti cannon */}
       <ConfettiCannon
         ref={confettiRef}
-        count={150}
+        count={100}
         origin={{ x: SCREEN_WIDTH / 2, y: SCREEN_HEIGHT / 2 }}
         autoStart={false}
         fadeOut={true}
@@ -119,7 +117,7 @@ export const CelebrationOverlay: React.FC<CelebrationOverlayProps> = ({
           },
         ]}
       >
-        <Text style={styles.emoji}>🎉</Text>
+        <Text style={styles.emoji}>✅</Text>
         <Text style={styles.message}>{message}</Text>
       </Animated.View>
     </Animated.View>
@@ -148,7 +146,7 @@ const styles = StyleSheet.create({
   message: {
     fontSize: typography.size.xl,
     fontWeight: typography.weight.bold,
-    color: getColors().primary.main,
+    color: getColors().success,
     textAlign: 'center',
   },
 });

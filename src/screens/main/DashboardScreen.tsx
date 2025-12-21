@@ -54,10 +54,12 @@ import {
   announceForAccessibility,
 } from '../../utils/accessibility';
 import { HIT_SLOP } from '../../constants/ui';
+import { getLayoutConfig, responsiveSpacing } from '../../utils/responsive';
 
 export default function DashboardScreen() {
   const { colors } = useTheme();
   const navigation = useNavigation();
+  const layoutConfig = getLayoutConfig();
   const [metrics, setMetrics] = useState<dashboardDB.TodayMetrics | null>(null);
   const [macroGoals, setMacroGoals] = useState<dashboardDB.MacroGoal[]>([]);
   const [budgetAlerts, setBudgetAlerts] = useState<budgetsDB.BudgetWithSpending[]>([]);
@@ -327,40 +329,41 @@ export default function DashboardScreen() {
             <Text style={styles.sectionLabel} {...makeHeader('Your Progress', 2)}>
               YOUR PROGRESS
             </Text>
-            <View style={styles.metricsGrid}>
-              {/* Top row: 2 metrics side by side */}
-              <View style={styles.metricsRow}>
-                <MetricCard
-                  label="Tasks"
-                  value={metrics.starts}
-                  helper={metrics.starts >= 3 ? 'Great!' : 'Keep going'}
-                  variant={metrics.starts >= 3 ? 'success' : 'default'}
-                  percentageChange={
-                    trendData?.tasks ? calculateMetricPercentageChange(trendData.tasks) : undefined
-                  }
-                  onPress={() => handleOpenChart('tasks', 'Tasks Completed')}
-                  style={styles.metricHalf}
-                  compact
-                  accessible={true}
-                  accessibilityLabel={`Tasks completed today: ${metrics.starts}`}
-                  accessibilityHint="Double tap to view detailed chart"
-                />
-                <MetricCard
-                  label="Habits"
-                  value={metrics.studyMinutes}
-                  helper="Today"
-                  variant="info"
-                  percentageChange={
-                    trendData?.habits ? calculateMetricPercentageChange(trendData.habits) : undefined
-                  }
-                  onPress={() => handleOpenChart('habits', 'Habits Completed')}
-                  style={styles.metricHalf}
-                  compact
-                  accessible={true}
-                  accessibilityLabel={`Habits completed today: ${metrics.studyMinutes}`}
-                  accessibilityHint="Double tap to view detailed chart"
-                />
-              </View>
+            <View style={[
+              styles.metricsGrid,
+              layoutConfig.columns > 1 && { flexDirection: 'row', flexWrap: 'wrap' }
+            ]}>
+              {/* Metrics cards adapt to grid layout */}
+              <MetricCard
+                label="Tasks"
+                value={metrics.starts}
+                helper={metrics.starts >= 3 ? 'Great!' : 'Keep going'}
+                variant={metrics.starts >= 3 ? 'success' : 'default'}
+                percentageChange={
+                  trendData?.tasks ? calculateMetricPercentageChange(trendData.tasks) : undefined
+                }
+                onPress={() => handleOpenChart('tasks', 'Tasks Completed')}
+                style={layoutConfig.columns === 1 ? styles.metricHalf : undefined}
+                compact
+                accessible={true}
+                accessibilityLabel={`Tasks completed today: ${metrics.starts}`}
+                accessibilityHint="Double tap to view detailed chart"
+              />
+              <MetricCard
+                label="Habits"
+                value={metrics.studyMinutes}
+                helper="Today"
+                variant="info"
+                percentageChange={
+                  trendData?.habits ? calculateMetricPercentageChange(trendData.habits) : undefined
+                }
+                onPress={() => handleOpenChart('habits', 'Habits Completed')}
+                style={layoutConfig.columns === 1 ? styles.metricHalf : undefined}
+                compact
+                accessible={true}
+                accessibilityLabel={`Habits completed today: ${metrics.studyMinutes}`}
+                accessibilityHint="Double tap to view detailed chart"
+              />
               {/* Bottom row: 1 metric as banner */}
               <MetricCard
                 label="Cash on hand"

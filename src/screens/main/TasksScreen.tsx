@@ -35,6 +35,7 @@ import { BulkActionBar } from '../../components/tasks/BulkActionBar';
 import { SwipeableTaskItem } from '../../components/tasks/SwipeableTaskItem';
 import { EnhancedDatePicker } from '../../components/tasks/EnhancedDatePicker';
 import { TaskLatencyBadge } from '../../components/tasks/TaskLatencyBadge';
+import { TaskCelebration } from '../../components/tasks/TaskCelebration';
 import * as filterStore from '../../store/taskFilterStore';
 import { clearHighlight } from '../../utils/navigation';
 import type { RecurrenceRule } from '../../types';
@@ -67,6 +68,7 @@ import { haptic } from '../../utils/haptics';
 import { confirmations, alertSuccess, alertError } from '../../utils/dialogs';
 import { HIT_SLOP, HIT_SLOP_LARGE } from '../../constants/ui';
 import { useKeyboardShortcuts, CommonShortcuts } from '../../utils/keyboardShortcuts';
+import { getLayoutConfig, responsiveSpacing, getGridColumns } from '../../utils/responsive';
 
 type ViewMode = 'list';
 type TaskStatus = 'todo' | 'in_progress' | 'blocked' | 'completed' | 'cancelled';
@@ -102,6 +104,8 @@ export default function TasksScreen() {
   const navigation = useNavigation();
   const params = route.params as { highlightId?: string; scrollTo?: boolean } | undefined;
   const viewMode: ViewMode = 'list'; // Only list view is implemented
+  const layoutConfig = getLayoutConfig();
+  const gridColumns = getGridColumns();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [filterStatus, setFilterStatus] = useState<TaskStatus | 'all' | 'overdue'>('all');
@@ -114,6 +118,8 @@ export default function TasksScreen() {
   const [selectedTaskIds, setSelectedTaskIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  const [celebrationVisible, setCelebrationVisible] = useState(false);
+  const [celebrationMessage, setCelebrationMessage] = useState('');
   const insets = useSafeAreaInsets();
   const { updateOptimistically, isPending } = useOptimisticUpdate();
   const tooltip = useTooltip();
@@ -220,6 +226,40 @@ export default function TasksScreen() {
         });
         // Reload to get fresh data from DB
         await loadTasks();
+
+        // Check for completion milestones
+        if (newStatus === 'completed') {
+          const allTasks = await tasksDB.getTasks({
+            sortField: 'createdAt',
+            sortDirection: 'desc',
+          });
+          const completedTasks = allTasks.filter(t => t.status === 'completed');
+          const completedCount = completedTasks.length;
+
+          let message = '';
+
+          if (completedCount === 1) {
+            message = 'First task completed!';
+          } else if (completedCount === 10) {
+            message = '10 tasks done! Great progress!';
+          } else if (completedCount === 50) {
+            message = '50 tasks completed! You\'re on fire!';
+          } else if (completedCount === 100) {
+            message = '100 TASKS! Productivity champion!';
+          } else if (completedCount % 25 === 0 && completedCount > 0) {
+            message = `${completedCount} tasks completed!`;
+          }
+
+          if (message) {
+            setCelebrationMessage(message);
+            setCelebrationVisible(true);
+            announceForAccessibility(message);
+            // Haptic burst for milestone
+            haptic.success();
+            setTimeout(() => haptic.light(), 100);
+            setTimeout(() => haptic.success(), 200);
+          }
+        }
       },
       // Options
       {
@@ -648,8 +688,14 @@ export default function TasksScreen() {
             </AnimatedListItem>
           )}
           keyExtractor={(item) => item.id}
+          key={`task-list-${gridColumns}`}
+          numColumns={gridColumns}
+          columnWrapperStyle={gridColumns > 1 ? { gap: responsiveSpacing(12, 16, 20) } : undefined}
           style={styles.content}
-          contentContainerStyle={styles.contentContainer}
+          contentContainerStyle={[
+            styles.contentContainer,
+            gridColumns > 1 && { paddingHorizontal: layoutConfig.padding },
+          ]}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -781,6 +827,13 @@ export default function TasksScreen() {
         message={tooltip.message}
         onDismiss={tooltip.hideTooltip}
         position="bottom"
+      />
+
+      {/* Task Completion Celebration */}
+      <TaskCelebration
+        visible={celebrationVisible}
+        message={celebrationMessage}
+        onDismiss={() => setCelebrationVisible(false)}
       />
 
       {/* Floating Action Button - Only show when not in bulk select mode */}
