@@ -31,12 +31,17 @@ export default function SettingsNavigator() {
         contentStyle: {
           backgroundColor: colors.background.primary,
         },
+        animation: 'slide_from_right',
+        animationDuration: 250,
       }}
     >
       <Stack.Screen
         name="SettingsMain"
         component={SettingsScreen}
-        options={{ headerShown: false }}
+        options={{
+          headerShown: false,
+          animation: 'fade',
+        }}
       />
       <Stack.Screen
         name="StorageOverview"
@@ -44,6 +49,7 @@ export default function SettingsNavigator() {
         options={{
           title: 'Storage Overview',
           headerShown: true,
+          animation: 'slide_from_right',
         }}
       />
       <Stack.Screen
@@ -52,6 +58,7 @@ export default function SettingsNavigator() {
         options={{
           title: 'Data Management',
           headerShown: true,
+          animation: 'slide_from_right',
         }}
       />
       <Stack.Screen
@@ -60,6 +67,7 @@ export default function SettingsNavigator() {
         options={{
           title: 'Category Management',
           headerShown: true,
+          animation: 'slide_from_right',
         }}
       />
     </Stack.Navigator>

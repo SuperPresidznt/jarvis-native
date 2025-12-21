@@ -439,19 +439,38 @@ export default function FinanceScreen() {
               );
             })()}
 
-            {/* Spending Trend Chart */}
+            {/* Charts Section */}
             <View style={styles.section}>
-              <SpendingTrendChart days={30} />
-            </View>
+              <Text style={styles.sectionLabel} {...makeHeader('Charts & Insights', 2)}>
+                CHARTS & INSIGHTS
+              </Text>
 
-            {/* Category Pie Chart */}
-            <View style={styles.section}>
-              <CategoryPieChart />
-            </View>
+              {/* Spending Trend Chart */}
+              <AppCard style={styles.chartCard}>
+                <View style={styles.chartHeader}>
+                  <Icon name="chart-line" size={20} color={colors.primary.main} />
+                  <Text style={styles.chartTitle}>Spending Trend (30 Days)</Text>
+                </View>
+                <SpendingTrendChart days={30} />
+              </AppCard>
 
-            {/* Monthly Comparison Chart */}
-            <View style={styles.section}>
-              <MonthlyComparisonChart months={6} />
+              {/* Category Pie Chart */}
+              <AppCard style={styles.chartCard}>
+                <View style={styles.chartHeader}>
+                  <Icon name="chart-pie" size={20} color={colors.primary.main} />
+                  <Text style={styles.chartTitle}>Category Breakdown</Text>
+                </View>
+                <CategoryPieChart />
+              </AppCard>
+
+              {/* Monthly Comparison Chart */}
+              <AppCard style={styles.chartCard}>
+                <View style={styles.chartHeader}>
+                  <Icon name="chart-bar" size={20} color={colors.primary.main} />
+                  <Text style={styles.chartTitle}>6-Month Comparison</Text>
+                </View>
+                <MonthlyComparisonChart months={6} />
+              </AppCard>
             </View>
 
             {/* Assets & Liabilities Summary */}
@@ -1348,6 +1367,21 @@ const createStyles = (colors: ReturnType<typeof getColors>) => StyleSheet.create
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+  },
+  chartCard: {
+    marginBottom: spacing.base,
+    padding: spacing.base,
+  },
+  chartHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+    gap: spacing.sm,
+  },
+  chartTitle: {
+    fontSize: typography.size.base,
+    fontWeight: typography.weight.semibold,
+    color: colors.text.primary,
     alignItems: 'center',
     marginBottom: spacing.md,
   },

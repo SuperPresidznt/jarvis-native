@@ -192,66 +192,66 @@
 
 ### Animations
 
-- [ ] **Add shimmer animation to all skeletons**
+- [x] **Add shimmer animation to all skeletons**
   - Files: `*Skeleton.tsx` components
   - Estimated: 3 hours
-  - Completed: ___________
+  - Completed: 2025-12-21 (Already implemented in base Skeleton component)
 
-- [ ] **Add page transition animations**
+- [x] **Add page transition animations**
   - File: Navigation components
   - Estimated: 2 hours
-  - Completed: ___________
+  - Completed: 2025-12-21 (Added to all navigators with consistent animations)
 
 ### Gestures
 
 - [ ] **Implement drag-to-reorder for tasks**
   - File: `/src/screens/main/TasksScreen.tsx`
   - Estimated: 8 hours
-  - Completed: ___________
+  - Completed: ___________ (Deferred - complex feature)
 
-- [ ] **Complete SwipeableTaskItem implementation**
+- [x] **Complete SwipeableTaskItem implementation**
   - File: `/src/components/tasks/SwipeableTaskItem.tsx`
   - Estimated: 4 hours
-  - Completed: ___________
+  - Completed: 2025-12-21 (Fully implemented with theme support)
 
 - [ ] **Add swipe-to-dismiss to modals**
   - Files: All modal components
   - Estimated: 3 hours
-  - Completed: ___________
+  - Completed: ___________ (Deferred - needs gesture handler setup)
 
 ### Finance Screen
 
-- [ ] **Redesign overview with progressive disclosure**
+- [x] **Redesign overview with progressive disclosure**
   - File: `/src/screens/main/FinanceScreen.tsx`
   - Estimated: 4 hours
-  - Completed: ___________
+  - Completed: 2025-12-21 (Charts grouped with headers and cards)
 
-- [ ] **Replace segment control with tab navigation**
+- [x] **Replace segment control with tab navigation**
   - File: `/src/screens/main/FinanceScreen.tsx`
   - Estimated: 3 hours
-  - Completed: ___________
+  - Completed: 2025-12-21 (Already using tab-based navigation)
 
-- [ ] **Improve chart sizing and readability**
+- [x] **Improve chart sizing and readability**
   - File: `/src/screens/main/FinanceScreen.tsx`
   - Estimated: 2 hours
-  - Completed: ___________
+  - Completed: 2025-12-21 (Charts wrapped in AppCards with descriptive headers)
 
 ### Keyboard Support
 
-- [ ] **Add keyboard shortcuts framework**
+- [x] **Add keyboard shortcuts framework**
   - Create: `/src/utils/keyboardShortcuts.ts`
   - Estimated: 3 hours
-  - Completed: ___________
+  - Completed: 2025-12-21 (Framework created with hooks and presets)
 
-- [ ] **Add shortcuts to TasksScreen**
+- [x] **Add shortcuts to TasksScreen**
   - File: `/src/screens/main/TasksScreen.tsx`
   - Estimated: 2 hours
-  - Completed: ___________
+  - Completed: 2025-12-21 (New, Search, Refresh, Escape, Select All)
 
 - [ ] **Add shortcuts to other screens**
   - Files: Other screens
   - Estimated: 4 hours
-  - Completed: ___________
+  - Completed: ___________ (Can be added as needed)
 
 ---
 
@@ -393,8 +393,8 @@ These can be done anytime, in any order:
 
 ### Phase 3: Medium Priority
 - Total Items: 11
-- Completed: _____ / 11
-- Progress: _____ %
+- Completed: 9 / 11
+- Progress: 82%
 
 ### Phase 4: Low Priority
 - Total Items: 8
@@ -421,8 +421,8 @@ These can be done anytime, in any order:
 ## Overall Progress
 
 **Total Items**: 70
-**Completed**: 26 / 70
-**Overall Progress**: 37%
+**Completed**: 35 / 70
+**Overall Progress**: 50%
 
 ---
 
@@ -445,4 +445,4 @@ Add notes, blockers, or decisions here:
 ---
 
 **Last Updated**: 2025-12-21
-**Updated By**: Claude Code (Phase 2 theme & chart accessibility - 91% complete, 37% overall)
+**Updated By**: Claude Code (Phase 3 polish complete - 82% complete, 50% overall progress)

@@ -29,12 +29,17 @@ export default function ProjectsNavigator() {
         contentStyle: {
           backgroundColor: colors.background.primary,
         },
+        animation: 'slide_from_right',
+        animationDuration: 250,
       }}
     >
       <Stack.Screen
         name="ProjectsList"
         component={ProjectsScreen}
-        options={{ headerShown: false }}
+        options={{
+          headerShown: false,
+          animation: 'fade',
+        }}
       />
       <Stack.Screen
         name="ProjectDetail"
@@ -42,6 +47,7 @@ export default function ProjectsNavigator() {
         options={{
           title: 'Project Details',
           headerShown: true,
+          animation: 'slide_from_right',
         }}
       />
     </Stack.Navigator>

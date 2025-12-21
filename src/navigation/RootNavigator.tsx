@@ -68,10 +68,22 @@ export default function RootNavigator({ navigationRef }: RootNavigatorProps) {
 
   return (
     <NavigationContainer ref={navigationRef}>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+          animation: 'fade',
+          animationDuration: 250,
+        }}
+      >
         {(isAuthenticated || FEATURES.DEMO_MODE) ? (
           <>
-            <Stack.Screen name="Main" component={MainNavigator} />
+            <Stack.Screen
+              name="Main"
+              component={MainNavigator}
+              options={{
+                animation: 'fade',
+              }}
+            />
             <Stack.Screen
               name="Search"
               component={SearchScreen}
@@ -79,13 +91,26 @@ export default function RootNavigator({ navigationRef }: RootNavigatorProps) {
                 presentation: 'modal',
                 headerShown: false,
                 animation: 'slide_from_bottom',
+                animationDuration: 300,
               }}
             />
           </>
         ) : (
           <>
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="Register" component={RegisterScreen} />
+            <Stack.Screen
+              name="Login"
+              component={LoginScreen}
+              options={{
+                animation: 'fade',
+              }}
+            />
+            <Stack.Screen
+              name="Register"
+              component={RegisterScreen}
+              options={{
+                animation: 'slide_from_right',
+              }}
+            />
           </>
         )}
       </Stack.Navigator>

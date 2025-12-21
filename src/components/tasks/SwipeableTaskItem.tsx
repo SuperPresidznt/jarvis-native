@@ -6,10 +6,11 @@
  */
 
 import React, { useRef } from 'react';
-import { View, StyleSheet, Animated, Text, Alert, Platform } from 'react-native';
+import { View, StyleSheet, Animated, Text, Alert } from 'react-native';
 import { Swipeable, RectButton } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { colors, spacing, borderRadius, typography } from '../../theme';
+import { spacing, borderRadius, typography } from '../../theme';
+import { useTheme } from '../../hooks/useTheme';
 import { haptic } from '../../utils/haptics';
 
 interface SwipeableTaskItemProps {
@@ -34,6 +35,7 @@ export const SwipeableTaskItem: React.FC<SwipeableTaskItemProps> = ({
   disabled = false,
 }) => {
   const swipeableRef = useRef<Swipeable>(null);
+  const { colors } = useTheme();
 
   // Right swipe action: Complete/Uncomplete
   const handleRightSwipe = () => {
@@ -91,7 +93,10 @@ export const SwipeableTaskItem: React.FC<SwipeableTaskItemProps> = ({
     });
 
     return (
-      <RectButton style={styles.rightAction} onPress={handleRightSwipe}>
+      <RectButton
+        style={[styles.rightAction, { backgroundColor: colors.success }]}
+        onPress={handleRightSwipe}
+      >
         <Animated.View
           style={[
             styles.actionContent,
@@ -103,9 +108,9 @@ export const SwipeableTaskItem: React.FC<SwipeableTaskItemProps> = ({
           <Icon
             name={isCompleted ? 'checkbox-blank-circle-outline' : 'check-circle'}
             size={28}
-            color="#FFFFFF"
+            color={colors.background.primary}
           />
-          <Text style={styles.actionText}>
+          <Text style={[styles.actionText, { color: colors.background.primary }]}>
             {isCompleted ? 'Undo' : 'Complete'}
           </Text>
         </Animated.View>
@@ -131,7 +136,10 @@ export const SwipeableTaskItem: React.FC<SwipeableTaskItemProps> = ({
     });
 
     return (
-      <RectButton style={styles.leftAction} onPress={handleLeftSwipe}>
+      <RectButton
+        style={[styles.leftAction, { backgroundColor: colors.error }]}
+        onPress={handleLeftSwipe}
+      >
         <Animated.View
           style={[
             styles.actionContent,
@@ -140,8 +148,10 @@ export const SwipeableTaskItem: React.FC<SwipeableTaskItemProps> = ({
             },
           ]}
         >
-          <Icon name="delete" size={28} color="#FFFFFF" />
-          <Text style={styles.actionText}>Delete</Text>
+          <Icon name="delete" size={28} color={colors.background.primary} />
+          <Text style={[styles.actionText, { color: colors.background.primary }]}>
+            Delete
+          </Text>
         </Animated.View>
       </RectButton>
     );
@@ -170,7 +180,6 @@ export const SwipeableTaskItem: React.FC<SwipeableTaskItemProps> = ({
 
 const styles = StyleSheet.create({
   rightAction: {
-    backgroundColor: colors.success,
     justifyContent: 'center',
     alignItems: 'flex-start',
     paddingLeft: spacing.lg,
@@ -179,7 +188,6 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   leftAction: {
-    backgroundColor: colors.error,
     justifyContent: 'center',
     alignItems: 'flex-end',
     paddingRight: spacing.lg,
@@ -193,7 +201,6 @@ const styles = StyleSheet.create({
     width: 80,
   },
   actionText: {
-    color: '#FFFFFF',
     fontSize: typography.size.xs,
     fontWeight: typography.weight.semibold,
     marginTop: spacing.xs,

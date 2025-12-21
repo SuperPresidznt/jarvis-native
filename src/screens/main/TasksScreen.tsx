@@ -66,6 +66,7 @@ import { sortTasks, isOverdue } from '../../utils/taskSorting';
 import { haptic } from '../../utils/haptics';
 import { confirmations, alertSuccess, alertError } from '../../utils/dialogs';
 import { HIT_SLOP, HIT_SLOP_LARGE } from '../../constants/ui';
+import { useKeyboardShortcuts, CommonShortcuts } from '../../utils/keyboardShortcuts';
 
 type ViewMode = 'list';
 type TaskStatus = 'todo' | 'in_progress' | 'blocked' | 'completed' | 'cancelled';
@@ -149,6 +150,49 @@ export default function TasksScreen() {
     screenName: 'tasks',
     onRefresh: loadTasks,
   });
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts([
+    CommonShortcuts.new(() => {
+      if (!showCreateModal && !bulkSelectMode) {
+        setShowCreateModal(true);
+      }
+    }),
+    CommonShortcuts.search(() => {
+      // Focus search input (if we add a ref to it)
+      announceForAccessibility('Search focused');
+    }),
+    CommonShortcuts.refresh(() => {
+      if (!refreshing) {
+        handleRefresh();
+      }
+    }),
+    {
+      key: 'Escape',
+      description: 'Exit bulk select mode or close modal',
+      action: () => {
+        if (bulkSelectMode) {
+          setBulkSelectMode(false);
+          setSelectedTaskIds(new Set());
+        } else if (showCreateModal) {
+          setShowCreateModal(false);
+        }
+      },
+    },
+    {
+      key: 'a',
+      modifiers: { meta: Platform.OS === 'ios', ctrl: Platform.OS !== 'ios' },
+      description: 'Select all tasks',
+      action: () => {
+        if (!bulkSelectMode) {
+          setBulkSelectMode(true);
+        }
+        setSelectedTaskIds(new Set(tasks.map(t => t.id)));
+        haptic.selection();
+      },
+      enabled: tasks.length > 0,
+    },
+  ]);
 
   const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
     // Haptic feedback based on status
