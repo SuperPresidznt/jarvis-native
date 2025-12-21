@@ -43,6 +43,16 @@ import {
   getColors,
 } from '../../theme';
 import { useTheme } from '../../theme/ThemeProvider';
+import {
+  makeButton,
+  makeHeader,
+  makeTextInput,
+  makeRadio,
+  makeTransactionLabel,
+  formatCurrencyForA11y,
+  formatDateForA11y,
+  announceForAccessibility,
+} from '../../utils/accessibility';
 
 type ViewMode = 'overview' | 'transactions' | 'budgets';
 type TimeFilter = 'month' | 'lastMonth' | 'all';
@@ -229,12 +239,18 @@ export default function FinanceScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Text style={styles.title}>Finance</Text>
+          <Text style={styles.title} {...makeHeader('Finance', 1)}>
+            Finance
+          </Text>
           <View style={styles.subtitleRow}>
-            <Text style={styles.subtitle}>Track your wealth</Text>
+            <Text style={styles.subtitle} accessible={false} importantForAccessibility="no-hide-descendants">
+              Track your wealth
+            </Text>
             {isPending && (
-              <View style={styles.savingIndicator}>
-                <Text style={styles.savingText}>Saving...</Text>
+              <View style={styles.savingIndicator} accessible={true} accessibilityLabel="Saving changes" accessibilityRole="progressbar">
+                <Text style={styles.savingText} accessible={false} importantForAccessibility="no-hide-descendants">
+                  Saving...
+                </Text>
               </View>
             )}
             <LastUpdated date={lastUpdated} />
@@ -264,6 +280,9 @@ export default function FinanceScreen() {
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.viewSelectorScroll}
+          accessible
+          accessibilityLabel="Finance view selector"
+          accessibilityHint="Scroll to select between overview, transactions, or budgets view"
         >
           {(['overview', 'transactions', 'budgets'] as const).map((mode) => (
             <TouchableOpacity
@@ -273,12 +292,19 @@ export default function FinanceScreen() {
                 styles.viewTab,
                 viewMode === mode && styles.viewTabActive,
               ]}
+              {...makeRadio(
+                `${mode.charAt(0).toUpperCase() + mode.slice(1)} view`,
+                viewMode === mode,
+                `Switch to ${mode} view`
+              )}
             >
               <Text
                 style={[
                   styles.viewTabText,
                   viewMode === mode && styles.viewTabTextActive,
                 ]}
+                accessible={false}
+                importantForAccessibility="no-hide-descendants"
               >
                 {mode.charAt(0).toUpperCase() + mode.slice(1)}
               </Text>
@@ -298,25 +324,38 @@ export default function FinanceScreen() {
             tintColor={colors.primary.main}
             colors={[colors.primary.main]}
             progressBackgroundColor={colors.background.primary}
+            accessibilityLabel="Refresh finance data"
           />
         }
         showsVerticalScrollIndicator={false}
+        accessible
+        accessibilityLabel={`Finance ${viewMode} view`}
+        accessibilityHint="Scroll to view your financial information"
       >
         {viewMode === 'overview' && summary && (
           <>
             {/* Summary KPIs */}
             <View style={styles.section}>
-              <Text style={styles.sectionLabel}>NET WORTH</Text>
-              <View style={styles.netWorthCard}>
+              <Text style={styles.sectionLabel} {...makeHeader('Net Worth', 2)}>
+                NET WORTH
+              </Text>
+              <View
+                style={styles.netWorthCard}
+                accessible
+                accessibilityLabel={`Net worth: ${formatCurrencyForA11y(summary.netWorth || 0)}, Assets: ${formatCurrencyForA11y(summary.totalAssets || 0)}, Debts: ${formatCurrencyForA11y(summary.totalLiabilities || 0)}`}
+                accessibilityRole="text"
+              >
                 <Text
                   style={[
                     styles.netWorthValue,
                     { color: (summary.netWorth || 0) >= 0 ? colors.success : colors.error },
                   ]}
+                  accessible={false}
+                  importantForAccessibility="no-hide-descendants"
                 >
                   {formatCurrency(summary.netWorth)}
                 </Text>
-                <Text style={styles.netWorthLabel}>
+                <Text style={styles.netWorthLabel} accessible={false} importantForAccessibility="no-hide-descendants">
                   Assets: {formatCurrency(summary.totalAssets)} | Debts:{' '}
                   {formatCurrency(summary.totalLiabilities)}
                 </Text>
@@ -325,7 +364,9 @@ export default function FinanceScreen() {
 
             {/* Current Month Summary */}
             <View style={styles.section}>
-              <Text style={styles.sectionLabel}>THIS MONTH</Text>
+              <Text style={styles.sectionLabel} {...makeHeader('This Month', 2)}>
+                THIS MONTH
+              </Text>
               <View style={styles.kpiGrid}>
                 <MetricCard
                   label="Income"

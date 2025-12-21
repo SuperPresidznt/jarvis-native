@@ -25,6 +25,13 @@ import { colors, typography, spacing, borderRadius } from '../../theme';
 import { haptic } from '../../utils/haptics';
 import { confirmations, alertSuccess, alertError } from '../../utils/dialogs';
 import { HIT_SLOP, HIT_SLOP_LARGE } from '../../constants/ui';
+import {
+  makeButton,
+  makeHeader,
+  makeTextInput,
+  makeProjectLabel,
+  announceForAccessibility,
+} from '../../utils/accessibility';
 
 type RootStackParamList = {
   ProjectDetail: { projectId: string };
@@ -119,14 +126,25 @@ export default function ProjectsScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Projects</Text>
+        <Text style={styles.headerTitle} {...makeHeader('Projects', 1)}>
+          Projects
+        </Text>
         <View style={styles.headerActions}>
-          <TouchableOpacity onPress={toggleArchived} style={styles.archiveToggle}>
+          <TouchableOpacity
+            onPress={toggleArchived}
+            style={styles.archiveToggle}
+            {...makeButton(
+              showArchived ? 'Show active projects' : 'Show archived projects',
+              'Double tap to toggle between active and archived projects'
+            )}
+          >
             <IconButton
               icon={showArchived ? 'archive' : 'archive-outline'}
               size={24}
               iconColor={showArchived ? colors.primary.main : colors.text.tertiary}
               hitSlop={HIT_SLOP}
+              accessible={false}
+              importantForAccessibility="no-hide-descendants"
             />
           </TouchableOpacity>
         </View>
@@ -134,17 +152,35 @@ export default function ProjectsScreen() {
 
       {/* Search Bar */}
       <View style={styles.searchContainer}>
-        <IconButton icon="magnify" size={20} iconColor={colors.text.tertiary} hitSlop={HIT_SLOP} />
+        <IconButton
+          icon="magnify"
+          size={20}
+          iconColor={colors.text.tertiary}
+          hitSlop={HIT_SLOP}
+          accessible={false}
+          importantForAccessibility="no-hide-descendants"
+        />
         <TextInput
           value={searchQuery}
           onChangeText={setSearchQuery}
           placeholder="Search projects..."
           placeholderTextColor={colors.text.placeholder}
           style={styles.searchInput}
+          {...makeTextInput('Search projects', searchQuery, 'Enter project name or description to search')}
         />
         {searchQuery.length > 0 && (
-          <TouchableOpacity onPress={() => { haptic.light(); setSearchQuery(''); }}>
-            <IconButton icon="close-circle" size={20} iconColor={colors.text.tertiary} hitSlop={HIT_SLOP} />
+          <TouchableOpacity
+            onPress={() => { haptic.light(); setSearchQuery(''); }}
+            {...makeButton('Clear search', 'Double tap to clear search text')}
+          >
+            <IconButton
+              icon="close-circle"
+              size={20}
+              iconColor={colors.text.tertiary}
+              hitSlop={HIT_SLOP}
+              accessible={false}
+              importantForAccessibility="no-hide-descendants"
+            />
           </TouchableOpacity>
         )}
       </View>
@@ -162,7 +198,16 @@ export default function ProjectsScreen() {
         keyExtractor={(item) => item.id}
         style={styles.content}
         contentContainerStyle={styles.contentContainer}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            accessibilityLabel="Refresh projects"
+          />
+        }
+        accessible
+        accessibilityLabel={`${showArchived ? 'Archived' : 'Active'} projects list`}
+        accessibilityHint="Scroll to view your projects"
         ListHeaderComponent={
           showArchived && archivedProjects.length > 0 ? (
             <Text style={styles.sectionTitle}>Archived Projects</Text>
@@ -215,6 +260,8 @@ export default function ProjectsScreen() {
         style={styles.fab}
         onPress={handleCreateProject}
         color={colors.background.primary}
+        accessibilityLabel="Create new project"
+        accessibilityHint="Double tap to create a new project"
       />
 
       {/* Project Form Modal */}

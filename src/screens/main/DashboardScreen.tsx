@@ -49,6 +49,7 @@ import { useTheme } from '../../theme/ThemeProvider';
 import {
   makeButton,
   makeTextInput,
+  makeHeader,
   formatCurrencyForA11y,
   announceForAccessibility,
 } from '../../utils/accessibility';
@@ -263,13 +264,17 @@ export default function DashboardScreen() {
           tintColor={colors.primary.main}
           colors={[colors.primary.main]}
           progressBackgroundColor={colors.background.primary}
+          accessibilityLabel="Refresh dashboard"
         />
       }
       showsVerticalScrollIndicator={false}
+      accessible
+      accessibilityLabel="Dashboard screen"
+      accessibilityHint="Scroll to view your daily metrics and quick actions"
     >
       <View style={[styles.content, { paddingTop: insets.top + spacing.base }]}>
         {/* HERO Header Section - MASSIVE Greeting */}
-        <View style={styles.header}>
+        <View style={styles.header} {...makeHeader(`${getGreeting()}, ${getFormattedDate()}`, 1)}>
           <View style={styles.headerContent}>
             <View style={styles.headerTextContainer}>
               {/* MASSIVE GRADIENT GREETING */}
@@ -277,6 +282,8 @@ export default function DashboardScreen() {
                 maskElement={
                   <Text style={styles.greeting}>{getGreeting()}</Text>
                 }
+                accessible={false}
+                importantForAccessibility="no-hide-descendants"
               >
                 <LinearGradient
                   colors={colors.gradient.hero as any}
@@ -287,7 +294,9 @@ export default function DashboardScreen() {
                   <Text style={[styles.greeting, { opacity: 0 }]}>{getGreeting()}</Text>
                 </LinearGradient>
               </MaskedView>
-              <Text style={styles.dateText}>{getFormattedDate()}</Text>
+              <Text style={styles.dateText} accessible={false} importantForAccessibility="no-hide-descendants">
+                {getFormattedDate()}
+              </Text>
               <LastUpdated date={lastUpdated} style={styles.lastUpdated} />
             </View>
             <IconButton
@@ -313,7 +322,9 @@ export default function DashboardScreen() {
         {/* Metrics Grid - 2 column layout */}
         {metrics && (
           <View style={styles.metricsSection}>
-            <Text style={styles.sectionLabel}>YOUR PROGRESS</Text>
+            <Text style={styles.sectionLabel} {...makeHeader('Your Progress', 2)}>
+              YOUR PROGRESS
+            </Text>
             <View style={styles.metricsGrid}>
               {/* Top row: 2 metrics side by side */}
               <View style={styles.metricsRow}>
@@ -373,14 +384,18 @@ export default function DashboardScreen() {
 
         {/* Task Latency Widget */}
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>TASK COMPLETION</Text>
+          <Text style={styles.sectionLabel} {...makeHeader('Task Completion', 2)}>
+            TASK COMPLETION
+          </Text>
           <TaskLatencyWidget />
         </View>
 
         {/* Budget Alerts */}
         {budgetAlerts.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>BUDGET ALERTS</Text>
+            <Text style={styles.sectionLabel} {...makeHeader('Budget Alerts', 2)}>
+              BUDGET ALERTS
+            </Text>
             {budgetAlerts.map((budget) => (
               <TouchableOpacity
                 key={budget.id}
@@ -436,7 +451,9 @@ export default function DashboardScreen() {
 
         {/* Start Controls Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>QUICK START</Text>
+          <Text style={styles.sectionLabel} {...makeHeader('Quick Start', 2)}>
+            QUICK START
+          </Text>
           <AppCard variant="elevated">
             <StartControls macroGoals={macroGoals} defaultDuration={10} />
           </AppCard>
@@ -449,6 +466,8 @@ export default function DashboardScreen() {
           icon="plus"
           onPress={() => setQuickCaptureVisible(true)}
           position="bottom-right"
+          accessibilityLabel="Quick capture"
+          accessibilityHint="Double tap to quickly add a task, log an expense, or start a focus session"
         />
       )}
 

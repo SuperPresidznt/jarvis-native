@@ -28,6 +28,12 @@ import { PomodoroHistory } from '../../components/pomodoro/PomodoroHistory';
 import { PomodoroSettingsModal } from '../../components/pomodoro/PomodoroSettings';
 import { TaskPickerModal } from '../../components/pomodoro/TaskPickerModal';
 import { typography, spacing, shadows } from '../../theme';
+import {
+  makeButton,
+  makeHeader,
+  makeRadio,
+  announceForAccessibility,
+} from '../../utils/accessibility';
 
 type ViewMode = 'timer' | 'stats' | 'history';
 
@@ -295,7 +301,7 @@ export default function PomodoroScreen() {
           },
         ]}
       >
-        <Text style={[styles.headerTitle, { color: colors.text.primary }]}>
+        <Text style={[styles.headerTitle, { color: colors.text.primary }]} {...makeHeader('Pomodoro', 1)}>
           Pomodoro
         </Text>
         <IconButton
@@ -303,11 +309,12 @@ export default function PomodoroScreen() {
           iconColor={colors.text.secondary}
           size={24}
           onPress={() => setShowSettings(true)}
+          {...makeButton('Settings', 'Double tap to open pomodoro settings')}
         />
       </View>
 
       {/* View Mode Selector */}
-      <View style={styles.viewModeContainer}>
+      <View style={styles.viewModeContainer} accessible accessibilityLabel="Pomodoro view mode" accessibilityHint="Select between timer, statistics, or history view">
         <SegmentedButtons
           value={viewMode}
           onValueChange={(value) => setViewMode(value as ViewMode)}
@@ -316,16 +323,19 @@ export default function PomodoroScreen() {
               value: 'timer',
               label: 'Timer',
               icon: 'timer-outline',
+              accessibilityLabel: 'Timer view',
             },
             {
               value: 'stats',
               label: 'Stats',
               icon: 'chart-bar',
+              accessibilityLabel: 'Statistics view',
             },
             {
               value: 'history',
               label: 'History',
               icon: 'history',
+              accessibilityLabel: 'History view',
             },
           ]}
           style={{ backgroundColor: colors.background.primary }}

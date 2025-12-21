@@ -42,6 +42,14 @@ import {
   getColors,
 } from '../../theme';
 import { useTheme } from '../../theme/ThemeProvider';
+import {
+  makeButton,
+  makeHeader,
+  makeTextInput,
+  makeRadio,
+  formatDateForA11y,
+  announceForAccessibility,
+} from '../../utils/accessibility';
 
 interface CalendarEvent extends calendarDB.CalendarEvent {
   isRecurring?: boolean;
@@ -245,14 +253,18 @@ export default function CalendarScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Text style={styles.title}>Calendar</Text>
+          <Text style={styles.title} {...makeHeader('Calendar', 1)}>
+            Calendar
+          </Text>
           <View style={styles.subtitleRow}>
-            <Text style={styles.subtitle}>
+            <Text style={styles.subtitle} accessible={true} accessibilityLabel={`${events.length} ${events.length !== 1 ? 'events' : 'event'} scheduled`}>
               {events.length} event{events.length !== 1 ? 's' : ''}
             </Text>
             {isPending && (
-              <View style={styles.savingIndicator}>
-                <Text style={styles.savingText}>Saving...</Text>
+              <View style={styles.savingIndicator} accessible={true} accessibilityLabel="Saving changes" accessibilityRole="progressbar">
+                <Text style={styles.savingText} accessible={false} importantForAccessibility="no-hide-descendants">
+                  Saving...
+                </Text>
               </View>
             )}
             <LastUpdated date={lastUpdated} />
@@ -265,6 +277,8 @@ export default function CalendarScreen() {
             setShowCreateModal(true);
           }}
           size="small"
+          accessibilityLabel="Create new event"
+          accessibilityHint="Double tap to add a new calendar event"
         />
       </View>
 
@@ -285,6 +299,9 @@ export default function CalendarScreen() {
         showsHorizontalScrollIndicator={false}
         style={styles.filterContainer}
         contentContainerStyle={styles.filterContent}
+        accessible
+        accessibilityLabel="Calendar view mode"
+        accessibilityHint="Scroll to select between agenda, day, or week view"
       >
         {(['agenda', 'day', 'week'] as const).map((mode) => (
           <AppChip
@@ -292,6 +309,11 @@ export default function CalendarScreen() {
             label={mode === 'agenda' ? 'Agenda' : mode === 'day' ? 'Day' : 'Week'}
             selected={viewMode === mode}
             onPress={() => setViewMode(mode)}
+            {...makeRadio(
+              `${mode === 'agenda' ? 'Agenda' : mode === 'day' ? 'Day' : 'Week'} view`,
+              viewMode === mode,
+              `Switch to ${mode} view`
+            )}
           />
         ))}
       </ScrollView>
@@ -336,9 +358,13 @@ export default function CalendarScreen() {
               colors={[colors.primary.main]}
               progressBackgroundColor={colors.background.primary}
               tintColor={colors.primary.main}
+              accessibilityLabel="Refresh calendar events"
             />
           }
           showsVerticalScrollIndicator={false}
+          accessible
+          accessibilityLabel="Calendar events list"
+          accessibilityHint="Scroll to view your upcoming events"
         >
           {filteredEvents.length === 0 ? (
             <EmptyState
@@ -355,6 +381,7 @@ export default function CalendarScreen() {
             <View style={styles.eventsList}>
               {filteredEvents.map((event) => {
                 const conflictCount = eventConflicts.get(event.id) || 0;
+                const eventLabel = `${event.title}, ${formatTime(event.startAt || event.startTime)} to ${formatTime(event.endAt || event.endTime)}, ${formatDate(event.startAt || event.startTime)}${event.location ? `, at ${event.location}` : ''}${conflictCount > 0 ? `, ${conflictCount} conflict${conflictCount > 1 ? 's' : ''} detected` : ''}${event.recurrence ? ', recurring event' : ''}`;
                 return (
                   <TouchableOpacity
                     key={event.id}
@@ -365,8 +392,12 @@ export default function CalendarScreen() {
                       setShowCreateModal(true);
                     }}
                     onLongPress={() => handleDelete(event.id)}
+                    {...makeButton(
+                      eventLabel,
+                      'Double tap to edit, long press to delete'
+                    )}
                   >
-                    <View style={styles.eventTimeColumn}>
+                    <View style={styles.eventTimeColumn} accessible={false} importantForAccessibility="no-hide-descendants">
                       <Text style={styles.eventTimeText}>
                         {formatTime(event.startAt || event.startTime)}
                       </Text>
@@ -376,7 +407,7 @@ export default function CalendarScreen() {
                       </Text>
                     </View>
 
-                    <View style={styles.eventContent}>
+                    <View style={styles.eventContent} accessible={false} importantForAccessibility="no-hide-descendants">
                       <View style={styles.eventHeader}>
                         <View style={styles.eventTitleRow}>
                           <Text style={styles.eventTitle}>{event.title}</Text>
@@ -619,13 +650,14 @@ const EventFormModal: React.FC<EventFormModalProps> = ({
             ]}
           >
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>
+              <Text style={styles.modalTitle} {...makeHeader(event ? 'Edit Event' : 'New Event', 1)}>
                 {event ? 'Edit Event' : 'New Event'}
               </Text>
               <IconButton
                 icon="close"
                 onPress={onClose}
                 iconColor={colors.text.tertiary}
+                {...makeButton('Close', 'Double tap to close this form')}
               />
             </View>
 
@@ -640,6 +672,7 @@ const EventFormModal: React.FC<EventFormModalProps> = ({
                   style={[styles.input, titleFocused && styles.inputFocused]}
                   onFocus={() => setTitleFocused(true)}
                   onBlur={() => setTitleFocused(false)}
+                  {...makeTextInput('Event title', title, 'Enter a title for your event')}
                 />
               </View>
 
@@ -659,6 +692,7 @@ const EventFormModal: React.FC<EventFormModalProps> = ({
                   numberOfLines={3}
                   onFocus={() => setDescFocused(true)}
                   onBlur={() => setDescFocused(false)}
+                  {...makeTextInput('Event description', description, 'Optional description for your event')}
                 />
               </View>
 
@@ -672,6 +706,7 @@ const EventFormModal: React.FC<EventFormModalProps> = ({
                   style={[styles.input, locationFocused && styles.inputFocused]}
                   onFocus={() => setLocationFocused(true)}
                   onBlur={() => setLocationFocused(false)}
+                  {...makeTextInput('Event location', location, 'Where this event will take place')}
                 />
               </View>
 
@@ -681,16 +716,24 @@ const EventFormModal: React.FC<EventFormModalProps> = ({
                   <TouchableOpacity
                     style={styles.dateTimeButton}
                     onPress={() => setShowStartDatePicker(true)}
+                    {...makeButton(
+                      `Start date: ${new Date(startTime).toLocaleDateString()}`,
+                      'Double tap to change start date'
+                    )}
                   >
-                    <Text style={styles.dateTimeButtonText}>
+                    <Text style={styles.dateTimeButtonText} accessible={false} importantForAccessibility="no-hide-descendants">
                       📅 {new Date(startTime).toLocaleDateString()}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.dateTimeButton}
                     onPress={() => setShowStartTimePicker(true)}
+                    {...makeButton(
+                      `Start time: ${new Date(startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+                      'Double tap to change start time'
+                    )}
                   >
-                    <Text style={styles.dateTimeButtonText}>
+                    <Text style={styles.dateTimeButtonText} accessible={false} importantForAccessibility="no-hide-descendants">
                       🕐 {new Date(startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </Text>
                   </TouchableOpacity>
@@ -703,16 +746,24 @@ const EventFormModal: React.FC<EventFormModalProps> = ({
                   <TouchableOpacity
                     style={styles.dateTimeButton}
                     onPress={() => setShowEndDatePicker(true)}
+                    {...makeButton(
+                      `End date: ${new Date(endTime).toLocaleDateString()}`,
+                      'Double tap to change end date'
+                    )}
                   >
-                    <Text style={styles.dateTimeButtonText}>
+                    <Text style={styles.dateTimeButtonText} accessible={false} importantForAccessibility="no-hide-descendants">
                       📅 {new Date(endTime).toLocaleDateString()}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.dateTimeButton}
                     onPress={() => setShowEndTimePicker(true)}
+                    {...makeButton(
+                      `End time: ${new Date(endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+                      'Double tap to change end time'
+                    )}
                   >
-                    <Text style={styles.dateTimeButtonText}>
+                    <Text style={styles.dateTimeButtonText} accessible={false} importantForAccessibility="no-hide-descendants">
                       🕐 {new Date(endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </Text>
                   </TouchableOpacity>
@@ -725,14 +776,20 @@ const EventFormModal: React.FC<EventFormModalProps> = ({
                   style={styles.recurrenceButton}
                   onPress={() => setShowRecurrencePicker(true)}
                   activeOpacity={0.7}
+                  {...makeButton(
+                    recurrence ? getRecurrenceSummary(recurrence) : 'Does not repeat',
+                    'Double tap to set event recurrence'
+                  )}
                 >
-                  <Text style={styles.recurrenceButtonText}>
+                  <Text style={styles.recurrenceButtonText} accessible={false} importantForAccessibility="no-hide-descendants">
                     {recurrence ? getRecurrenceSummary(recurrence) : 'Does not repeat'}
                   </Text>
                   <IconButton
                     icon="chevron-right"
                     size={20}
                     iconColor={colors.text.tertiary}
+                    accessible={false}
+                    importantForAccessibility="no-hide-descendants"
                   />
                 </TouchableOpacity>
               </View>

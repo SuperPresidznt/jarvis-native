@@ -24,6 +24,8 @@ interface FloatingActionButtonProps {
   size?: number;
   iconSize?: number;
   variant?: 'primary' | 'secondary';
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
 }
 
 export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
@@ -34,6 +36,8 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
   size = 64,
   iconSize = 28,
   variant = 'primary',
+  accessibilityLabel,
+  accessibilityHint,
 }) => {
   const [scaleValue] = useState(new Animated.Value(1));
 
@@ -95,6 +99,10 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
         onPressOut={handlePressOut}
         activeOpacity={0.9}
         style={styles.touchable}
+        accessible
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel}
+        accessibilityHint={accessibilityHint}
       >
         <LinearGradient
           colors={gradientColors}

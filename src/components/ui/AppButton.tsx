@@ -35,6 +35,8 @@ interface AppButtonProps {
   fullWidth?: boolean;
   style?: ViewStyle;
   textStyle?: TextStyle;
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
 }
 
 export const AppButton: React.FC<AppButtonProps> = ({
@@ -50,6 +52,8 @@ export const AppButton: React.FC<AppButtonProps> = ({
   fullWidth = false,
   style,
   textStyle,
+  accessibilityLabel,
+  accessibilityHint,
 }) => {
   const { colors } = useTheme();
   // Support both title prop and children
@@ -174,6 +178,14 @@ export const AppButton: React.FC<AppButtonProps> = ({
         disabled={disabled || loading}
         activeOpacity={0.8}
         style={[styles.touchable, fullWidth && styles.fullWidth, style]}
+        accessible
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel || (typeof buttonText === 'string' ? buttonText : undefined)}
+        accessibilityHint={accessibilityHint}
+        accessibilityState={{
+          disabled: disabled || loading,
+          busy: loading,
+        }}
       >
         {useGradient ? (
           <LinearGradient
