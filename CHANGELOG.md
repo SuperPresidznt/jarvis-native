@@ -10,6 +10,8 @@
 - fix: Install react-native-worklets for Reanimated
 - fix: TaskCard layout in multi-column grid (calculate explicit widths)
 - fix: Pin react-test-renderer to 19.1.0 for CI compatibility
+- fix: Add --non-interactive to expo prebuild in CI
+- chore: Add pre-push git hook for local validation
 
 ## 2025-12-21
 

@@ -12,7 +12,8 @@
     "lint": "eslint . --ext .ts,.tsx",
     "test": "jest",
     "test:smoke": "jest __tests__/smoke.test.tsx",
-    "validate": "npm run type-check && npm run lint && npm run test"
+    "validate": "npm run type-check && npm run lint && npm run test",
+    "prepare": "git config core.hooksPath .husky || true"
   },
   "dependencies": {
     "@notifee/react-native": "^8.0.0",
