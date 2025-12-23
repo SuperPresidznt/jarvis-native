@@ -2,6 +2,7 @@
 
 ## 2025-12-23
 
+- feat: Add task picker to quick-capture focus start
 - feat: Add per-feature notification toggles (habits, calendar)
 - chore: Reorganize docs to `.archive/` and new `docs/` structure
 - fix: Jest 30→29.7 for Expo 54 compatibility
