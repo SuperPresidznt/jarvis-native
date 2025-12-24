@@ -340,42 +340,41 @@ export default function DashboardScreen() {
             <Text style={styles.sectionLabel} {...makeHeader('Your Progress', 2)}>
               YOUR PROGRESS
             </Text>
-            <View style={[
-              styles.metricsGrid,
-              layoutConfig.columns > 1 && { flexDirection: 'row', flexWrap: 'wrap' }
-            ]}>
-              {/* Metrics cards adapt to grid layout */}
-              <MetricCard
-                label="Tasks"
-                value={metrics.starts}
-                helper={metrics.starts >= 3 ? 'Great!' : 'Keep going'}
-                variant={metrics.starts >= 3 ? 'success' : 'default'}
-                percentageChange={
-                  trendData?.tasks ? calculateMetricPercentageChange(trendData.tasks) : undefined
-                }
-                onPress={() => handleOpenChart('tasks', 'Tasks Completed')}
-                style={layoutConfig.columns === 1 ? styles.metricHalf : undefined}
-                compact
-                accessible={true}
-                accessibilityLabel={`Tasks completed today: ${metrics.starts}`}
-                accessibilityHint="Double tap to view detailed chart"
-              />
-              <MetricCard
-                label="Habits"
-                value={metrics.studyMinutes}
-                helper="Today"
-                variant="info"
-                percentageChange={
-                  trendData?.habits ? calculateMetricPercentageChange(trendData.habits) : undefined
-                }
-                onPress={() => handleOpenChart('habits', 'Habits Completed')}
-                style={layoutConfig.columns === 1 ? styles.metricHalf : undefined}
-                compact
-                accessible={true}
-                accessibilityLabel={`Habits completed today: ${metrics.studyMinutes}`}
-                accessibilityHint="Double tap to view detailed chart"
-              />
-              {/* Bottom row: 1 metric as banner */}
+            <View style={styles.metricsGrid}>
+              {/* Top row: Tasks and Habits side by side */}
+              <View style={styles.metricsRow}>
+                <MetricCard
+                  label="Tasks"
+                  value={metrics.starts}
+                  helper={metrics.starts >= 3 ? 'Great!' : 'Keep going'}
+                  variant={metrics.starts >= 3 ? 'success' : 'default'}
+                  percentageChange={
+                    trendData?.tasks ? calculateMetricPercentageChange(trendData.tasks) : undefined
+                  }
+                  onPress={() => handleOpenChart('tasks', 'Tasks Completed')}
+                  style={styles.metricHalf}
+                  compact
+                  accessible={true}
+                  accessibilityLabel={`Tasks completed today: ${metrics.starts}`}
+                  accessibilityHint="Double tap to view detailed chart"
+                />
+                <MetricCard
+                  label="Habits"
+                  value={metrics.studyMinutes}
+                  helper="Today"
+                  variant="info"
+                  percentageChange={
+                    trendData?.habits ? calculateMetricPercentageChange(trendData.habits) : undefined
+                  }
+                  onPress={() => handleOpenChart('habits', 'Habits Completed')}
+                  style={styles.metricHalf}
+                  compact
+                  accessible={true}
+                  accessibilityLabel={`Habits completed today: ${metrics.studyMinutes}`}
+                  accessibilityHint="Double tap to view detailed chart"
+                />
+              </View>
+              {/* Bottom row: Cash on hand full width */}
               <MetricCard
                 label="Cash on hand"
                 value={formatCash(metrics.cash, metrics.currency)}
