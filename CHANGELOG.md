@@ -12,7 +12,9 @@
 - feat: FAB menu for creating tasks or projects
 - feat: Dashboard inline actions - complete tasks and log habits directly from TodaysFocusCard
 - feat: Quick Capture Sheet "Log Habit" option for fast habit logging
+- feat: Smart Recommendations - Pattern-based contextual suggestions on dashboard (5 types: focus time, overdue tasks, budget alerts, habit streaks, productivity patterns)
 - docs: UX Workflow Analysis paper (`docs/UX_WORKFLOW_ANALYSIS.md`)
+- docs: Updated UX Overhaul Changelog with Phase 8 (Smart Recommendations)
 
 ## 2025-12-23
 

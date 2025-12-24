@@ -18,12 +18,13 @@
 6. [Phase 5: Habits + Calendar Integration](#phase-5-habits--calendar-integration)
 7. [Phase 6: Pattern Consistency](#phase-6-pattern-consistency)
 8. [Phase 7: More Menu Polish](#phase-7-more-menu-polish)
-9. [Files Removed](#files-removed)
-10. [Files Created](#files-created)
-11. [Files Modified](#files-modified)
-12. [Troubleshooting](#troubleshooting)
-13. [Migration Guide](#migration-guide)
-14. [Git History](#git-history)
+9. [Phase 8: Smart Contextual Recommendations](#phase-8-smart-contextual-recommendations)
+10. [Files Removed](#files-removed)
+11. [Files Created](#files-created)
+12. [Files Modified](#files-modified)
+13. [Troubleshooting](#troubleshooting)
+14. [Migration Guide](#migration-guide)
+15. [Git History](#git-history)
 
 ---
 
@@ -411,6 +412,224 @@ export default function TrackScreen() {
 
 ---
 
+## Phase 8: Smart Contextual Recommendations
+
+### Overview
+
+Intelligent, pattern-based contextual suggestions displayed on the dashboard. All recommendations are generated from local data analysis - NO AI/LLM required.
+
+### Changes Made
+
+**1. Created `src/components/dashboard/SmartRecommendations.tsx`**
+- Pattern-based recommendation engine
+- Analyzes user behavior from historical data
+- Prioritizes recommendations by urgency (max 2-3 shown)
+- Dismissible with per-day persistence via AsyncStorage
+- Color-coded gradient backgrounds by recommendation type
+- Accessible with screen reader support
+
+**2. Updated `src/screens/main/DashboardScreen.tsx`**
+- Integrated SmartRecommendations component
+- Passes required data props (tasks, habits, budgets, focus sessions)
+- Provides navigation callbacks for recommendation actions
+- Positioned prominently at top of dashboard feed
+
+**3. Updated `src/database/habits.ts`**
+- Added `getHabitsNotLoggedToday()` function
+- Filters habits by today's date that haven't been logged
+- Supports habit streak risk detection
+
+**4. Updated `src/database/focusSessions.ts`**
+- Added `limit` parameter to filter functions
+- Enables efficient querying for recent sessions
+- Supports focus time pattern detection
+
+### Recommendation Types (5 Total)
+
+All recommendations are generated from local data patterns, no external AI services:
+
+**1. Focus Time Suggestion** (Priority: 7)
+- **Trigger:** Current time is within 1 hour of user's typical focus time
+- **Data:** Analyzes historical focus session start times
+- **Message:** "You usually focus around 9 AM - start a session?"
+- **Action:** Opens focus timer
+- **Color:** Primary blue gradient
+
+**2. Overdue Task Alert** (Priority: 9)
+- **Trigger:** One or more tasks past due date
+- **Data:** Checks task due dates against today
+- **Message:** "3 tasks overdue - review priorities?"
+- **Action:** Navigates to Tasks screen
+- **Color:** Error red gradient
+
+**3. Budget Warning** (Priority: 8-10)
+- **Trigger:** Budget at 85%+ usage or exceeded
+- **Data:** Calculates budget spent percentage
+- **Message:** "Budget alert: Dining at 85% used"
+- **Action:** Navigates to Finance/Budgets
+- **Color:** Warning orange gradient
+- **Note:** Shows highest usage budget first
+
+**4. Habit Streak Risk** (Priority: 6)
+- **Trigger:** Habit with 3+ day streak not logged today
+- **Data:** Checks habits not logged today with active streaks
+- **Message:** "Meditation streak at risk - log now?"
+- **Action:** Quick log habit
+- **Color:** Error red gradient
+
+**5. Productivity Patterns** (Priority: 3-5)
+- **Momentum:** "You've completed 5 tasks today - great momentum!" (5+ tasks)
+- **Encouragement:** "No tasks completed yet today - want to start?" (0 tasks after 9 AM)
+- **Data:** Counts completed tasks for current day
+- **Action:** Navigates to Tasks screen
+- **Color:** Success green gradient (momentum) or info gradient (start)
+
+### Features
+
+**Prioritization Logic:**
+- Budget exceeded: Priority 10 (highest)
+- Overdue tasks: Priority 9
+- Budget warning: Priority 8
+- Focus time suggestion: Priority 7
+- Habit streak risk: Priority 6
+- Productivity start: Priority 5
+- Productivity momentum: Priority 3
+
+**Dismissal Behavior:**
+- Each recommendation can be dismissed via X button
+- Dismissed state stored in AsyncStorage per day
+- Storage key format: `dismissed_recommendations_YYYY-MM-DD`
+- Automatically resets at midnight (new date key)
+- Dismissal is per-recommendation type (can dismiss focus but keep tasks)
+
+**Visual Design:**
+- Gradient backgrounds matching recommendation urgency
+- Icon indicators (timer, alert, fire, trending-up)
+- Inline action button (primary CTA)
+- Dismiss button (tertiary action)
+- Shadow and border for card elevation
+- Consistent with app design system
+
+**Performance:**
+- useMemo hook for recommendation calculation
+- Efficient database queries with limits
+- AsyncStorage for lightweight persistence
+- No network calls or external dependencies
+
+### Impact
+
+- **Proactive Assistance:** Surface relevant actions before user searches
+- **Behavior Patterns:** Learn from user habits without AI
+- **Reduced Friction:** One-tap actions from recommendations
+- **Privacy First:** All analysis happens locally on device
+- **Non-Intrusive:** Dismissible and limited to 2-3 cards max
+- **Contextual Awareness:** Right action at the right time
+
+---
+
+## Troubleshooting (Recommendations)
+
+### Problem: Recommendations not showing
+**Symptoms:**
+- SmartRecommendations component returns null
+- Dashboard looks empty
+
+**Solution:**
+1. Check if there's enough historical data:
+   ```typescript
+   // Need at least some data for patterns
+   - Focus sessions: 3+ historical sessions for time patterns
+   - Tasks: At least 1 task with due date
+   - Budgets: At least 1 budget with spending
+   - Habits: At least 1 habit with 3+ day streak
+   ```
+
+2. Verify data is being passed to component:
+   ```typescript
+   // In DashboardScreen.tsx
+   console.log('Recommendations data:', {
+     tasks: tasks.length,
+     habits: habits.length,
+     budgets: budgets.length,
+     focusSessions: focusSessions.length,
+     completedToday: completedTasksToday
+   });
+   ```
+
+3. Check if all recommendations are dismissed:
+   - Recommendations reset daily at midnight
+   - Clear AsyncStorage to test: `dismissed_recommendations_*`
+
+### Problem: Dismissed recommendations coming back
+**Symptoms:**
+- Dismissed recommendation reappears immediately
+- Dismiss button not working
+
+**Solution:**
+1. Check AsyncStorage date key format:
+   ```typescript
+   // Should be YYYY-MM-DD format
+   const key = `dismissed_recommendations_2025-12-24`;
+   ```
+
+2. Verify AsyncStorage persistence:
+   ```typescript
+   import AsyncStorage from '@react-native-async-storage/async-storage';
+
+   // Check stored values
+   const today = new Date().toISOString().split('T')[0];
+   const key = `dismissed_recommendations_${today}`;
+   const dismissed = await AsyncStorage.getItem(key);
+   console.log('Dismissed types:', dismissed);
+   ```
+
+3. Ensure state updates correctly:
+   ```typescript
+   // In SmartRecommendations.tsx
+   const handleDismiss = async (rec: Recommendation) => {
+     await dismissRecommendation(rec.type);
+     setDismissedTypes(prev => new Set([...prev, rec.type])); // ✅
+   };
+   ```
+
+### Problem: Performance issues with recommendations
+**Symptoms:**
+- Dashboard slow to render
+- Lag when scrolling
+- High memory usage
+
+**Solution:**
+1. Verify useMemo is working:
+   ```typescript
+   // Dependencies should be stable
+   const recommendations = useMemo(() => {
+     // calculation...
+   }, [tasks, habits, budgets, focusSessions, completedTasksToday]);
+   ```
+
+2. Check database query efficiency:
+   ```typescript
+   // Use limits to avoid loading too much data
+   const recentSessions = await getFocusSessions({ limit: 50 });
+   ```
+
+3. Ensure MAX_RECOMMENDATIONS is respected:
+   ```typescript
+   const MAX_RECOMMENDATIONS = 2; // Should limit to 2-3 cards
+   ```
+
+4. Profile component rendering:
+   ```typescript
+   // Add React DevTools profiler
+   import { Profiler } from 'react';
+
+   <Profiler id="SmartRecommendations" onRender={...}>
+     <SmartRecommendations {...props} />
+   </Profiler>
+   ```
+
+---
+
 ## Files Removed
 
 The following 12 files were deleted as part of the consolidation:
@@ -468,7 +687,12 @@ src/hooks/useUnifiedTimer.ts (if exists)
 src/components/tasks/ProjectTasksGroup.tsx
 ```
 
-**Total:** 7+ new files
+### Dashboard Intelligence (1 file)
+```
+src/components/dashboard/SmartRecommendations.tsx
+```
+
+**Total:** 8+ new files
 
 ---
 
@@ -481,11 +705,11 @@ src/navigation/linking.ts               - Updated deep links
 src/types/index.ts                      - New navigation types
 ```
 
-### Screens (5 files)
+### Screens (6 files)
 ```
 src/screens/main/FocusScreen.tsx        - Integrated QuickStartPanel
 src/screens/main/TasksScreen.tsx        - Project grouping
-src/screens/main/DashboardScreen.tsx    - Inline action handlers
+src/screens/main/DashboardScreen.tsx    - Inline actions + SmartRecommendations
 src/screens/main/FinanceScreen.tsx      - SegmentedButtons
 src/screens/main/HabitsScreen.tsx       - Embedded mode
 src/screens/main/CalendarScreen.tsx     - Embedded mode
@@ -497,13 +721,15 @@ src/components/dashboard/QuickCaptureSheet.tsx  - Added habit logging
 src/components/TodaysFocusCard.tsx              - Inline actions
 ```
 
-### Database (2 files)
+### Database (4 files)
 ```
 src/database/schema.ts                  - New focus_sessions table
 src/database/migrations/                - Migration scripts
+src/database/habits.ts                  - Added getHabitsNotLoggedToday()
+src/database/focusSessions.ts           - Added limit parameter to filters
 ```
 
-**Total:** 12+ modified files
+**Total:** 14+ modified files
 
 ---
 
