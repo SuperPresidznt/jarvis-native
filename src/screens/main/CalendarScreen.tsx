@@ -25,6 +25,8 @@ import { detectConflicts, EventConflict } from '../../database/calendar';
 import * as undoService from '../../services/undo';
 import { ConflictWarning } from '../../components/calendar/ConflictWarning';
 import { ReminderPicker } from '../../components/calendar/ReminderPicker';
+import ShareButton from '../../components/ShareButton';
+import { copyEventLink } from '../../utils/deepLinks';
 import { AppButton, AppChip, EmptyState, LoadingState, LastUpdated, SearchBar } from '../../components/ui';
 import { CalendarEventSkeleton } from '../../components/calendar/CalendarEventSkeleton';
 import { RecurrencePicker } from '../../components/RecurrencePicker';
@@ -655,13 +657,22 @@ const EventFormModal: React.FC<EventFormModalProps> = ({
               <Text style={styles.modalTitle} {...makeHeader(event ? 'Edit Event' : 'New Event', 1)}>
                 {event ? 'Edit Event' : 'New Event'}
               </Text>
-              <IconButton
-                icon="close"
-                onPress={onClose}
-                iconColor={colors.text.tertiary}
-                {...makeButton('Close', 'Double tap to close this form')}
-              
-                hitSlop={HIT_SLOP}/>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                {event && (
+                  <ShareButton
+                    onCopyLink={() => copyEventLink(event.id, event.title)}
+                    iconColor={colors.text.secondary}
+                    size={20}
+                  />
+                )}
+                <IconButton
+                  icon="close"
+                  onPress={onClose}
+                  iconColor={colors.text.tertiary}
+                  {...makeButton('Close', 'Double tap to close this form')}
+                  hitSlop={HIT_SLOP}
+                />
+              </View>
             </View>
 
             <ScrollView style={styles.modalBody} keyboardShouldPersistTaps="handled">

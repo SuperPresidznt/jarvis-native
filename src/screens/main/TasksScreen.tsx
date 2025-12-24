@@ -37,6 +37,8 @@ import { SwipeableTaskItem } from '../../components/tasks/SwipeableTaskItem';
 import { EnhancedDatePicker } from '../../components/tasks/EnhancedDatePicker';
 import { TaskLatencyBadge } from '../../components/tasks/TaskLatencyBadge';
 import { TaskCelebration } from '../../components/tasks/TaskCelebration';
+import ShareButton from '../../components/ShareButton';
+import { copyTaskLink } from '../../utils/deepLinks';
 import * as filterStore from '../../store/taskFilterStore';
 import { clearHighlight } from '../../utils/navigation';
 import type { RecurrenceRule } from '../../types';
@@ -1284,13 +1286,22 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
               <Text style={styles.modalTitle}>
                 {task ? 'Edit Task' : 'New Task'}
               </Text>
-              <IconButton
-                icon="close"
-                onPress={onClose}
-                iconColor={colors.text.tertiary}
-                hitSlop={HIT_SLOP}
-                {...makeButton('Close', 'Double tap to close and discard changes')}
-              />
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                {task && (
+                  <ShareButton
+                    onCopyLink={() => copyTaskLink(task.id, task.title)}
+                    iconColor={colors.text.secondary}
+                    size={20}
+                  />
+                )}
+                <IconButton
+                  icon="close"
+                  onPress={onClose}
+                  iconColor={colors.text.tertiary}
+                  hitSlop={HIT_SLOP}
+                  {...makeButton('Close', 'Double tap to close and discard changes')}
+                />
+              </View>
             </View>
 
             <ScrollView

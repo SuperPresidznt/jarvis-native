@@ -29,6 +29,8 @@ import { HabitNotesModal } from '../../components/habits/HabitNotesModal';
 import { HabitLogsView } from '../../components/habits/HabitLogsView';
 import { StreakBadge } from '../../components/habits/StreakBadge';
 import { CelebrationOverlay } from '../../components/habits/CelebrationOverlay';
+import ShareButton from '../../components/ShareButton';
+import { copyHabitLink } from '../../utils/deepLinks';
 import { AppButton, AppChip, EmptyState, LoadingState, LastUpdated, SearchBar } from '../../components/ui';
 import { HabitCardSkeleton } from '../../components/habits/HabitCardSkeleton';
 import * as storage from '../../services/storage';
@@ -1016,12 +1018,21 @@ const HabitFormModal: React.FC<HabitFormModalProps> = ({
             <Text style={styles.modalTitle}>
               {habit ? 'Edit Habit' : 'New Habit'}
             </Text>
-            <IconButton
-              icon="close"
-              onPress={onClose}
-              iconColor={colors.text.tertiary}
-              hitSlop={HIT_SLOP}
-            />
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              {habit && (
+                <ShareButton
+                  onCopyLink={() => copyHabitLink(habit.id, habit.name)}
+                  iconColor={colors.text.secondary}
+                  size={20}
+                />
+              )}
+              <IconButton
+                icon="close"
+                onPress={onClose}
+                iconColor={colors.text.tertiary}
+                hitSlop={HIT_SLOP}
+              />
+            </View>
           </View>
 
           <ScrollView style={styles.modalBody} keyboardShouldPersistTaps="handled">

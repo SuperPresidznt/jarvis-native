@@ -201,13 +201,13 @@ export type RootStackParamList = {
 
 export type MainTabParamList = {
   Dashboard: undefined;
-  AIChat: undefined;
-  Tasks: undefined;
-  Projects: undefined;
-  Habits: undefined;
+  AIChat: undefined | { conversationId?: string };
+  Tasks: undefined | { taskId?: string };
+  Projects: undefined | { projectId?: string };
+  Habits: undefined | { habitId?: string };
   Focus: undefined;
   Pomodoro: undefined;
-  Calendar: undefined;
+  Calendar: undefined | { eventId?: string };
   Finance: undefined;
   Settings: undefined;
 };

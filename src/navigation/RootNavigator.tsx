@@ -12,6 +12,7 @@ import { useAuthStore } from '../store/authStore';
 import { useOnboarding } from '../hooks/useOnboarding';
 import { RootStackParamList } from '../types';
 import { FEATURES } from '../constants/config';
+import { linking } from './linking';
 
 // Screens
 import LoginScreen from '../screens/auth/LoginScreen';
@@ -49,7 +50,7 @@ export default function RootNavigator({ navigationRef }: RootNavigatorProps) {
   // Show onboarding flow for first-time users
   if (!isOnboardingComplete) {
     return (
-      <NavigationContainer ref={navigationRef}>
+      <NavigationContainer ref={navigationRef} linking={linking}>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Onboarding">
             {() => (
@@ -67,7 +68,7 @@ export default function RootNavigator({ navigationRef }: RootNavigatorProps) {
   }
 
   return (
-    <NavigationContainer ref={navigationRef}>
+    <NavigationContainer ref={navigationRef} linking={linking}>
       <Stack.Navigator
         screenOptions={{
           headerShown: false,

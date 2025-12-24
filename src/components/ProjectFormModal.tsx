@@ -20,6 +20,8 @@ import { IconButton } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as projectsDB from '../database/projects';
 import type { Project } from '../database/projects';
+import ShareButton from './ShareButton';
+import { copyProjectLink } from '../utils/deepLinks';
 import { AppButton } from './ui';
 import { colors, typography, spacing, borderRadius } from '../theme';
 import { HIT_SLOP } from '../constants/ui';
@@ -161,12 +163,21 @@ export function ProjectFormModal({ visible, project, onClose, onSuccess }: Proje
               <Text style={styles.modalTitle}>
                 {project ? 'Edit Project' : 'New Project'}
               </Text>
-              <IconButton
-                icon="close"
-                onPress={onClose}
-                iconColor={colors.text.tertiary}
-              
-                hitSlop={HIT_SLOP}/>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                {project && (
+                  <ShareButton
+                    onCopyLink={() => copyProjectLink(project.id, project.name)}
+                    iconColor={colors.text.tertiary}
+                    size={20}
+                  />
+                )}
+                <IconButton
+                  icon="close"
+                  onPress={onClose}
+                  iconColor={colors.text.tertiary}
+                  hitSlop={HIT_SLOP}
+                />
+              </View>
             </View>
 
             <ScrollView style={styles.modalBody} keyboardShouldPersistTaps="handled">
