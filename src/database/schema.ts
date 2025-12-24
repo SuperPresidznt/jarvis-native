@@ -165,38 +165,24 @@ export const CREATE_TABLES = {
     );
   `,
 
-  focus_blocks: `
-    CREATE TABLE IF NOT EXISTS focus_blocks (
+  focus_sessions: `
+    CREATE TABLE IF NOT EXISTS focus_sessions (
       id TEXT PRIMARY KEY,
       title TEXT NOT NULL,
       description TEXT,
       duration_minutes INTEGER NOT NULL,
       actual_minutes INTEGER,
       task_id TEXT,
+      is_pomodoro INTEGER DEFAULT 0,
+      session_number INTEGER,
+      break_minutes INTEGER,
+      phone_in_mode INTEGER DEFAULT 0,
       status TEXT DEFAULT 'scheduled',
       start_time TEXT,
       end_time TEXT,
-      phone_in_mode INTEGER DEFAULT 0,
-      break_taken INTEGER DEFAULT 0,
-      created_at TEXT NOT NULL,
-      updated_at TEXT NOT NULL,
-      synced INTEGER DEFAULT 0,
-      FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE SET NULL
-    );
-  `,
-
-  pomodoro_sessions: `
-    CREATE TABLE IF NOT EXISTS pomodoro_sessions (
-      id TEXT PRIMARY KEY,
-      task_id TEXT,
-      session_number INTEGER NOT NULL,
-      duration_minutes INTEGER NOT NULL,
-      break_minutes INTEGER NOT NULL,
-      status TEXT DEFAULT 'in_progress',
-      started_at TEXT NOT NULL,
-      completed_at TEXT,
       notes TEXT,
       created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
       synced INTEGER DEFAULT 0,
       FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE SET NULL
     );
@@ -266,13 +252,10 @@ export const CREATE_INDEXES = {
   finance_categories_type: 'CREATE INDEX IF NOT EXISTS idx_categories_type ON finance_categories(type);',
   finance_categories_custom: 'CREATE INDEX IF NOT EXISTS idx_categories_custom ON finance_categories(is_custom);',
 
-  focus_blocks_status: 'CREATE INDEX IF NOT EXISTS idx_focus_blocks_status ON focus_blocks(status);',
-  focus_blocks_task: 'CREATE INDEX IF NOT EXISTS idx_focus_blocks_task ON focus_blocks(task_id);',
-  focus_blocks_start_time: 'CREATE INDEX IF NOT EXISTS idx_focus_blocks_start_time ON focus_blocks(start_time);',
-
-  pomodoro_sessions_task: 'CREATE INDEX IF NOT EXISTS idx_pomodoro_sessions_task ON pomodoro_sessions(task_id);',
-  pomodoro_sessions_status: 'CREATE INDEX IF NOT EXISTS idx_pomodoro_sessions_status ON pomodoro_sessions(status);',
-  pomodoro_sessions_started_at: 'CREATE INDEX IF NOT EXISTS idx_pomodoro_sessions_started_at ON pomodoro_sessions(started_at);',
+  focus_sessions_status: 'CREATE INDEX IF NOT EXISTS idx_focus_sessions_status ON focus_sessions(status);',
+  focus_sessions_task: 'CREATE INDEX IF NOT EXISTS idx_focus_sessions_task ON focus_sessions(task_id);',
+  focus_sessions_start_time: 'CREATE INDEX IF NOT EXISTS idx_focus_sessions_start_time ON focus_sessions(start_time);',
+  focus_sessions_is_pomodoro: 'CREATE INDEX IF NOT EXISTS idx_focus_sessions_is_pomodoro ON focus_sessions(is_pomodoro);',
 
   ai_messages_conversation: 'CREATE INDEX IF NOT EXISTS idx_ai_messages_conversation ON ai_messages(conversation_id);',
   ai_messages_timestamp: 'CREATE INDEX IF NOT EXISTS idx_ai_messages_timestamp ON ai_messages(timestamp);',
@@ -285,9 +268,8 @@ export const CREATE_INDEXES = {
 export const DROP_TABLES = [
   'DROP TABLE IF EXISTS ai_messages',
   'DROP TABLE IF EXISTS ai_conversations',
-  'DROP TABLE IF EXISTS pomodoro_sessions',
   'DROP TABLE IF EXISTS pomodoro_settings',
-  'DROP TABLE IF EXISTS focus_blocks',
+  'DROP TABLE IF EXISTS focus_sessions',
   'DROP TABLE IF EXISTS habit_logs',
   'DROP TABLE IF EXISTS habits',
   'DROP TABLE IF EXISTS tasks',

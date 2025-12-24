@@ -16,12 +16,16 @@ interface TodaysFocusCardProps {
   focus: TodaysFocus;
   onNavigate: (type: 'task' | 'habit' | 'event', id: string) => void;
   onViewAll: (type: 'tasks' | 'habits' | 'events') => void;
+  onCompleteTask?: (taskId: string) => void;
+  onLogHabit?: (habitId: string) => void;
 }
 
 export const TodaysFocusCard: React.FC<TodaysFocusCardProps> = ({
   focus,
   onNavigate,
   onViewAll,
+  onCompleteTask,
+  onLogHabit,
 }) => {
   const formatTime = (timeStr?: string) => {
     if (!timeStr) return '';
@@ -168,53 +172,94 @@ export const TodaysFocusCard: React.FC<TodaysFocusCardProps> = ({
         )}
       </View>
 
-      <TouchableOpacity
-        style={styles.topFocusItem}
-        onPress={() => topItem && onNavigate(topItem.type, topItem.id)}
-        activeOpacity={0.8}
-      >
-        <View style={[styles.topIconContainer, { backgroundColor: priorityColor + '20' }]}>
-          <IconButton
-            icon={icon}
-            size={40}              // BIGGER icon! (was 32)
-            iconColor={priorityColor}
-            style={styles.topIcon}
-          
-                hitSlop={HIT_SLOP}/>
-        </View>
-
-        <View style={styles.topContent}>
-          <Text style={styles.topTitle} numberOfLines={2}>
-            {topItem.title}
-          </Text>
-
-          <View style={styles.topMeta}>
-            {topItem.time && (
-              <Text style={styles.topTime}>
-                {formatTime(topItem.time)}
-              </Text>
-            )}
-            {topItem.isOverdue && (
-              <View style={styles.topOverdueBadge}>
-                <Text style={styles.topOverdueText}>OVERDUE</Text>
-              </View>
-            )}
-            {topItem.project && (
-              <Text style={styles.topProject} numberOfLines={1}>
-                {topItem.project}
-              </Text>
-            )}
+      <View style={styles.topFocusItem}>
+        <TouchableOpacity
+          style={styles.topFocusContent}
+          onPress={() => topItem && onNavigate(topItem.type, topItem.id)}
+          activeOpacity={0.8}
+        >
+          <View style={[styles.topIconContainer, { backgroundColor: priorityColor + '20' }]}>
+            <IconButton
+              icon={icon}
+              size={40}
+              iconColor={priorityColor}
+              style={styles.topIcon}
+              hitSlop={HIT_SLOP}
+            />
           </View>
-        </View>
 
-        <IconButton
-          icon="chevron-right"
-          size={24}
-          iconColor={colors.text.secondary}
-          style={styles.chevron}
-        
-                hitSlop={HIT_SLOP}/>
-      </TouchableOpacity>
+          <View style={styles.topContent}>
+            <Text style={styles.topTitle} numberOfLines={2}>
+              {topItem.title}
+            </Text>
+
+            <View style={styles.topMeta}>
+              {topItem.time && (
+                <Text style={styles.topTime}>
+                  {formatTime(topItem.time)}
+                </Text>
+              )}
+              {topItem.isOverdue && (
+                <View style={styles.topOverdueBadge}>
+                  <Text style={styles.topOverdueText}>OVERDUE</Text>
+                </View>
+              )}
+              {topItem.project && (
+                <Text style={styles.topProject} numberOfLines={1}>
+                  {topItem.project}
+                </Text>
+              )}
+            </View>
+          </View>
+        </TouchableOpacity>
+
+        {/* Inline Action Button */}
+        {topItem.type === 'task' && onCompleteTask && (
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => onCompleteTask(topItem.id)}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.actionButtonInner, { backgroundColor: colors.success + '20' }]}>
+              <IconButton
+                icon="check"
+                size={28}
+                iconColor={colors.success}
+                style={styles.actionIcon}
+              />
+            </View>
+            <Text style={[styles.actionLabel, { color: colors.success }]}>Done</Text>
+          </TouchableOpacity>
+        )}
+
+        {topItem.type === 'habit' && onLogHabit && (
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => onLogHabit(topItem.id)}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.actionButtonInner, { backgroundColor: colors.primary.main + '20' }]}>
+              <IconButton
+                icon="plus"
+                size={28}
+                iconColor={colors.primary.main}
+                style={styles.actionIcon}
+              />
+            </View>
+            <Text style={[styles.actionLabel, { color: colors.primary.main }]}>Log</Text>
+          </TouchableOpacity>
+        )}
+
+        {topItem.type === 'event' && (
+          <IconButton
+            icon="chevron-right"
+            size={24}
+            iconColor={colors.text.secondary}
+            style={styles.chevron}
+            hitSlop={HIT_SLOP}
+          />
+        )}
+      </View>
     </AppCard>
   );
 };
@@ -245,11 +290,35 @@ const styles = StyleSheet.create({
   topFocusItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: spacing.xl,            // Much more padding! (was base)
+    padding: spacing.lg,
     backgroundColor: colors.background.primary + '40',
-    borderRadius: borderRadius.xl,  // More rounded (was lg)
-    borderWidth: 2,                 // Thicker border (was 1)
-    borderColor: 'rgba(16, 232, 127, 0.3)', // Vibrant green tint (was white 0.05)
+    borderRadius: borderRadius.xl,
+    borderWidth: 2,
+    borderColor: 'rgba(16, 232, 127, 0.3)',
+  },
+  topFocusContent: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  actionButton: {
+    alignItems: 'center',
+    marginLeft: spacing.md,
+  },
+  actionButtonInner: {
+    width: 56,
+    height: 56,
+    borderRadius: borderRadius.lg,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  actionIcon: {
+    margin: 0,
+  },
+  actionLabel: {
+    fontSize: typography.size.xs,
+    fontWeight: typography.weight.semibold,
+    marginTop: spacing.xs,
   },
   topIconContainer: {
     width: 80,                      // BIGGER (was 64)

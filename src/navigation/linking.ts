@@ -12,52 +12,50 @@ export const linking: LinkingOptions<RootStackParamList> = {
     screens: {
       Main: {
         screens: {
+          // Home tab
           Dashboard: 'dashboard',
-          AIChat: {
-            path: 'ai',
-            screens: {
-              AIChatMain: 'chat',
-              ConversationDetail: 'chat/:conversationId',
-            },
-          },
+
+          // Tasks tab
           Tasks: {
             path: 'tasks',
-            screens: {
-              TasksList: '',
-              TaskDetail: 'task/:taskId',
+            parse: {
+              taskId: (taskId: string) => taskId,
             },
           },
-          Projects: {
-            path: 'projects',
-            screens: {
-              ProjectsList: '',
-              ProjectDetail: 'project/:projectId',
-            },
-          },
-          Habits: {
-            path: 'habits',
-            screens: {
-              HabitsList: '',
-              HabitDetail: 'habit/:habitId',
-            },
-          },
-          Calendar: {
-            path: 'calendar',
-            screens: {
-              CalendarMain: '',
-              EventDetail: 'event/:eventId',
-            },
-          },
-          Finance: 'finance',
+
+          // Focus tab
           Focus: 'focus',
-          Pomodoro: 'pomodoro',
-          Settings: {
-            path: 'settings',
+
+          // Track tab (Habits + Calendar)
+          Track: {
+            path: 'track',
+            parse: {
+              view: (view: string) => view as 'habits' | 'calendar',
+              habitId: (habitId: string) => habitId,
+              eventId: (eventId: string) => eventId,
+            },
+          },
+
+          // More tab (stack navigator)
+          More: {
             screens: {
-              SettingsMain: '',
-              StorageOverview: 'storage',
-              DataManagement: 'data',
-              CategoryManagement: 'categories',
+              MoreMenu: '',
+              Finance: 'finance',
+              AIChat: {
+                path: 'ai',
+                parse: {
+                  conversationId: (id: string) => id,
+                },
+              },
+              Settings: {
+                path: 'settings',
+                screens: {
+                  SettingsMain: '',
+                  StorageOverview: 'storage',
+                  DataManagement: 'data',
+                  CategoryManagement: 'categories',
+                },
+              },
             },
           },
         },

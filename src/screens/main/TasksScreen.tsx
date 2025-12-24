@@ -20,13 +20,16 @@ import {
   FlatList,
   Dimensions,
 } from 'react-native';
-import { IconButton, Checkbox, Badge } from 'react-native-paper';
+import { IconButton, Checkbox, Badge, SegmentedButtons, Menu } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as tasksDB from '../../database/tasks';
+import * as projectsDB from '../../database/projects';
 import * as undoService from '../../services/undo';
 import type { Project } from '../../database/projects';
+import { ProjectTasksGroup } from '../../components/tasks/ProjectTasksGroup';
+import { ProjectFormModal } from '../../components/ProjectFormModal';
 import { AppButton, AppCard, AppChip, EmptyState, LoadingState, LastUpdated, SearchBar, AnimatedListItem, FloatingActionButton } from '../../components/ui';
 import { TaskCardSkeleton } from '../../components/tasks/TaskCardSkeleton';
 import { RecurrencePicker } from '../../components/RecurrencePicker';
@@ -133,6 +136,11 @@ export default function TasksScreen() {
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [celebrationVisible, setCelebrationVisible] = useState(false);
   const [celebrationMessage, setCelebrationMessage] = useState('');
+  const [taskViewMode, setTaskViewMode] = useState<'all' | 'byProject'>('all');
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [showFabMenu, setShowFabMenu] = useState(false);
+  const [showProjectModal, setShowProjectModal] = useState(false);
+  const [preselectedProjectId, setPreselectedProjectId] = useState<string | undefined>();
   const insets = useSafeAreaInsets();
   const { updateOptimistically, isPending } = useOptimisticUpdate();
   const tooltip = useTooltip();
@@ -163,6 +171,20 @@ export default function TasksScreen() {
   useEffect(() => {
     loadTasks();
   }, [loadTasks, refreshTrigger]);
+
+  // Load projects for "By Project" view
+  const loadProjects = useCallback(async () => {
+    try {
+      const loadedProjects = await projectsDB.getProjectsWithStats(false);
+      setProjects(loadedProjects);
+    } catch (error) {
+      console.error('Error loading projects:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadProjects();
+  }, [loadProjects]);
 
   // Pull-to-refresh with haptics and timestamp
   const { refreshing, handleRefresh, lastUpdated } = useRefreshControl({
@@ -621,7 +643,28 @@ export default function TasksScreen() {
         </View>
       )}
 
-      {/* View Mode Selector - Removed: Only list view is implemented */}
+      {/* Task View Mode Selector: All Tasks vs By Project */}
+      {!bulkSelectMode && (
+        <View style={styles.viewModeContainer}>
+          <SegmentedButtons
+            value={taskViewMode}
+            onValueChange={(value) => setTaskViewMode(value as 'all' | 'byProject')}
+            buttons={[
+              {
+                value: 'all',
+                label: 'All Tasks',
+                icon: 'format-list-bulleted',
+              },
+              {
+                value: 'byProject',
+                label: 'By Project',
+                icon: 'folder-outline',
+              },
+            ]}
+            style={{ backgroundColor: colors.background.primary }}
+          />
+        </View>
+      )}
 
       {/* Filters */}
       {viewMode === 'list' && !bulkSelectMode && (
@@ -670,7 +713,49 @@ export default function TasksScreen() {
       )}
 
       {/* Content */}
-      {viewMode === 'list' ? (
+      {taskViewMode === 'byProject' ? (
+        <ProjectTasksGroup
+          tasks={filteredTasks}
+          projects={projects}
+          onTaskPress={(task) => handleEdit(task as Task)}
+          onTaskComplete={(taskId) => handleStatusChange(taskId, 'completed')}
+          onCreateTask={(projectId) => {
+            setPreselectedProjectId(projectId);
+            setSelectedTask(null);
+            setShowCreateModal(true);
+          }}
+          onProjectPress={(project) => {
+            // Optional: could navigate to project details
+          }}
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+          renderTaskItem={(task) => (
+            <SwipeableTaskItem
+              key={task.id}
+              taskId={task.id}
+              taskTitle={task.title}
+              isCompleted={task.status === 'completed'}
+              onComplete={() => handleStatusChange(task.id, 'completed')}
+              onUncomplete={() => handleStatusChange(task.id, 'todo')}
+              onDelete={() => handleDelete(task.id)}
+              disabled={bulkSelectMode}
+            >
+              <TaskCard
+                task={task as Task}
+                onStatusChange={handleStatusChange}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                highlightId={params?.highlightId}
+                // @ts-expect-error - Navigation type compatibility
+                onHighlightComplete={() => clearHighlight(navigation)}
+                bulkSelectMode={bulkSelectMode}
+                selected={selectedTaskIds.has(task.id)}
+                onToggleSelect={() => toggleTaskSelection(task.id)}
+              />
+            </SwipeableTaskItem>
+          )}
+        />
+      ) : viewMode === 'list' ? (
         <FlatList
           data={filteredTasks}
           renderItem={({ item: task, index }) => (
@@ -851,16 +936,55 @@ export default function TasksScreen() {
         onDismiss={() => setCelebrationVisible(false)}
       />
 
-      {/* Floating Action Button - Only show when not in bulk select mode */}
+      {/* Floating Action Button with Menu */}
       {!bulkSelectMode && (
-        <FloatingActionButton
-          icon="plus"
-          onPress={() => {
-            setSelectedTask(null);
-            setShowCreateModal(true);
-          }}
-        />
+        <View style={[styles.fabContainer, { bottom: insets.bottom + 16 }]}>
+          <Menu
+            visible={showFabMenu}
+            onDismiss={() => setShowFabMenu(false)}
+            anchor={
+              <FloatingActionButton
+                icon={showFabMenu ? 'close' : 'plus'}
+                onPress={() => setShowFabMenu(!showFabMenu)}
+              />
+            }
+            contentStyle={[styles.fabMenu, { backgroundColor: colors.background.secondary }]}
+            anchorPosition="top"
+          >
+            <Menu.Item
+              leadingIcon="checkbox-marked-circle-plus-outline"
+              onPress={() => {
+                setShowFabMenu(false);
+                setSelectedTask(null);
+                setPreselectedProjectId(undefined);
+                setShowCreateModal(true);
+              }}
+              title="New Task"
+              titleStyle={{ color: colors.text.primary }}
+            />
+            <Menu.Item
+              leadingIcon="folder-plus-outline"
+              onPress={() => {
+                setShowFabMenu(false);
+                setShowProjectModal(true);
+              }}
+              title="New Project"
+              titleStyle={{ color: colors.text.primary }}
+            />
+          </Menu>
+        </View>
       )}
+
+      {/* Project Form Modal */}
+      <ProjectFormModal
+        visible={showProjectModal}
+        project={null}
+        onClose={() => setShowProjectModal(false)}
+        onSuccess={() => {
+          loadProjects();
+          setRefreshTrigger((prev) => prev + 1);
+        }}
+      />
     </View>
   );
 }
@@ -1488,6 +1612,19 @@ const createStyles = (colors: ReturnType<typeof getColors>) => StyleSheet.create
   searchContainer: {
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.sm,
+  },
+  viewModeContainer: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.sm,
+  },
+  fabContainer: {
+    position: 'absolute',
+    right: spacing.lg,
+    zIndex: 100,
+  },
+  fabMenu: {
+    borderRadius: borderRadius.lg,
+    ...shadows.lg,
   },
   filterButtonContainer: {
     position: 'relative',

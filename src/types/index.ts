@@ -199,16 +199,20 @@ export type RootStackParamList = {
   Onboarding: undefined;
 };
 
+// Simplified 5-tab navigation
 export type MainTabParamList = {
   Dashboard: undefined;
-  AIChat: undefined | { conversationId?: string };
   Tasks: undefined | { taskId?: string };
-  Projects: undefined | { projectId?: string };
-  Habits: undefined | { habitId?: string };
   Focus: undefined;
-  Pomodoro: undefined;
-  Calendar: undefined | { eventId?: string };
+  Track: undefined | { view?: 'habits' | 'calendar'; habitId?: string; eventId?: string };
+  More: undefined;
+};
+
+// More stack (Finance, AI, Settings)
+export type MoreStackParamList = {
+  MoreMenu: undefined;
   Finance: undefined;
+  AIChat: undefined | { conversationId?: string };
   Settings: undefined;
 };
 

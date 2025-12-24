@@ -1,5 +1,19 @@
 # Changelog
 
+## 2025-12-24
+
+- feat: Navigation consolidation - 10 tabs reduced to 5 (Home, Tasks, Focus, Track, More)
+- feat: Create TrackScreen with Habits + Calendar toggle
+- feat: Create MoreScreen with Finance, AI, Settings menu
+- feat: Merge Pomodoro into Focus - Quick Start panel with duration presets
+- feat: Add Pomodoro mode toggle (enables work/break cycle awareness)
+- feat: Tasks + Projects integration - "By Project" view toggle
+- feat: ProjectTasksGroup with collapsible project sections
+- feat: FAB menu for creating tasks or projects
+- feat: Dashboard inline actions - complete tasks and log habits directly from TodaysFocusCard
+- feat: Quick Capture Sheet "Log Habit" option for fast habit logging
+- docs: UX Workflow Analysis paper (`docs/UX_WORKFLOW_ANALYSIS.md`)
+
 ## 2025-12-23
 
 - feat: Add Toast confirmation with undo for quick-capture actions

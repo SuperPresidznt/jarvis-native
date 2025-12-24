@@ -7,7 +7,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { IconButton } from 'react-native-paper';
 import { useTheme } from '../../hooks/useTheme';
-import { FocusBlock } from '../../database/focusBlocks';
+import { FocusSession } from '../../database/focusSessions';
 import {
   formatDuration,
   generateInsights,
@@ -21,7 +21,7 @@ import { typography, spacing, borderRadius, shadows } from '../../theme';
 import { HIT_SLOP } from '../../constants/ui';
 
 interface FocusAnalyticsProps {
-  blocks: FocusBlock[];
+  blocks: FocusSession[];
   hourlyData: Array<{ hour: number; minutes: number; sessions: number }>;
   stats: {
     totalFocusMinutes: number;

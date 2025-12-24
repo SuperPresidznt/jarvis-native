@@ -16,15 +16,15 @@ import {
 import { IconButton } from 'react-native-paper';
 // Note: Using semi-transparent overlay instead of BlurView for broader compatibility
 import { useTheme } from '../../hooks/useTheme';
-import { useFocusTimer } from '../../hooks/useFocusTimer';
+import { useUnifiedTimer } from '../../hooks/useUnifiedTimer';
 import { usePhoneInMode } from '../../hooks/usePhoneInMode';
-import { FocusBlock } from '../../database/focusBlocks';
+import { FocusSession } from '../../database/focusSessions';
 import { typography, spacing, borderRadius } from '../../theme';
 import { HIT_SLOP } from '../../constants/ui';
 
 interface PhoneInModalProps {
   visible: boolean;
-  focusBlock: FocusBlock;
+  focusBlock: FocusSession;
   onComplete: () => void;
   onEmergencyExit: () => void;
 }
@@ -45,7 +45,7 @@ export const PhoneInModal: React.FC<PhoneInModalProps> = ({
     pause,
     resume,
     stop,
-  } = useFocusTimer(focusBlock);
+  } = useUnifiedTimer(focusBlock);
   const { triggerBreakNotification, triggerCompletionHaptic } = usePhoneInMode();
 
   // Block back button on Android

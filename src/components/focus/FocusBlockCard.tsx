@@ -7,20 +7,20 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { IconButton } from 'react-native-paper';
 import { useTheme } from '../../hooks/useTheme';
-import { FocusBlock } from '../../database/focusBlocks';
+import { FocusSession } from '../../database/focusSessions';
 import { formatDuration, calculateEfficiency } from '../../utils/focusAnalytics';
 import { typography, spacing, borderRadius, shadows } from '../../theme';
 import { HIT_SLOP } from '../../constants/ui';
 
-interface FocusBlockCardProps {
-  block: FocusBlock;
+interface FocusSessionCardProps {
+  block: FocusSession;
   onPress?: () => void;
   onStart?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
 }
 
-export const FocusBlockCard: React.FC<FocusBlockCardProps> = ({
+export const FocusBlockCard: React.FC<FocusSessionCardProps> = ({
   block,
   onPress,
   onStart,

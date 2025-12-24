@@ -3,7 +3,7 @@
  * Calculate productivity insights and patterns from focus blocks
  */
 
-import { FocusBlock } from '../database/focusBlocks';
+import { FocusSession } from '../database/focusSessions';
 
 export interface ProductiveHour {
   hour: number;
@@ -58,7 +58,7 @@ export function getMostProductiveHours(
 /**
  * Calculate weekday statistics from focus blocks
  */
-export function calculateWeekdayStats(blocks: FocusBlock[]): WeekdayStats[] {
+export function calculateWeekdayStats(blocks: FocusSession[]): WeekdayStats[] {
   const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const stats = Array.from({ length: 7 }, (_, i) => ({
     day: i,
@@ -81,7 +81,7 @@ export function calculateWeekdayStats(blocks: FocusBlock[]): WeekdayStats[] {
 /**
  * Get focus time for today
  */
-export function getTodayFocusTime(blocks: FocusBlock[]): number {
+export function getTodayFocusTime(blocks: FocusSession[]): number {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -98,7 +98,7 @@ export function getTodayFocusTime(blocks: FocusBlock[]): number {
 /**
  * Get focus time for this week
  */
-export function getWeekFocusTime(blocks: FocusBlock[]): number {
+export function getWeekFocusTime(blocks: FocusSession[]): number {
   const now = new Date();
   const weekStart = new Date(now);
   weekStart.setDate(now.getDate() - now.getDay());
@@ -116,7 +116,7 @@ export function getWeekFocusTime(blocks: FocusBlock[]): number {
 /**
  * Get focus time for this month
  */
-export function getMonthFocusTime(blocks: FocusBlock[]): number {
+export function getMonthFocusTime(blocks: FocusSession[]): number {
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
@@ -169,7 +169,7 @@ export function formatDetailedDuration(minutes: number): string {
  * Generate insights from focus data
  */
 export function generateInsights(
-  blocks: FocusBlock[],
+  blocks: FocusSession[],
   stats: {
     currentStreak: number;
     completionRate: number;
@@ -282,7 +282,7 @@ export function generateInsights(
 /**
  * Calculate 7-day trend data for sparkline
  */
-export function get7DayTrend(blocks: FocusBlock[]): number[] {
+export function get7DayTrend(blocks: FocusSession[]): number[] {
   const days = 7;
   const trend: number[] = [];
   const today = new Date();
@@ -320,7 +320,7 @@ export function getTimePeriodLabel(days: number): string {
 /**
  * Check if focus block is active (in_progress and not overdue)
  */
-export function isFocusBlockActive(block: FocusBlock): boolean {
+export function isFocusSessionActive(block: FocusSession): boolean {
   if (block.status !== 'in_progress' || !block.startTime) return false;
 
   const startTime = new Date(block.startTime).getTime();
@@ -334,7 +334,7 @@ export function isFocusBlockActive(block: FocusBlock): boolean {
 /**
  * Get elapsed time for active focus block
  */
-export function getElapsedTime(block: FocusBlock): number {
+export function getElapsedTime(block: FocusSession): number {
   if (block.status !== 'in_progress' || !block.startTime) return 0;
 
   const startTime = new Date(block.startTime).getTime();
@@ -345,7 +345,7 @@ export function getElapsedTime(block: FocusBlock): number {
 /**
  * Get remaining time for active focus block
  */
-export function getRemainingTime(block: FocusBlock): number {
+export function getRemainingTime(block: FocusSession): number {
   const elapsed = getElapsedTime(block);
   return Math.max(0, block.durationMinutes - elapsed);
 }
@@ -353,7 +353,7 @@ export function getRemainingTime(block: FocusBlock): number {
 /**
  * Calculate focus efficiency (actual vs planned time)
  */
-export function calculateEfficiency(block: FocusBlock): number {
+export function calculateEfficiency(block: FocusSession): number {
   if (block.status !== 'completed' || !block.actualMinutes) return 100;
 
   const efficiency = (block.actualMinutes / block.durationMinutes) * 100;
@@ -372,7 +372,7 @@ export default {
   generateInsights,
   get7DayTrend,
   getTimePeriodLabel,
-  isFocusBlockActive,
+  isFocusSessionActive,
   getElapsedTime,
   getRemainingTime,
   calculateEfficiency,

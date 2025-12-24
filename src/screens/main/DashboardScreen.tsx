@@ -22,10 +22,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
 import * as dashboardDB from '../../database/dashboard';
 import * as tasksDB from '../../database/tasks';
+import * as habitsDB from '../../database/habits';
 import * as financeDB from '../../database/finance';
 import * as budgetsDB from '../../database/budgets';
 import * as analyticsDB from '../../database/analytics';
-import * as focusBlocksDB from '../../database/focusBlocks';
+import * as focusSessionsDB from '../../database/focusSessions';
+import { haptic } from '../../utils/haptics';
 import { MetricCard } from '../../components/MetricCard';
 import { StartControls } from '../../components/StartControls';
 import { TodaysFocusCard } from '../../components/TodaysFocusCard';
@@ -73,18 +75,20 @@ export default function DashboardScreen() {
   const [selectedChartTitle, setSelectedChartTitle] = useState('');
   const [quickCaptureVisible, setQuickCaptureVisible] = useState(false);
   const [activeTasks, setActiveTasks] = useState<tasksDB.Task[]>([]);
+  const [activeHabits, setActiveHabits] = useState<habitsDB.Habit[]>([]);
   const insets = useSafeAreaInsets();
 
   // Load dashboard data
   const loadData = useCallback(async () => {
     try {
-      const [metricsData, goalsData, alertsData, focusData, trendsData, tasksData] = await Promise.all([
+      const [metricsData, goalsData, alertsData, focusData, trendsData, tasksData, habitsData] = await Promise.all([
         dashboardDB.getTodayMetrics(),
         dashboardDB.getMacroGoals(),
         budgetsDB.getAlertBudgets(),
         dashboardDB.getTodaysFocus(),
         analyticsDB.getDashboardTrendData(7),
         tasksDB.getTasks({ statuses: ['todo', 'in_progress'], sortField: 'dueDate', sortDirection: 'asc' }),
+        habitsDB.getHabits(),
       ]);
       setMetrics(metricsData);
       setMacroGoals(goalsData);
@@ -92,6 +96,7 @@ export default function DashboardScreen() {
       setTodaysFocus(focusData);
       setTrendData(trendsData);
       setActiveTasks(tasksData);
+      setActiveHabits(habitsData);
     } catch (error) {
       console.error('[Dashboard] Error loading data:', error);
       Alert.alert('Error', 'Failed to load dashboard data');
@@ -183,7 +188,7 @@ export default function DashboardScreen() {
   const handleStartFocus = async (taskId?: string) => {
     try {
       // Create a default focus block with optional task link
-      const focusBlock = await focusBlocksDB.createFocusBlock({
+      const focusBlock = await focusSessionsDB.createFocusSession({
         title: taskId ? 'Task Focus Session' : 'Focus Session',
         durationMinutes: 25,
         taskId,
@@ -191,7 +196,7 @@ export default function DashboardScreen() {
       });
 
       // Start the focus block immediately
-      await focusBlocksDB.startFocusBlock(focusBlock.id);
+      await focusSessionsDB.startFocusSession(focusBlock.id);
 
       // Navigate to Focus screen to show the active timer
       // @ts-expect-error - Navigation type compatibility
@@ -213,6 +218,32 @@ export default function DashboardScreen() {
   const handleFocusViewAll = (type: 'tasks' | 'habits' | 'events') => {
     // @ts-expect-error - Navigation type compatibility
     navigateToViewAll(navigation, type);
+  };
+
+  // Inline task completion from dashboard
+  const handleCompleteTask = async (taskId: string) => {
+    try {
+      haptic.success();
+      await tasksDB.updateTask(taskId, { status: 'completed' });
+      announceForAccessibility('Task completed');
+      await loadData();
+    } catch (error) {
+      console.error('[Dashboard] Error completing task:', error);
+      Alert.alert('Error', 'Failed to complete task');
+    }
+  };
+
+  // Inline habit logging from dashboard
+  const handleLogHabit = async (habitId: string) => {
+    try {
+      haptic.success();
+      await habitsDB.logHabitCompletion(habitId, new Date().toISOString().split('T')[0], true);
+      announceForAccessibility('Habit logged');
+      await loadData();
+    } catch (error) {
+      console.error('[Dashboard] Error logging habit:', error);
+      Alert.alert('Error', 'Failed to log habit');
+    }
   };
 
   const handleOpenChart = (type: ChartDataType, title: string) => {
@@ -331,6 +362,8 @@ export default function DashboardScreen() {
             focus={todaysFocus}
             onNavigate={handleFocusNavigate}
             onViewAll={handleFocusViewAll}
+            onCompleteTask={handleCompleteTask}
+            onLogHabit={handleLogHabit}
           />
         )}
 
@@ -495,7 +528,9 @@ export default function DashboardScreen() {
         onQuickTask={handleQuickTask}
         onLogExpense={handleLogExpense}
         onStartFocus={handleStartFocus}
+        onLogHabit={handleLogHabit}
         tasks={activeTasks}
+        habits={activeHabits}
       />
 
       {/* Detailed Chart Modal */}

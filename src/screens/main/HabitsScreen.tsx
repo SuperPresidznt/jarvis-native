@@ -72,7 +72,11 @@ interface Habit extends habitsDB.Habit {
   };
 }
 
-export default function HabitsScreen() {
+interface HabitsScreenProps {
+  embedded?: boolean;
+}
+
+export default function HabitsScreen({ embedded = false }: HabitsScreenProps) {
   const { colors } = useTheme();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
@@ -398,11 +402,13 @@ export default function HabitsScreen() {
   if (isLoading && habits.length === 0) {
     return (
       <View style={styles.container}>
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <Text style={styles.title}>Habits</Text>
+        {!embedded && (
+          <View style={styles.header}>
+            <View style={styles.headerLeft}>
+              <Text style={styles.title}>Habits</Text>
+            </View>
           </View>
-        </View>
+        )}
         <ScrollView
           style={styles.content}
           accessible
@@ -421,31 +427,33 @@ export default function HabitsScreen() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Text style={styles.title}>Habits</Text>
-          <View style={styles.subtitleRow}>
-            <Text style={styles.subtitle}>
-              {activeHabits.length} active habit{activeHabits.length !== 1 ? 's' : ''}
-            </Text>
-            {isPending && (
-              <View style={styles.savingIndicator}>
-                <Text style={styles.savingText}>Saving...</Text>
-              </View>
-            )}
-            <LastUpdated date={lastUpdated} />
+      {!embedded && (
+        <View style={styles.header}>
+          <View style={styles.headerLeft}>
+            <Text style={styles.title}>Habits</Text>
+            <View style={styles.subtitleRow}>
+              <Text style={styles.subtitle}>
+                {activeHabits.length} active habit{activeHabits.length !== 1 ? 's' : ''}
+              </Text>
+              {isPending && (
+                <View style={styles.savingIndicator}>
+                  <Text style={styles.savingText}>Saving...</Text>
+                </View>
+              )}
+              <LastUpdated date={lastUpdated} />
+            </View>
           </View>
+          <AppButton
+            title="New Habit"
+            onPress={() => {
+              setSelectedHabit(null);
+              setShowCreateModal(true);
+            }}
+            size="small"
+            {...makeButton('Create new habit', 'Double tap to create a new habit')}
+          />
         </View>
-        <AppButton
-          title="New Habit"
-          onPress={() => {
-            setSelectedHabit(null);
-            setShowCreateModal(true);
-          }}
-          size="small"
-          {...makeButton('Create new habit', 'Double tap to create a new habit')}
-        />
-      </View>
+      )}
 
       {/* Search Bar */}
       <View style={styles.searchContainer}>

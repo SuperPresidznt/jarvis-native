@@ -3,7 +3,7 @@
  * Utility functions for pomodoro timer logic
  */
 
-import { PomodoroSettings } from '../database/pomodoro';
+import { PomodoroSettings } from '../database/focusSessions';
 
 export type PomodoroPhase = 'work' | 'short_break' | 'long_break';
 

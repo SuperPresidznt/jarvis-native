@@ -60,7 +60,11 @@ interface CalendarEvent extends calendarDB.CalendarEvent {
   endAt?: string;
 }
 
-export default function CalendarScreen() {
+interface CalendarScreenProps {
+  embedded?: boolean;
+}
+
+export default function CalendarScreen({ embedded = false }: CalendarScreenProps) {
   const { colors } = useTheme();
   const [viewMode, setViewMode] = useState<'agenda' | 'day' | 'week'>('agenda');
   const [events, setEvents] = useState<CalendarEvent[]>([]);
@@ -229,11 +233,13 @@ export default function CalendarScreen() {
   if (isLoading && events.length === 0) {
     return (
       <View style={styles.container}>
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <Text style={styles.title}>Calendar</Text>
+        {!embedded && (
+          <View style={styles.header}>
+            <View style={styles.headerLeft}>
+              <Text style={styles.title}>Calendar</Text>
+            </View>
           </View>
-        </View>
+        )}
         <ScrollView
           style={styles.content}
           accessible
@@ -254,36 +260,38 @@ export default function CalendarScreen() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Text style={styles.title} {...makeHeader('Calendar', 1)}>
-            Calendar
-          </Text>
-          <View style={styles.subtitleRow}>
-            <Text style={styles.subtitle} accessible={true} accessibilityLabel={`${events.length} ${events.length !== 1 ? 'events' : 'event'} scheduled`}>
-              {events.length} event{events.length !== 1 ? 's' : ''}
+      {!embedded && (
+        <View style={styles.header}>
+          <View style={styles.headerLeft}>
+            <Text style={styles.title} {...makeHeader('Calendar', 1)}>
+              Calendar
             </Text>
-            {isPending && (
-              <View style={styles.savingIndicator} accessible={true} accessibilityLabel="Saving changes" accessibilityRole="progressbar">
-                <Text style={styles.savingText} accessible={false} importantForAccessibility="no-hide-descendants">
-                  Saving...
-                </Text>
-              </View>
-            )}
-            <LastUpdated date={lastUpdated} />
+            <View style={styles.subtitleRow}>
+              <Text style={styles.subtitle} accessible={true} accessibilityLabel={`${events.length} ${events.length !== 1 ? 'events' : 'event'} scheduled`}>
+                {events.length} event{events.length !== 1 ? 's' : ''}
+              </Text>
+              {isPending && (
+                <View style={styles.savingIndicator} accessible={true} accessibilityLabel="Saving changes" accessibilityRole="progressbar">
+                  <Text style={styles.savingText} accessible={false} importantForAccessibility="no-hide-descendants">
+                    Saving...
+                  </Text>
+                </View>
+              )}
+              <LastUpdated date={lastUpdated} />
+            </View>
           </View>
+          <AppButton
+            title="New Event"
+            onPress={() => {
+              setSelectedEvent(null);
+              setShowCreateModal(true);
+            }}
+            size="small"
+            accessibilityLabel="Create new event"
+            accessibilityHint="Double tap to add a new calendar event"
+          />
         </View>
-        <AppButton
-          title="New Event"
-          onPress={() => {
-            setSelectedEvent(null);
-            setShowCreateModal(true);
-          }}
-          size="small"
-          accessibilityLabel="Create new event"
-          accessibilityHint="Double tap to add a new calendar event"
-        />
-      </View>
+      )}
 
       {/* Search Bar */}
       <View style={styles.searchContainer}>

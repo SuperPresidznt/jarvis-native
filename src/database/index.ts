@@ -133,6 +133,130 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
     console.error('[DB] Migration: Error adding sort_order to tasks:', error);
   }
 
+  // Migration 6: Consolidate Pomodoro and Focus into unified focus_sessions table
+  try {
+    const tableInfo = await db.getAllAsync<{ name: string }>(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='focus_sessions'"
+    );
+
+    const hasFocusSessions = tableInfo.length > 0;
+
+    if (!hasFocusSessions) {
+      console.log('[DB] Migration: Creating unified focus_sessions table and migrating data');
+
+      // Create the new unified table
+      await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS focus_sessions (
+          id TEXT PRIMARY KEY,
+          title TEXT NOT NULL,
+          description TEXT,
+          duration_minutes INTEGER NOT NULL,
+          actual_minutes INTEGER,
+          task_id TEXT,
+          is_pomodoro INTEGER DEFAULT 0,
+          session_number INTEGER,
+          break_minutes INTEGER,
+          phone_in_mode INTEGER DEFAULT 0,
+          status TEXT DEFAULT 'scheduled',
+          start_time TEXT,
+          end_time TEXT,
+          notes TEXT,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL,
+          synced INTEGER DEFAULT 0,
+          FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE SET NULL
+        );
+      `);
+
+      // Migrate data from focus_blocks
+      await db.execAsync(`
+        INSERT INTO focus_sessions (
+          id, title, description, duration_minutes, actual_minutes, task_id,
+          is_pomodoro, session_number, break_minutes, phone_in_mode,
+          status, start_time, end_time, notes, created_at, updated_at, synced
+        )
+        SELECT
+          id,
+          title,
+          description,
+          duration_minutes,
+          actual_minutes,
+          task_id,
+          0 as is_pomodoro,
+          NULL as session_number,
+          NULL as break_minutes,
+          phone_in_mode,
+          status,
+          start_time,
+          end_time,
+          NULL as notes,
+          created_at,
+          updated_at,
+          synced
+        FROM focus_blocks
+        WHERE EXISTS (SELECT 1 FROM sqlite_master WHERE type='table' AND name='focus_blocks');
+      `);
+
+      // Migrate data from pomodoro_sessions
+      await db.execAsync(`
+        INSERT INTO focus_sessions (
+          id, title, description, duration_minutes, actual_minutes, task_id,
+          is_pomodoro, session_number, break_minutes, phone_in_mode,
+          status, start_time, end_time, notes, created_at, updated_at, synced
+        )
+        SELECT
+          id,
+          'Pomodoro Session #' || session_number as title,
+          NULL as description,
+          duration_minutes,
+          duration_minutes as actual_minutes,
+          task_id,
+          1 as is_pomodoro,
+          session_number,
+          break_minutes,
+          0 as phone_in_mode,
+          CASE status
+            WHEN 'in_progress' THEN 'in_progress'
+            WHEN 'completed' THEN 'completed'
+            WHEN 'cancelled' THEN 'cancelled'
+            ELSE 'scheduled'
+          END as status,
+          started_at as start_time,
+          completed_at as end_time,
+          notes,
+          created_at,
+          created_at as updated_at,
+          synced
+        FROM pomodoro_sessions
+        WHERE EXISTS (SELECT 1 FROM sqlite_master WHERE type='table' AND name='pomodoro_sessions');
+      `);
+
+      // Create indexes for the new table
+      await db.execAsync(`
+        CREATE INDEX IF NOT EXISTS idx_focus_sessions_status ON focus_sessions(status);
+      `);
+      await db.execAsync(`
+        CREATE INDEX IF NOT EXISTS idx_focus_sessions_task ON focus_sessions(task_id);
+      `);
+      await db.execAsync(`
+        CREATE INDEX IF NOT EXISTS idx_focus_sessions_start_time ON focus_sessions(start_time);
+      `);
+      await db.execAsync(`
+        CREATE INDEX IF NOT EXISTS idx_focus_sessions_is_pomodoro ON focus_sessions(is_pomodoro);
+      `);
+
+      // Drop old tables
+      await db.execAsync('DROP TABLE IF EXISTS focus_blocks;');
+      await db.execAsync('DROP TABLE IF EXISTS pomodoro_sessions;');
+
+      console.log('[DB] Migration: Successfully consolidated into focus_sessions table');
+    } else {
+      console.log('[DB] Migration: focus_sessions table already exists, skipping consolidation');
+    }
+  } catch (error) {
+    console.error('[DB] Migration: Error consolidating focus_sessions:', error);
+  }
+
   console.log('[DB] Migrations complete');
 }
 

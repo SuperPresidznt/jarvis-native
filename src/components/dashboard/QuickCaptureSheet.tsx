@@ -25,9 +25,10 @@ import { colors, typography, spacing, borderRadius, shadows } from '../../theme'
 import { makeButton, makeTextInput, announceForAccessibility } from '../../utils/accessibility';
 import { HIT_SLOP } from '../../constants/ui';
 import { Task } from '../../database/tasks';
+import { Habit } from '../../database/habits';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-const SHEET_HEIGHT = 480;
+const SHEET_HEIGHT = 520;
 
 interface QuickCaptureSheetProps {
   visible: boolean;
@@ -35,10 +36,12 @@ interface QuickCaptureSheetProps {
   onQuickTask: (title: string) => Promise<void>;
   onLogExpense: (amount: string) => Promise<void>;
   onStartFocus: (taskId?: string) => Promise<void>;
+  onLogHabit?: (habitId: string) => Promise<void>;
   tasks?: Task[];
+  habits?: Habit[];
 }
 
-type CaptureMode = 'menu' | 'task' | 'expense' | 'focus';
+type CaptureMode = 'menu' | 'task' | 'expense' | 'focus' | 'habit';
 
 export const QuickCaptureSheet: React.FC<QuickCaptureSheetProps> = ({
   visible,
@@ -46,7 +49,9 @@ export const QuickCaptureSheet: React.FC<QuickCaptureSheetProps> = ({
   onQuickTask,
   onLogExpense,
   onStartFocus,
+  onLogHabit,
   tasks = [],
+  habits = [],
 }) => {
   const [slideAnim] = useState(new Animated.Value(SCREEN_HEIGHT));
   const [overlayOpacity] = useState(new Animated.Value(0));
@@ -54,6 +59,7 @@ export const QuickCaptureSheet: React.FC<QuickCaptureSheetProps> = ({
   const [taskTitle, setTaskTitle] = useState('');
   const [expenseAmount, setExpenseAmount] = useState('');
   const [selectedTaskId, setSelectedTaskId] = useState<string | undefined>();
+  const [selectedHabitId, setSelectedHabitId] = useState<string | undefined>();
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -62,6 +68,7 @@ export const QuickCaptureSheet: React.FC<QuickCaptureSheetProps> = ({
       setTaskTitle('');
       setExpenseAmount('');
       setSelectedTaskId(undefined);
+      setSelectedHabitId(undefined);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
       Animated.parallel([
@@ -150,6 +157,24 @@ export const QuickCaptureSheet: React.FC<QuickCaptureSheetProps> = ({
     }
   };
 
+  const handleHabitSubmit = async () => {
+    if (!selectedHabitId || !onLogHabit || isSaving) return;
+
+    setIsSaving(true);
+    try {
+      await onLogHabit(selectedHabitId);
+      announceForAccessibility('Habit logged successfully');
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      handleClose();
+    } catch (error) {
+      console.error('Error logging habit:', error);
+      announceForAccessibility('Failed to log habit');
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const renderMenu = () => (
     <>
       <View style={styles.header}>
@@ -223,6 +248,29 @@ export const QuickCaptureSheet: React.FC<QuickCaptureSheetProps> = ({
           <IconButton icon="chevron-right" size={20} iconColor={colors.text.tertiary} style={styles.chevron}
                 hitSlop={HIT_SLOP}/>
         </TouchableOpacity>
+
+        {onLogHabit && habits.length > 0 && (
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setMode('habit');
+            }}
+            activeOpacity={0.7}
+            {...makeButton('Log Habit', 'Double tap to log a habit completion')}
+          >
+            <View style={[styles.menuIcon, { backgroundColor: colors.success + '20' }]}>
+              <IconButton icon="check-circle-outline" size={28} iconColor={colors.success} style={styles.iconButton}
+                  hitSlop={HIT_SLOP}/>
+            </View>
+            <View style={styles.menuContent}>
+              <Text style={styles.menuTitle}>Log Habit</Text>
+              <Text style={styles.menuDescription}>Record a habit completion</Text>
+            </View>
+            <IconButton icon="chevron-right" size={20} iconColor={colors.text.tertiary} style={styles.chevron}
+                hitSlop={HIT_SLOP}/>
+          </TouchableOpacity>
+        )}
       </View>
     </>
   );
@@ -537,6 +585,142 @@ export const QuickCaptureSheet: React.FC<QuickCaptureSheetProps> = ({
     );
   };
 
+  const renderHabitForm = () => {
+    // All habits from getHabits() are active (no status field in Habit type)
+    const activeHabits = habits;
+
+    return (
+      <>
+        <View style={styles.header}>
+          <TouchableOpacity
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setMode('menu');
+            }}
+            {...makeButton('Back', 'Double tap to go back')}
+          >
+            <IconButton icon="arrow-left" size={24} iconColor={colors.text.secondary} style={styles.closeButton}
+                hitSlop={HIT_SLOP}/>
+          </TouchableOpacity>
+          <Text style={styles.title}>Log Habit</Text>
+          <View style={{ width: 40 }} />
+        </View>
+
+        <View style={styles.form}>
+          <Text style={styles.label}>Select Habit</Text>
+          <Text style={styles.helperText}>
+            Choose a habit to log for today
+          </Text>
+
+          <ScrollView style={styles.taskList} showsVerticalScrollIndicator={false}>
+            {activeHabits.map((habit) => (
+              <TouchableOpacity
+                key={habit.id}
+                style={[
+                  styles.taskOption,
+                  selectedHabitId === habit.id && styles.taskOptionSelected,
+                  {
+                    backgroundColor:
+                      selectedHabitId === habit.id
+                        ? colors.success + '20'
+                        : colors.background.primary,
+                    borderColor:
+                      selectedHabitId === habit.id ? colors.success : colors.border.default,
+                  },
+                ]}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setSelectedHabitId(habit.id);
+                }}
+                {...makeButton(
+                  `Habit: ${habit.name}`,
+                  'Double tap to select this habit'
+                )}
+              >
+                <View style={styles.taskOptionIcon}>
+                  <IconButton
+                    icon="refresh"
+                    size={24}
+                    iconColor={
+                      selectedHabitId === habit.id ? colors.success : colors.text.tertiary
+                    }
+                    style={styles.iconButton}
+                    hitSlop={HIT_SLOP}
+                  />
+                </View>
+                <View style={styles.taskOptionContent}>
+                  <Text
+                    style={[
+                      styles.taskOptionTitle,
+                      {
+                        color:
+                          selectedHabitId === habit.id ? colors.success : colors.text.primary,
+                      },
+                    ]}
+                    numberOfLines={2}
+                  >
+                    {habit.name}
+                  </Text>
+                  {habit.cadence && (
+                    <Text
+                      style={[styles.taskOptionDescription, { color: colors.text.tertiary }]}
+                      numberOfLines={1}
+                    >
+                      {habit.cadence}
+                    </Text>
+                  )}
+                </View>
+                {selectedHabitId === habit.id && (
+                  <IconButton
+                    icon="check-circle"
+                    size={24}
+                    iconColor={colors.success}
+                    style={styles.iconButton}
+                    hitSlop={HIT_SLOP}
+                  />
+                )}
+              </TouchableOpacity>
+            ))}
+
+            {activeHabits.length === 0 && (
+              <View style={styles.emptyTasks}>
+                <Text style={[styles.emptyTasksText, { color: colors.text.tertiary }]}>
+                  No active habits found.
+                </Text>
+              </View>
+            )}
+          </ScrollView>
+
+          <View style={styles.formActions}>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setMode('menu');
+              }}
+              {...makeButton('Cancel', 'Double tap to cancel')}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.submitButton, { backgroundColor: colors.success }, (!selectedHabitId || isSaving) && styles.submitButtonDisabled]}
+              onPress={handleHabitSubmit}
+              disabled={!selectedHabitId || isSaving}
+              {...makeButton('Log Habit', 'Double tap to log habit', !selectedHabitId || isSaving)}
+            >
+              {isSaving ? (
+                <ActivityIndicator size="small" color={colors.text.primary} />
+              ) : (
+                <Text style={styles.submitButtonText}>Log</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+      </>
+    );
+  };
+
   return (
     <Modal
       visible={visible}
@@ -574,6 +758,7 @@ export const QuickCaptureSheet: React.FC<QuickCaptureSheetProps> = ({
           {mode === 'task' && renderTaskForm()}
           {mode === 'expense' && renderExpenseForm()}
           {mode === 'focus' && renderFocusForm()}
+          {mode === 'habit' && renderHabitForm()}
         </Animated.View>
       </KeyboardAvoidingView>
     </Modal>

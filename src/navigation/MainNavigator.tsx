@@ -1,10 +1,10 @@
 /**
  * Main Navigator
- * Professional dark-themed bottom tab navigation
+ * Simplified 5-tab navigation: Home, Tasks, Focus, Track, More
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MainTabParamList } from '../types';
@@ -12,12 +12,10 @@ import { useTheme } from '../hooks/useTheme';
 import { useBadgeCounts } from '../hooks/useBadgeCounts';
 import {
   typography,
-  spacing,
-  borderRadius,
   shadows,
 } from '../theme';
 
-// Icons (using simple text for now - in production use react-native-vector-icons)
+// Icons
 import { IconButton, Badge } from 'react-native-paper';
 
 // Error Boundary
@@ -25,15 +23,10 @@ import { ErrorBoundary } from '../components/ErrorBoundary';
 
 // Screens
 import DashboardScreen from '../screens/main/DashboardScreen';
-import AIChatScreen from '../screens/main/AIChatScreen';
 import TasksScreen from '../screens/main/TasksScreen';
-import ProjectsNavigator from './ProjectsNavigator';
-import HabitsScreen from '../screens/main/HabitsScreen';
 import FocusScreen from '../screens/main/FocusScreen';
-import PomodoroScreen from '../screens/main/PomodoroScreen';
-import CalendarScreen from '../screens/main/CalendarScreen';
-import FinanceScreen from '../screens/main/FinanceScreen';
-import SettingsNavigator from './SettingsNavigator';
+import TrackScreen from '../screens/main/TrackScreen';
+import MoreNavigator from './MoreNavigator';
 import { HIT_SLOP } from '../constants/ui';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -110,6 +103,7 @@ export default function MainNavigator() {
         headerTintColor: colors.text.primary,
       }}
     >
+      {/* Home - Dashboard */}
       <Tab.Screen
         name="Dashboard"
         options={{
@@ -117,7 +111,7 @@ export default function MainNavigator() {
             <TabIcon icon="view-dashboard" focused={focused} colors={colors} />
           ),
           tabBarLabel: 'Home',
-          headerShown: false, // Dashboard has its own header
+          headerShown: false,
         }}
       >
         {() => (
@@ -127,32 +121,7 @@ export default function MainNavigator() {
         )}
       </Tab.Screen>
 
-      <Tab.Screen
-        name="AIChat"
-        options={({ navigation }) => ({
-          tabBarIcon: ({ focused }) => (
-            <TabIcon icon="robot" focused={focused} colors={colors} />
-          ),
-          tabBarLabel: 'AI',
-          title: 'AI Assistant',
-          headerRight: () => (
-            <IconButton
-              icon="magnify"
-              iconColor={colors.text.secondary}
-              size={24}
-              onPress={() => navigation.navigate('Search' as never)}
-                hitSlop={HIT_SLOP}
-            />
-          ),
-        })}
-      >
-        {() => (
-          <ErrorBoundary>
-            <AIChatScreen />
-          </ErrorBoundary>
-        )}
-      </Tab.Screen>
-
+      {/* Tasks */}
       <Tab.Screen
         name="Tasks"
         options={{
@@ -165,7 +134,7 @@ export default function MainNavigator() {
             />
           ),
           tabBarLabel: 'Tasks',
-          headerShown: false, // Tasks has its own header
+          headerShown: false,
         }}
       >
         {() => (
@@ -175,57 +144,19 @@ export default function MainNavigator() {
         )}
       </Tab.Screen>
 
-      <Tab.Screen
-        name="Projects"
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <TabIcon icon="folder-outline" focused={focused} colors={colors} />
-          ),
-          tabBarLabel: 'Projects',
-          headerShown: false, // ProjectsNavigator has its own headers
-        }}
-      >
-        {() => (
-          <ErrorBoundary>
-            <ProjectsNavigator />
-          </ErrorBoundary>
-        )}
-      </Tab.Screen>
-
-      <Tab.Screen
-        name="Habits"
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <TabIcon
-              icon="chart-line"
-              focused={focused}
-              colors={colors}
-              badgeCount={counts.habits}
-            />
-          ),
-          tabBarLabel: 'Habits',
-          headerShown: false, // Habits has its own header
-        }}
-      >
-        {() => (
-          <ErrorBoundary>
-            <HabitsScreen />
-          </ErrorBoundary>
-        )}
-      </Tab.Screen>
-
+      {/* Focus */}
       <Tab.Screen
         name="Focus"
         options={{
           tabBarIcon: ({ focused }) => (
             <TabIcon
-              icon="bullseye-arrow"
+              icon="timer-outline"
               focused={focused}
               colors={colors}
             />
           ),
           tabBarLabel: 'Focus',
-          headerShown: false, // Focus has its own header
+          headerShown: false,
         }}
       >
         {() => (
@@ -235,80 +166,43 @@ export default function MainNavigator() {
         )}
       </Tab.Screen>
 
+      {/* Track - Habits + Calendar */}
       <Tab.Screen
-        name="Pomodoro"
+        name="Track"
         options={{
           tabBarIcon: ({ focused }) => (
             <TabIcon
-              icon="timer-outline"
+              icon="chart-line"
               focused={focused}
               colors={colors}
+              badgeCount={(counts.habits || 0) + (counts.calendar || 0)}
             />
           ),
-          tabBarLabel: 'Pomodoro',
-          headerShown: false, // Pomodoro has its own header
+          tabBarLabel: 'Track',
+          headerShown: false,
         }}
       >
         {() => (
           <ErrorBoundary>
-            <PomodoroScreen />
+            <TrackScreen />
           </ErrorBoundary>
         )}
       </Tab.Screen>
 
+      {/* More - Finance, AI, Settings */}
       <Tab.Screen
-        name="Calendar"
+        name="More"
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon
-              icon="calendar"
-              focused={focused}
-              colors={colors}
-              badgeCount={counts.calendar}
-            />
+            <TabIcon icon="dots-horizontal" focused={focused} colors={colors} />
           ),
-          tabBarLabel: 'Calendar',
-          headerShown: false, // Calendar has its own header
+          tabBarLabel: 'More',
+          headerShown: false,
         }}
       >
         {() => (
           <ErrorBoundary>
-            <CalendarScreen />
-          </ErrorBoundary>
-        )}
-      </Tab.Screen>
-
-      <Tab.Screen
-        name="Finance"
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <TabIcon icon="wallet" focused={focused} colors={colors} />
-          ),
-          tabBarLabel: 'Finance',
-          headerShown: false, // Finance has its own header
-        }}
-      >
-        {() => (
-          <ErrorBoundary>
-            <FinanceScreen />
-          </ErrorBoundary>
-        )}
-      </Tab.Screen>
-
-      <Tab.Screen
-        name="Settings"
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <TabIcon icon="cog" focused={focused} colors={colors} />
-          ),
-          tabBarLabel: 'Settings',
-          title: 'Settings',
-          headerShown: false, // SettingsNavigator has its own headers
-        }}
-      >
-        {() => (
-          <ErrorBoundary>
-            <SettingsNavigator />
+            <MoreNavigator />
           </ErrorBoundary>
         )}
       </Tab.Screen>

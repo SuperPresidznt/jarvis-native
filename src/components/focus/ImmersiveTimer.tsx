@@ -17,14 +17,14 @@ import {
 } from 'react-native';
 import { IconButton } from 'react-native-paper';
 import { useTheme } from '../../hooks/useTheme';
-import { useFocusTimer } from '../../hooks/useFocusTimer';
-import { FocusBlock } from '../../database/focusBlocks';
+import { useUnifiedTimer } from '../../hooks/useUnifiedTimer';
+import { FocusSession } from '../../database/focusSessions';
 import { typography, spacing } from '../../theme';
 import { haptic } from '../../utils/haptics';
 import { HIT_SLOP } from '../../constants/ui';
 
 interface ImmersiveTimerProps {
-  focusBlock: FocusBlock;
+  focusBlock: FocusSession;
   onExit: () => void;
   onPause?: () => void;
   onResume?: () => void;
@@ -54,7 +54,7 @@ export const ImmersiveTimer: React.FC<ImmersiveTimerProps> = ({
     pause,
     resume,
     stop,
-  } = useFocusTimer(focusBlock);
+  } = useUnifiedTimer(focusBlock);
 
   const [showControls, setShowControls] = useState(true);
 

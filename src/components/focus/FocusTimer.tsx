@@ -9,13 +9,13 @@ import { IconButton, ProgressBar } from 'react-native-paper';
 // Note: Using React Native's Animated API instead of Reanimated for broader compatibility
 import { Animated } from 'react-native';
 import { useTheme } from '../../hooks/useTheme';
-import { useFocusTimer } from '../../hooks/useFocusTimer';
-import { FocusBlock } from '../../database/focusBlocks';
+import { useUnifiedTimer } from '../../hooks/useUnifiedTimer';
+import { FocusSession } from '../../database/focusSessions';
 import { typography, spacing, borderRadius, shadows } from '../../theme';
 import { HIT_SLOP } from '../../constants/ui';
 
 interface FocusTimerProps {
-  focusBlock: FocusBlock;
+  focusBlock: FocusSession;
   onPause?: () => void;
   onResume?: () => void;
   onStop?: () => void;
@@ -41,7 +41,7 @@ export const FocusTimer: React.FC<FocusTimerProps> = ({
     pause,
     resume,
     stop,
-  } = useFocusTimer(focusBlock);
+  } = useUnifiedTimer(focusBlock);
 
   // Pulse animation for active timer
   const pulseScale = React.useRef(new Animated.Value(1)).current;

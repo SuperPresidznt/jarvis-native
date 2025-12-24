@@ -19,9 +19,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../hooks/useTheme';
 import { usePhoneInMode } from '../../hooks/usePhoneInMode';
 import { useOptimisticUpdate } from '../../hooks/useOptimisticUpdate';
-import * as focusBlocksDB from '../../database/focusBlocks';
+import * as focusSessionsDB from '../../database/focusSessions';
 import * as tasksDB from '../../database/tasks';
-import { FocusBlock, CreateFocusBlockData } from '../../database/focusBlocks';
+import { FocusSession, CreateFocusSessionData } from '../../database/focusSessions';
 import { Task } from '../../database/tasks';
 import { FocusBlockCard } from '../../components/focus/FocusBlockCard';
 import { FocusTimer } from '../../components/focus/FocusTimer';
@@ -30,7 +30,9 @@ import { SessionCompleteOverlay } from '../../components/focus/SessionCompleteOv
 import { PhoneInModal } from '../../components/focus/PhoneInModal';
 import { FocusBlockForm } from '../../components/focus/FocusBlockForm';
 import { FocusAnalytics } from '../../components/focus/FocusAnalytics';
+import { QuickStartPanel } from '../../components/focus/QuickStartPanel';
 import { EmptyState, LoadingState } from '../../components/ui';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { typography, spacing, borderRadius, shadows } from '../../theme';
 import { haptic } from '../../utils/haptics';
 import { HIT_SLOP } from '../../constants/ui';
@@ -39,7 +41,7 @@ type ViewMode = 'current' | 'list' | 'analytics';
 
 interface SectionData {
   title: string;
-  data: FocusBlock[];
+  data: FocusSession[];
 }
 
 export default function FocusScreen() {
@@ -49,8 +51,8 @@ export default function FocusScreen() {
   const { updateOptimistically, isPending } = useOptimisticUpdate();
 
   const [viewMode, setViewMode] = useState<ViewMode>('current');
-  const [blocks, setBlocks] = useState<FocusBlock[]>([]);
-  const [activeBlock, setActiveBlock] = useState<FocusBlock | null>(null);
+  const [blocks, setBlocks] = useState<FocusSession[]>([]);
+  const [activeBlock, setActiveBlock] = useState<FocusSession | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -62,7 +64,23 @@ export default function FocusScreen() {
     minutes: number;
     title: string;
   } | null>(null);
-  const [editingBlock, setEditingBlock] = useState<FocusBlock | null>(null);
+  const [editingBlock, setEditingBlock] = useState<FocusSession | null>(null);
+  const [pomodoroModeEnabled, setPomodoroModeEnabled] = useState(false);
+
+  // Load Pomodoro mode preference
+  useEffect(() => {
+    AsyncStorage.getItem('@focus_pomodoro_mode').then((value) => {
+      if (value !== null) {
+        setPomodoroModeEnabled(value === 'true');
+      }
+    });
+  }, []);
+
+  // Save Pomodoro mode preference
+  const handlePomodoroModeChange = useCallback(async (enabled: boolean) => {
+    setPomodoroModeEnabled(enabled);
+    await AsyncStorage.setItem('@focus_pomodoro_mode', String(enabled));
+  }, []);
 
   // Analytics data
   const [stats, setStats] = useState({
@@ -81,12 +99,12 @@ export default function FocusScreen() {
     try {
       const [loadedBlocks, loadedTasks, blockStats, hourlyStats, completionRate, streak] =
         await Promise.all([
-          focusBlocksDB.getFocusBlocks(),
+          focusSessionsDB.getFocusSessions(),
           tasksDB.getTasks({ statuses: ['todo', 'in_progress'], sortField: 'dueDate', sortDirection: 'asc' }),
-          focusBlocksDB.getFocusBlockStats(),
-          focusBlocksDB.getFocusTimeByHour(),
-          focusBlocksDB.getFocusCompletionRate(),
-          focusBlocksDB.getFocusStreak(),
+          focusSessionsDB.getFocusStats(),
+          focusSessionsDB.getFocusTimeByHour(),
+          focusSessionsDB.getFocusCompletionRate(),
+          focusSessionsDB.getFocusStreak(),
         ]);
 
       setBlocks(loadedBlocks);
@@ -123,30 +141,62 @@ export default function FocusScreen() {
     loadData();
   }, [loadData]);
 
-  // Create focus block
-  const handleCreate = async (data: CreateFocusBlockData) => {
+  // Quick start handler - creates and immediately starts a focus block
+  const handleQuickStart = useCallback(
+    async (options: {
+      minutes: number;
+      title: string;
+      taskId?: string;
+      pomodoroMode: boolean;
+    }) => {
+      try {
+        // Create a focus session
+        const newBlock = await focusSessionsDB.createFocusSession({
+          title: options.title,
+          durationMinutes: options.minutes,
+          taskId: options.taskId,
+          phoneInMode: false,
+          isPomodoro: options.pomodoroMode,
+          sessionNumber: options.pomodoroMode ? 1 : undefined,
+        });
+
+        // Start it immediately
+        await focusSessionsDB.startFocusSession(newBlock.id);
+        await loadData();
+
+        haptic.buttonPress();
+      } catch (error) {
+        console.error('Error with quick start:', error);
+        Alert.alert('Error', 'Failed to start focus session');
+      }
+    },
+    [loadData]
+  );
+
+  // Create focus session
+  const handleCreate = async (data: CreateFocusSessionData) => {
     try {
-      await focusBlocksDB.createFocusBlock(data);
+      await focusSessionsDB.createFocusSession(data);
       await loadData();
-      Alert.alert('Success', 'Focus block created');
+      Alert.alert('Success', 'Focus session created');
     } catch (error) {
-      console.error('Error creating focus block:', error);
-      Alert.alert('Error', 'Failed to create focus block');
+      console.error('Error creating focus session:', error);
+      Alert.alert('Error', 'Failed to create focus session');
     }
   };
 
-  // Update focus block
-  const handleUpdate = async (data: CreateFocusBlockData) => {
+  // Update focus session
+  const handleUpdate = async (data: CreateFocusSessionData) => {
     if (!editingBlock) return;
 
     try {
-      await focusBlocksDB.updateFocusBlock(editingBlock.id, data);
+      await focusSessionsDB.updateFocusSession(editingBlock.id, data);
       await loadData();
       setEditingBlock(null);
-      Alert.alert('Success', 'Focus block updated');
+      Alert.alert('Success', 'Focus session updated');
     } catch (error) {
-      console.error('Error updating focus block:', error);
-      Alert.alert('Error', 'Failed to update focus block');
+      console.error('Error updating focus session:', error);
+      Alert.alert('Error', 'Failed to update focus session');
     }
   };
 
@@ -183,7 +233,7 @@ export default function FocusScreen() {
     }
   };
 
-  const startBlock = async (blockId: string, block: FocusBlock) => {
+  const startBlock = async (blockId: string, block: FocusSession) => {
     await updateOptimistically(
       () => {
         const updated = blocks.map((b) =>
@@ -195,7 +245,7 @@ export default function FocusScreen() {
         );
       },
       async () => {
-        await focusBlocksDB.startFocusBlock(blockId);
+        await focusSessionsDB.startFocusSession(blockId);
         await loadData();
 
         // Enable phone-in mode if requested
@@ -226,7 +276,7 @@ export default function FocusScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
-              await focusBlocksDB.cancelFocusBlock(blockId);
+              await focusSessionsDB.cancelFocusSession(blockId);
               setActiveBlock(null);
               setShowPhoneInModal(false);
               await disablePhoneIn();
@@ -250,7 +300,7 @@ export default function FocusScreen() {
       const startTime = new Date(activeBlock.startTime!);
       const actualMinutes = Math.floor((now.getTime() - startTime.getTime()) / 60000);
 
-      await focusBlocksDB.completeFocusBlock(activeBlock.id, actualMinutes);
+      await focusSessionsDB.completeFocusSession(activeBlock.id, actualMinutes);
 
       // Store session data for celebration overlay
       setCompletedSessionData({
@@ -284,7 +334,7 @@ export default function FocusScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
-              await focusBlocksDB.deleteFocusBlock(blockId);
+              await focusSessionsDB.deleteFocusSession(blockId);
               await loadData();
             } catch (error) {
               console.error('Error deleting focus block:', error);
@@ -297,7 +347,7 @@ export default function FocusScreen() {
   };
 
   // Edit focus block
-  const handleEdit = (block: FocusBlock) => {
+  const handleEdit = (block: FocusSession) => {
     setEditingBlock(block);
     setShowCreateModal(true);
   };
@@ -392,10 +442,11 @@ export default function FocusScreen() {
             />
           }
         >
-          <EmptyState
-            icon="⏳"
-            title="No Active Focus Block"
-            description="Start a focus session to begin tracking your time"
+          {/* Quick Start Panel */}
+          <QuickStartPanel
+            onStart={handleQuickStart}
+            pomodoroModeEnabled={pomodoroModeEnabled}
+            onPomodoroModeChange={handlePomodoroModeChange}
           />
 
           {upcomingBlocks.length > 0 && (

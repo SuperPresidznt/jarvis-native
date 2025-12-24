@@ -16,17 +16,17 @@ import {
 } from 'react-native';
 import { IconButton } from 'react-native-paper';
 import { useTheme } from '../../hooks/useTheme';
-import { FocusBlock, CreateFocusBlockData } from '../../database/focusBlocks';
+import { FocusSession, CreateFocusSessionData } from '../../database/focusSessions';
 import { Task } from '../../database/tasks';
 import { typography, spacing, borderRadius, shadows, inputStyle, inputFocusStyle } from '../../theme';
 import { HIT_SLOP } from '../../constants/ui';
 
 interface FocusBlockFormProps {
   visible: boolean;
-  focusBlock?: FocusBlock | null;
+  focusBlock?: FocusSession | null;
   tasks?: Task[];
   onClose: () => void;
-  onSave: (data: CreateFocusBlockData) => Promise<void>;
+  onSave: (data: CreateFocusSessionData) => Promise<void>;
 }
 
 const QUICK_DURATIONS = [
@@ -93,7 +93,7 @@ export const FocusBlockForm: React.FC<FocusBlockFormProps> = ({
     setIsSubmitting(true);
 
     try {
-      const data: CreateFocusBlockData = {
+      const data: CreateFocusSessionData = {
         title: title.trim(),
         description: description.trim() || undefined,
         durationMinutes,
