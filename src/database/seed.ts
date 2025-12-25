@@ -132,7 +132,6 @@ async function seedHabits(): Promise<void> {
     const created = await createHabit(habit);
 
     // Log some completions for demo purposes
-    const today = new Date().toISOString().split('T')[0];
     const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
     if (habit.cadence === 'daily') {

@@ -436,6 +436,7 @@ export function getCurrentTimestamp(): string {
  */
 export async function executeQuery<T>(
   sql: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   params: any[] = []
 ): Promise<T[]> {
   const db = await getDatabase();
@@ -453,6 +454,7 @@ export async function executeQuery<T>(
  */
 export async function executeQuerySingle<T>(
   sql: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   params: any[] = []
 ): Promise<T | null> {
   const db = await getDatabase();
@@ -470,6 +472,7 @@ export async function executeQuerySingle<T>(
  */
 export async function executeWrite(
   sql: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   params: any[] = []
 ): Promise<SQLite.SQLiteRunResult> {
   const db = await getDatabase();

@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ViewStyle, Animated } from 'react-native';
+import { Text, StyleSheet, ViewStyle, Animated } from 'react-native';
 import { useTheme } from '../../theme/ThemeProvider';
 import { typography, spacing, getColors } from '../../theme';
 import { AppButton } from './AppButton';

@@ -31,7 +31,7 @@ export default function Tooltip({
   onDismiss,
   position = 'bottom',
 }: TooltipProps) {
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
 
   const containerStyle = [
     styles.container,

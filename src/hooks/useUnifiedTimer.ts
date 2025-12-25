@@ -139,7 +139,7 @@ export function useUnifiedTimer(session: FocusSession | null): UseUnifiedTimerRe
    * Start a regular focus session
    */
   const startFocus = useCallback(
-    async (durationMinutes: number) => {
+    async (_durationMinutes: number) => {
       if (!session || isRunning) return;
 
       const now = new Date();

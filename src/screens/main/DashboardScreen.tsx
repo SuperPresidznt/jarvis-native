@@ -9,7 +9,6 @@ import {
   StyleSheet,
   ScrollView,
   RefreshControl,
-  TextInput,
   Text,
   TouchableOpacity,
   Animated,

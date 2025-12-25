@@ -27,7 +27,7 @@ import { ConflictWarning } from '../../components/calendar/ConflictWarning';
 import { ReminderPicker } from '../../components/calendar/ReminderPicker';
 import ShareButton from '../../components/ShareButton';
 import { copyEventLink } from '../../utils/deepLinks';
-import { AppButton, AppChip, EmptyState, LoadingState, LastUpdated, SearchBar } from '../../components/ui';
+import { AppButton, AppChip, EmptyState, LastUpdated, SearchBar } from '../../components/ui';
 import { CalendarEventSkeleton } from '../../components/calendar/CalendarEventSkeleton';
 import { RecurrencePicker } from '../../components/RecurrencePicker';
 import type { RecurrenceRule } from '../../types';

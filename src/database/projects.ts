@@ -118,15 +118,15 @@ export async function getProjectWithStats(id: string): Promise<Project | null> {
     WHERE project_id = ?
   `;
 
-  const stats = await executeQuerySingle<any>(statsSql, [id]);
+  const stats = await executeQuerySingle<Record<string, unknown>>(statsSql, [id]);
 
   return {
     ...project,
     taskStats: {
-      total: stats?.total || 0,
-      completed: stats?.completed || 0,
-      inProgress: stats?.in_progress || 0,
-      todo: stats?.todo || 0,
+      total: (stats?.total as number) || 0,
+      completed: (stats?.completed as number) || 0,
+      inProgress: (stats?.in_progress as number) || 0,
+      todo: (stats?.todo as number) || 0,
     },
   };
 }
@@ -150,7 +150,7 @@ export async function getProjectsWithStats(includeArchived: boolean = false): Pr
     GROUP BY project_id
   `;
 
-  const statsRows = await executeQuery<any>(statsSql);
+  const statsRows = await executeQuery<Record<string, unknown>>(statsSql);
 
   // Create a map of project_id to stats
   const statsMap = new Map();
@@ -313,12 +313,12 @@ export async function getProjectCounts(): Promise<{
     FROM projects
   `;
 
-  const result = await executeQuerySingle<any>(sql);
+  const result = await executeQuerySingle<Record<string, unknown>>(sql);
   return {
-    total: result?.total || 0,
-    active: result?.active || 0,
-    archived: result?.archived || 0,
-    completed: result?.completed || 0,
+    total: (result?.total as number) || 0,
+    active: (result?.active as number) || 0,
+    archived: (result?.archived as number) || 0,
+    completed: (result?.completed as number) || 0,
   };
 }
 

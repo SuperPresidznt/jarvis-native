@@ -10,7 +10,7 @@ import apiService from './api';
 export interface ChatRequest {
   message: string;
   sessionId?: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 }
 
 export interface ChatResponse {

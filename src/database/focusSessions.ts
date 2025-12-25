@@ -473,7 +473,7 @@ export async function getFocusStats(includePomodoro: boolean = true): Promise<Fo
     sql += ' WHERE is_pomodoro = 0';
   }
 
-  const result = await executeQuerySingle<any>(sql, params);
+  const result = await executeQuerySingle<Record<string, unknown>>(sql, params);
   return {
     total: result?.total || 0,
     scheduled: result?.scheduled || 0,
@@ -515,7 +515,7 @@ export async function getFocusTimeByDate(
 
   sql += ' GROUP BY DATE(start_time) ORDER BY date ASC';
 
-  const rows = await executeQuery<any>(sql, params);
+  const rows = await executeQuery<Record<string, unknown>>(sql, params);
   return rows.map(row => ({
     date: row.date,
     minutes: row.minutes || 0,
@@ -685,7 +685,7 @@ export async function getTodayStats(
     sql += ' AND is_pomodoro = 0';
   }
 
-  const result = await executeQuerySingle<any>(sql, params);
+  const result = await executeQuerySingle<Record<string, unknown>>(sql, params);
 
   return {
     completedCount: result?.count || 0,
@@ -720,7 +720,7 @@ export async function getWeeklyStats(
     sql += ' AND is_pomodoro = 0';
   }
 
-  const result = await executeQuerySingle<any>(sql, params);
+  const result = await executeQuerySingle<Record<string, unknown>>(sql, params);
 
   return {
     completedCount: result?.count || 0,
@@ -737,7 +737,7 @@ export async function getWeeklyStats(
  * Get pomodoro settings (creates default if not exists)
  */
 export async function getPomodoroSettings(): Promise<PomodoroSettings> {
-  const result = await executeQuerySingle<any>('SELECT * FROM pomodoro_settings LIMIT 1');
+  const result = await executeQuerySingle<Record<string, unknown>>('SELECT * FROM pomodoro_settings LIMIT 1');
 
   if (result) {
     return {

@@ -80,7 +80,7 @@ export async function getInitialURL(): Promise<string | null> {
 /**
  * Subscribe to URL changes (deep links while app is running)
  */
-export function subscribe(listener: (url: string) => void): () => void {
+export function subscribe(_listener: (url: string) => void): () => void {
   // For mobile, we need to use Linking.addEventListener()
   // This is handled by NavigationContainer automatically
   return () => {

@@ -3,6 +3,7 @@
  * Provides mock implementations when native module isn't available
  */
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let notifee: any = null;
 let isAvailable = false;
 

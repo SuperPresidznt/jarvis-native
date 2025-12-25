@@ -11,7 +11,6 @@ import {
   RefreshControl,
   Modal,
   TextInput,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Text,

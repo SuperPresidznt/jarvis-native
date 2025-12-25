@@ -380,7 +380,7 @@ export async function getHabitStats(habitId: string): Promise<{
     WHERE habit_id = ?
   `;
 
-  const result = await executeQuerySingle<any>(sql, [habitId]);
+  const result = await executeQuerySingle<Record<string, unknown>>(sql, [habitId]);
 
   const totalDays = result?.total_days || 0;
   const completedDays = result?.completed_days || 0;
@@ -784,7 +784,7 @@ export async function getHabitsWithStats(): Promise<HabitWithStats[]> {
     ORDER BY h.created_at DESC
   `;
 
-  const rows = await executeQuery<any>(sql, [today, startDate, today]);
+  const rows = await executeQuery<Record<string, unknown>>(sql, [today, startDate, today]);
 
   // Map to HabitWithStats
   return rows.map(row => {

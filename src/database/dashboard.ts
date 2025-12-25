@@ -3,11 +3,7 @@
  * Provides offline dashboard metrics from existing data
  */
 
-import {
-  executeQuery,
-  executeQuerySingle,
-} from './index';
-import { getAssets, getLiabilities, getFinanceSummary } from './finance';
+import { getFinanceSummary } from './finance';
 import { getTasks, Task } from './tasks';
 import { getHabits, Habit, isHabitCompletedToday } from './habits';
 import { getEvents, CalendarEvent } from './calendar';

@@ -6,7 +6,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, Animated, ViewStyle, DimensionValue } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { spacing, borderRadius, getColors } from '../../theme';
+import { getColors } from '../../theme';
 import { useTheme } from '../../theme/ThemeProvider';
 
 interface SkeletonProps {
@@ -60,11 +60,6 @@ export const Skeleton: React.FC<SkeletonProps> = ({
       return () => animation.stop();
     }
   }, [pulseAnimation, shimmerAnimation, variant]);
-
-  const shimmerOpacity = shimmerAnimation.interpolate({
-    inputRange: [0, 0.5, 1],
-    outputRange: [0.3, 1, 0.3],
-  });
 
   const shimmerTranslateX = shimmerAnimation.interpolate({
     inputRange: [0, 1],

@@ -57,7 +57,7 @@ interface SettingItemProps {
   rightElement?: React.ReactNode;
   danger?: boolean;
   showChevron?: boolean;
-  styles: any;
+  styles: ReturnType<typeof createStyles>;
 }
 
 export default function SettingsScreen() {

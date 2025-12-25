@@ -3,6 +3,8 @@
  * SQLite table schemas for offline-first data storage
  */
 
+import * as SQLite from 'expo-sqlite';
+
 export const DB_NAME = 'jarvis.db';
 export const DB_VERSION = 1;
 
@@ -287,5 +289,5 @@ export const DROP_TABLES = [
  */
 export interface MigrationFunction {
   name: string;
-  run: (db: any) => Promise<void>;
+  run: (db: SQLite.SQLiteDatabase) => Promise<void>;
 }

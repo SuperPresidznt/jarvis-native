@@ -50,10 +50,12 @@ export default function ProjectDetailScreen() {
 
   useEffect(() => {
     loadProjectData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId]);
 
   useEffect(() => {
     filterTasks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter, tasks]);
 
   const loadProjectData = async () => {

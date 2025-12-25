@@ -113,7 +113,7 @@ async function calculateBudgetSpending(
       AND type = 'expense'
   `;
 
-  const result = await executeQuerySingle<any>(sql, [category, startDate, endDate]);
+  const result = await executeQuerySingle<Record<string, unknown>>(sql, [category, startDate, endDate]);
 
   return {
     spent: result?.total_spent || 0,

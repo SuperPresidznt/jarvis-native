@@ -64,9 +64,10 @@ class ApiService {
   private handleError(error: AxiosError): ApiError {
     if (error.response) {
       // Server responded with error
+      const data = error.response.data as Record<string, unknown> | undefined;
       return {
-        message: (error.response.data as any)?.message || 'An error occurred',
-        code: (error.response.data as any)?.code,
+        message: (data?.message as string) || 'An error occurred',
+        code: data?.code as string | undefined,
         statusCode: error.response.status,
       };
     } else if (error.request) {

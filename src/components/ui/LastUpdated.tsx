@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { typography, spacing, getColors } from '../../theme';
 import { useTheme } from '../../theme/ThemeProvider';
@@ -12,7 +12,7 @@ import { getRelativeTime } from '../../utils/dateUtils';
 
 interface LastUpdatedProps {
   date: Date | null;
-  style?: any;
+  style?: ViewStyle;
 }
 
 /**

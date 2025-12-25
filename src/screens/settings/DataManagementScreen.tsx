@@ -9,7 +9,6 @@ import {
   StyleSheet,
   ScrollView,
   Text,
-  Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';

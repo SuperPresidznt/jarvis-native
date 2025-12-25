@@ -6,7 +6,6 @@
 import notifee, {
   AndroidImportance,
   AuthorizationStatus,
-  Notification,
   TimestampTrigger,
   TriggerType,
   RepeatFrequency,

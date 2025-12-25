@@ -15,8 +15,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../hooks/useTheme';
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
-
 interface WelcomeScreenProps {
   onGetStarted: () => void;
   onSkip: () => void;

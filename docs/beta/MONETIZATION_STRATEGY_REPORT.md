@@ -459,99 +459,151 @@ Source: [Guru Startups](https://www.gurustartups.com/reports/freemium-to-paid-co
 
 **Verdict:** Bad UX for consumer app. Works for B2B APIs but not end-user productivity tools.
 
-### 5.5 Model E: Solo Dev Theme Store (Simplified)
+### 5.5 Model E: Solo-Created Add-Ons (REALISTIC)
 
 **Structure:**
 - **Free base app** with core features
 - **YOU create and sell add-ons:**
-  - Theme packs ($2-5 each, YOU design 5-10 themes)
+  - Theme packs ($2-5 each, YOU design 5-10 themes with AI assistance)
   - Template bundles ($3-5, YOU create productivity templates)
-  - No user-generated content or marketplace
-  - Simple in-app purchase (Apple handles payment)
+  - NO user-generated content or marketplace
+  - NO revenue sharing with creators
+  - Simple in-app purchase (Apple/Google handles payment)
 
 **Revenue:** In-app purchases (one-time purchases)
 
-**Examples:** Things 3 (one app, simple IAP), Forest (unlock themes)
+**Examples:** Things 3 (one app, simple IAP), Forest (unlock themes), Bear (premium themes)
 
 **Pros:**
 - Additional revenue stream beyond subscription
-- No moderation or community management overhead
+- NO moderation or community management overhead
 - YOU control quality (design themes yourself or with AI)
 - Simple implementation (StoreKit/Google Billing)
 - Lower perceived cost (users pay for what they want)
+- Can use AI tools to accelerate theme creation
 
 **Cons:**
 - Limited by YOUR time (can only create so many themes)
 - One-time revenue (not recurring)
-- Requires design work upfront
-- Platform fee cuts (Apple 30%)
+- Requires design work upfront (20-40 hours for 5-10 themes)
+- Platform fee cuts (Apple 30%, Google 15%)
 
 **Solo Dev Reality:**
-- Create 5-10 premium themes (20-40 hours total)
-- Create 5-10 productivity templates (10-20 hours)
-- Sell theme packs for $2-5 each
-- Expected revenue: 10-20% of users buy themes = $5-10K/year additional at 5K users
-- **Verdict:** Realistic for solo dev, implement in Year 2 after core app is stable
+- **Time Investment:** 20-40 hours total for initial theme pack
+  - 2-4 hours per theme design (use Figma + AI color palette generators)
+  - 5-10 themes = 10-20 hours design
+  - 5-10 hours implementation + testing
+  - 5-10 hours for template bundles (use AI to generate task templates)
+- **Pricing:** $2-5 per theme pack (bundle of 3 themes)
+- **Expected Revenue:** 10-20% of active users buy themes
+  - At 5,000 users: 500-1,000 buyers × $3 = $1,500-3,000 one-time
+  - At 10,000 users: 1,000-2,000 buyers × $3 = $3,000-6,000 one-time
+- **Implementation Timing:** Year 2, after subscription revenue > $50K/year
+- **Verdict:** Realistic for solo dev, defer until core app is stable and proven
 
-### 5.6 Model F: Flywheel / Network Effects (NOT FOR SOLO DEV)
+### 5.6 What Solo Devs Should SKIP (Complexity Traps)
 
-**Structure:**
-- **Free tier with viral loops:**
-  - Share tasks → invite collaborators (both get premium trial)
-  - Public habit streaks → social proof
-  - Community templates → user-generated content
-- **Revenue:** Subscriptions + marketplace (long-term)
+**AVOID These "Growth Hacks" - They Require Teams:**
 
-**Examples:**
-- Notion's viral sharing (team of 100+)
-- Habitica's guilds/parties (requires moderation team)
-- Strava's social fitness (backed by $150M+ funding)
+#### A) User Marketplace / UGC Platform
+**What it is:**
+- Users create and sell themes, templates, plugins
+- Revenue sharing (e.g., 70% creator, 30% platform)
+- Public template library with ratings/reviews
 
-**Pros:**
-- Self-reinforcing growth (each user brings more users)
-- Network effects (value increases with more users)
-- Moat (hard to switch once network is established)
+**Why skip:**
+- **Moderation overhead:** Full-time job reviewing submissions, handling copyright disputes
+- **Payment complexity:** 1099 tax forms for creators, payment splitting, dispute resolution
+- **Legal liability:** DMCA takedowns, copyright infringement, fraud prevention
+- **Technical complexity:** Review queue, payment escrow, creator dashboards
+- **Platform risk:** Apple 30% cut + your cut = creators get <50%, hard to attract quality creators
+- **Time investment:** 200-400 hours to build, ongoing support
 
-**Cons:**
-- **Hard to bootstrap** (requires critical mass of 10K+ users)
-- Feature complexity (social features take months to build)
-- Moderation overhead (community management = full-time job)
-- Legal liability (user-generated content requires ToS, DMCA, abuse systems)
-- Infrastructure costs (hosting user content, CDN for images)
+**Solo dev reality:** You'd spend more time moderating than coding. Not worth it until revenue > $500K/year AND you hire a support team.
 
-**Solo Dev Reality:**
-- **SKIP THIS ENTIRELY** - requires team of 5-10+ people
-- Social features require: moderation tools, abuse reporting, content filtering, community management
-- Average cost to run UGC platform: $50K-100K/year minimum (moderation + infrastructure)
-- Legal risk too high for solo operation (COPPA, GDPR, Section 230)
+#### B) Social / Network Features
+**What it is:**
+- Public habit challenges
+- Team task boards
+- Social feed of achievements
+- Friend leaderboards
 
-**Verdict:** **NOT REALISTIC** for solo dev + AI. Defer indefinitely or only if you hire a team (10K+ users, $500K+ revenue).
+**Why skip:**
+- **Moderation hell:** Abuse, spam, harassment, bullying
+- **Legal compliance:** COPPA (kids under 13), GDPR (EU users), content filtering
+- **Infrastructure costs:** Hosting user content, CDN, scaling database for social graph
+- **Feature creep:** Notifications, privacy settings, blocking/reporting, admin tools
+- **Time investment:** 100-200 hours base features, ongoing community management
 
-### 5.7 Recommended Model: Freemium + Solo Dev Add-ons (REVISED)
+**Solo dev reality:** Social = full-time community manager. Only viable if you hire help at 10K+ users.
 
-**Phase 1 (MVP - Launch):** Freemium ONLY
-- Free tier: Core features, 15 AI messages/day
-- Premium: $9.99/month or $84/year, 200 AI messages/day
-- Target: 3-5% conversion
-- Focus: Product-market fit, user feedback, iterate on core features
+#### C) Flywheel / Viral Loops
+**What it is:**
+- "Invite 3 friends, get 1 month free"
+- "Share your task list to unlock premium"
+- "Powered by [YourApp]" footer in exports
 
-**Phase 2 (Year 2, if 5K+ users):** Add Solo-Created Themes
-- YOU design 5-10 premium themes ($2-5 each)
-- Simple in-app purchase (no marketplace complexity)
-- Expected additional revenue: $5-10K/year
-- Time investment: 20-40 hours total (evenings/weekends)
+**Why skip:**
+- **Hard to bootstrap:** Requires 10K+ users to see flywheel effects
+- **Gaming/abuse:** Fake accounts, referral fraud
+- **Lower user quality:** Users who join for free stuff, not product value
+- **Tracking complexity:** Attribution, fraud detection, payout management
 
-**Phase 3 (Year 3+, if 10K+ users AND hiring):** Consider Team Features
-- Only if revenue > $100K/year AND you hire help
-- Team collaboration (requires backend work)
-- Shared workspace (1-2 month dev time)
-- NOT flywheel/UGC - too risky for solo dev
+**Solo dev reality:** Viral loops work for funded startups with growth teams. Solo dev should focus on product quality, not growth hacks.
 
-**What to SKIP Forever (Solo Dev):**
-- User-generated content marketplace (requires moderation team)
-- Public habit challenges (legal liability, moderation overhead)
-- Community features (social = full-time community manager)
-- Revenue sharing with creators (payment splitting = complexity nightmare)
+#### D) Revenue Sharing Models
+**What it is:**
+- "Affiliates earn 20% recurring commission"
+- "Partners get 50% of revenue from their referrals"
+
+**Why skip:**
+- **Tax nightmare:** 1099 forms, payment thresholds, international taxes
+- **Fraud risk:** Cookie stuffing, fake referrals, chargebacks
+- **Payment complexity:** Tracking, attribution, multi-currency, dispute resolution
+- **Support overhead:** Partner onboarding, payout questions, commission disputes
+
+**Solo dev reality:** Unless you're a tax expert or hire one, stay away from revenue sharing.
+
+**Verdict:** All of the above require TEAMS, not solo developers. Focus on simple subscription model, defer complexity until you have 10K+ users AND $200K+/year revenue to hire help.
+
+### 5.7 Recommended Model: Freemium ONLY (Keep It Simple)
+
+**Phase 1 (Launch → Year 1):** Freemium Subscription ONLY
+- **Free tier:** Core features, 15 AI messages/day
+- **Premium:** $9.99/month or $84/year, 200 AI messages/day
+- **Target conversion:** 3-5% (industry standard)
+- **Focus:** Product-market fit, user feedback, iterate on core features
+- **Support load:** 1-2 hours/day (manageable solo)
+- **Time allocation:** 80% product, 15% support, 5% marketing
+
+**Decision Gate: Should I add complexity?**
+- IF revenue > $50K/year AND you have 5,000+ users → Consider Phase 2
+- IF revenue < $50K/year → Stay focused on Phase 1, grow user base
+
+**Phase 2 (Year 2, ONLY if revenue > $50K/year):** Add Solo-Created Themes
+- **YOU design 5-10 premium themes** with AI assistance ($2-5 each)
+- Simple in-app purchase (StoreKit/Google Billing, NO marketplace)
+- Expected additional revenue: $1,500-6,000 one-time (10-20% attach rate)
+- Time investment: 20-40 hours total (evenings/weekends over 1-2 months)
+- NO user-generated content, NO moderation, NO revenue sharing
+
+**Decision Gate: Should I hire?**
+- IF revenue > $100K/year → Hire part-time VA for support (10 hours/week)
+- IF revenue > $200K/year → Hire full-time developer or support person
+- IF revenue < $100K/year → Stay solo, don't overhire
+
+**Phase 3 (Year 3+, ONLY if revenue > $200K/year AND you hire):** Team Features
+- Only if you have 10,000+ users AND hired at least 1 person
+- Simple team collaboration (shared task lists, not real-time sync)
+- Per-seat pricing: $14.99/month for 2-5 users
+- Time investment: 1-2 months dev time (requires backend work)
+- Still NO flywheel/UGC/marketplace (too risky even with small team)
+
+**What to SKIP Forever (Even With Revenue):**
+- User marketplace / revenue sharing (legal + tax nightmare)
+- Social features / public challenges (moderation = full-time job)
+- Complex team permissions (engineering burden, low ROI)
+- Freemium with unlimited free tier (cost explosion risk)
 
 ---
 
@@ -1082,17 +1134,17 @@ Adding marketplace revenue:
 - Onboarding optimization (increase activation)
 - Target: 10,000 free users, 400-500 paid users
 
-**Phase 3: Expand Monetization (Year 2)**
-- Launch theme store ($1-5 one-time purchases)
-- Premium templates ($3-10)
-- Team plan ($19.99/month for 2-5 users)
+**Phase 3: Add Solo-Created Themes (Year 2, ONLY if revenue > $50K)**
+- YOU design 5-10 theme packs ($2-5 each)
+- YOU create 5-10 template bundles ($3-5 each)
+- Simple in-app purchase, NO marketplace
 - Target: 50,000 free users, 2,000 paid users
 
-**Phase 4: Scale & Flywheel (Year 3+)**
-- Social features (public habits, challenges)
-- User-generated content (templates, themes)
-- API access for developers ($20/month)
-- Target: 100K+ free users, 5K+ paid users
+**Phase 4: SKIP or Defer Indefinitely (Unless You Hire Team)**
+- ~~Social features~~ (requires full-time community manager)
+- ~~User-generated content~~ (legal + moderation nightmare)
+- ~~API access for developers~~ (support overhead, low ROI for solo dev)
+- Only consider if revenue > $200K/year AND you hire at least 1 person
 
 ### 10.4 Key Metrics to Track
 
@@ -1129,15 +1181,16 @@ Adding marketplace revenue:
 
 ---
 
-## 10. Conclusion
+## 10. Conclusion (Revised for Solo Dev)
 
-Jarvis Native has a clear path to sustainable monetization:
+Jarvis Native has a clear path to sustainable solo dev monetization:
 
-1. **Launch with freemium model** (free tier + $9.99/month Pro)
-2. **Target 3-5% conversion** (industry standard, achievable)
-3. **Reach 1,000 paid users** within 12-18 months ($100K+/year)
-4. **Scale to 5-10K paid users** by Year 3 ($500K-1M/year)
-5. **Expand monetization** with marketplace, teams, API (Year 2+)
+1. **Launch with freemium model** (free tier + $9.99/month Pro) - KEEP IT SIMPLE
+2. **Target 3-5% conversion** (industry standard, achievable solo)
+3. **Reach 1,000 paid users** within 12-18 months ($100K+/year = sustainable solo income)
+4. **Scale to 3-5K paid users** by Year 3 ($300-500K/year = comfortable solo income)
+5. **Add solo-created themes** (Year 2+, ONLY if revenue > $50K/year)
+6. **Skip marketplace, social, UGC** (requires teams, not worth complexity)
 
 **This is fair:**
 - Users save $244-488/year vs. buying standalone apps
@@ -1150,18 +1203,293 @@ Jarvis Native has a clear path to sustainable monetization:
 - AI costs are manageable ($0.168/user/month)
 - Infrastructure costs are minimal (AWS free tier → $0.01-0.05/user)
 
-**This is scalable:**
+**This is scalable (for solo dev):**
 - Margins improve at scale (fixed costs amortize)
-- Marketplace adds revenue diversity (Phase 2+)
-- Flywheel effects kick in (network effects, UGC)
+- Simple add-ons (themes) add revenue diversity in Year 2+
+- Focus on product quality, not growth hacks
 
 **Next steps:**
-1. Build MVP with free + pro tiers
+1. Build MVP with free + pro tiers ONLY (no marketplace, no social)
 2. Launch with 14-day free trial (no credit card)
 3. Optimize onboarding (maximize activation)
 4. A/B test pricing ($7.99 vs. $9.99 vs. $11.99)
 5. Measure conversion, churn, LTV religiously
-6. Iterate toward 1,000 paid users (break-even → profit)
+6. Iterate toward 1,000 paid users = $100K+/year (sustainable solo income)
+
+---
+
+## 11. Solo Dev Reality Check
+
+This section explicitly addresses what's realistic for 1 person + AI to build, manage, and monetize.
+
+### 11.1 What's Actually Realistic for Solo Dev + AI
+
+**Your Situation:**
+- **You:** Solo developer (no team, no investors)
+- **Tools:** AI assistance (Claude/GPT for coding, design, strategy)
+- **Time:** Evenings/weekends OR full-time (need revenue within 6-12 months)
+- **Budget:** Minimal ($0-5K for tools, hosting, legal)
+
+**What You CAN Do:**
+
+#### 1. Core App Development (3-6 months)
+- ✅ Build features yourself with AI pair programming (Claude Code, Cursor, GitHub Copilot)
+- ✅ UI/UX design with AI assistance (v0.dev, Midjourney, ChatGPT for copy)
+- ✅ Backend API with AI code generation (Next.js, Express, FastAPI)
+- ✅ Test and iterate based on user feedback
+- **Time:** 200-400 hours total (3-6 months part-time)
+
+#### 2. Freemium Subscription (Launch Strategy)
+- ✅ Simple two-tier pricing: Free + Pro
+- ✅ Stripe/RevenueCat for payment processing (handles subscriptions, refunds, analytics)
+- ✅ AI can help write pricing copy, FAQ, onboarding emails
+- ✅ Manage 100-1,000 users solo (1-2 hours/day support)
+- **Revenue:** 1,000 paid users × $100/year = $100K/year (sustainable solo income)
+
+#### 3. Solo-Created Premium Content (Year 2)
+- ✅ Design 5-10 premium themes yourself (Figma + AI color palette generators)
+- ✅ Create productivity templates (AI can draft task/habit templates, you refine)
+- ✅ Write premium guides/tutorials (AI-assisted writing)
+- ✅ Sell as simple in-app purchases ($2-5 each)
+- **Time:** 20-40 hours total
+- **Revenue:** $1,500-6,000 additional (10-20% attach rate at 5K users)
+
+#### 4. Marketing & Content (Ongoing)
+- ✅ AI-generated blog posts (ChatGPT drafts, you edit and publish)
+- ✅ Social media content (AI writes, you post)
+- ✅ Email marketing (AI writes sequences, you customize)
+- ✅ SEO optimization (AI suggests keywords, writes meta descriptions)
+- **Time:** 5-10 hours/week
+
+#### 5. Customer Support (Manageable at Scale)
+- ✅ AI chatbot for common questions (reduce support load 50-70%)
+- ✅ Canned responses with AI personalization (Zendesk, Intercom)
+- ✅ 1-2 hours/day for personalized support (up to 1,000 active users)
+- ✅ Knowledge base articles (AI-generated, you review)
+- **Scale:** Can handle 100-500 active users solo, 1,000+ with AI automation
+
+**Solo Dev Capacity:**
+- **Product development:** 10-20 hours/week (new features, bug fixes)
+- **Support:** 5-10 hours/week (email, chat, bug triage)
+- **Marketing:** 5-10 hours/week (content, social media, ASO)
+- **Total: 20-40 hours/week** (sustainable long-term)
+
+---
+
+### 11.2 What You CANNOT Do Solo (Complexity Traps)
+
+These features require TEAMS, not solo developers. Skip them entirely.
+
+#### 1. User-Generated Content Platforms ❌
+**Requires:**
+- Moderation team (full-time job reviewing submissions, handling copyright disputes)
+- Legal: DMCA takedowns, Section 230 compliance, copyright infringement
+- Payment splitting: 1099 tax forms for creators, escrow, dispute resolution
+- Technical: Review queue, creator dashboards, payment escrow
+- **Cost:** $50K-100K/year minimum (moderation tools + staff)
+- **Time:** 200-400 hours to build, ongoing full-time support
+
+**Solo dev reality:** You'd spend more time moderating than coding. Not worth it until revenue > $500K/year AND you hire a support team.
+
+#### 2. Social/Network Features ❌
+**Requires:**
+- Community management (full-time job: abuse, spam, harassment, bullying)
+- Legal: COPPA (kids under 13), GDPR (EU users), content filtering
+- Infrastructure: Hosting user content, CDN, scaling database for social graph
+- Feature creep: Notifications, privacy settings, blocking/reporting, admin tools
+- **Time:** 100-200 hours base features, ongoing community management
+
+**Solo dev reality:** Social = full-time community manager. Only viable if you hire help at 10K+ users.
+
+#### 3. Revenue Sharing / Marketplace ❌
+**Requires:**
+- Tax complexity: 1099 forms for creators, payment thresholds, international taxes
+- Payment processing: Stripe Connect, PayPal Payouts, multi-currency
+- Fraud prevention: Cookie stuffing, fake referrals, chargebacks
+- Support overhead: Creator onboarding, payout questions, commission disputes
+- **Time:** 80-120 hours to build, ongoing support nightmare
+
+**Solo dev reality:** Unless you're a tax expert or hire one, stay away from revenue sharing.
+
+#### 4. Team Collaboration (Complex) ❌
+**Requires:**
+- Real-time sync: WebSockets, conflict resolution, complex backend
+- Permission systems: Admin, editor, viewer roles (80+ hours to build)
+- Billing complexity: Per-seat pricing, team management UI
+- Support overhead: Team admin issues, billing disputes
+- **Time:** 200-300 hours to build, ongoing support
+
+**Solo dev reality:** Simple team features (shared task lists) are OK. Real-time collaboration requires a team.
+
+#### 5. Freemium with Unlimited Free Tier ❌
+**Why it's risky:**
+- AI costs: $0.13/user/month × 10K free users = $1,300/month burn rate
+- Break-even: Need 125 paid users just to cover free tier costs
+- Risk: Free tier abuse, cost explosion
+- **Better:** Limit free tier aggressively (15 AI messages/day) OR charge everyone
+
+**Solo dev reality:** You can't afford to subsidize 10K free users on $0 revenue. Keep free tier limited.
+
+---
+
+### 11.3 Recommended Solo Dev Path (Realistic Timeline)
+
+**Months 1-6: Build MVP**
+- **Focus:** Core features (Tasks, Habits, Calendar, Finance, Focus, AI Chat)
+- **Goal:** Ship to App Store + Play Store
+- **Revenue:** $0 (no users yet)
+- **Time:** Full-time OR 20-30 hours/week part-time
+- **AI Assistance:** Pair programming, UI design, backend scaffolding
+
+**Months 7-12: Launch & Iterate**
+- **Focus:** User feedback, bug fixes, onboarding optimization
+- **Goal:** 100-500 users, 3-5% conversion (5-25 paid users)
+- **Revenue:** $500-2,500/year (5-25 paid users × $100/year)
+- **Time:** 10-20 hours/week (support + iteration)
+- **AI Assistance:** Support chatbot, email sequences, bug triage
+
+**Year 2: Scale to 1,000 Paid Users**
+- **Focus:** Marketing (SEO, content, ASO), feature polish
+- **Goal:** 1,000 paid users = $100K+/year (sustainable solo income)
+- **Revenue:** $100K-150K/year
+- **Time:** 20-30 hours/week (can hire VA for support at $50K revenue)
+- **AI Assistance:** Content generation, social media, customer support automation
+
+**Year 3: Add Solo-Created Premium Content**
+- **Focus:** Premium themes ($2-5 each), templates, guides
+- **Goal:** 5,000 paid users + 10-20% buy add-ons
+- **Revenue:** $500K/year subscriptions + $25-50K add-ons = $525-550K total
+- **Time:** 30-40 hours/week (hire part-time support at $100K revenue)
+- **AI Assistance:** Theme design (color palettes), template creation, guide writing
+
+**Year 4+: Hire Team OR Stay Solo**
+- **Option A:** Hire 1-2 people (support, marketing) → scale to 10K users
+- **Option B:** Stay solo, maintain 5K users, focus on quality + lifestyle
+- **Revenue:** $500K-1M/year (solo) OR $1M-2M/year (small team)
+
+---
+
+### 11.4 When to Add Complexity (Decision Gates)
+
+**ONLY Add Themes/IAP if:**
+- ✅ You have 5,000+ active users
+- ✅ Subscription revenue > $50K/year (proven demand)
+- ✅ Users explicitly ask for themes (feature request volume)
+- ✅ You have 20-40 hours to invest upfront (evenings/weekends)
+
+**ONLY Add Team Features if:**
+- ✅ You have 10,000+ users
+- ✅ Revenue > $100K/year (can afford to hire)
+- ✅ Users explicitly ask for sharing/collaboration (high demand)
+- ✅ You hire at least 1 other developer (can't do solo)
+
+**NEVER Add (Solo Dev):**
+- ❌ User-generated content marketplace (too risky, too complex)
+- ❌ Public social features (moderation = full-time job)
+- ❌ Revenue sharing (payment/tax nightmare)
+- ❌ Complex team permissions (not worth engineering time)
+
+---
+
+### 11.5 Sustainable Solo Dev Business Model
+
+**Target: $100K-300K/year revenue (Solo + AI)**
+
+**Math:**
+- 1,000 paid users × $100/year = $100K/year (minimum viable solo income)
+- 3,000 paid users × $100/year = $300K/year (comfortable solo income)
+- 5,000 paid users × $100/year = $500K/year (can hire help)
+
+**Margins:**
+- AI costs: $2/user/year ($10K/year at 5K users)
+- Infrastructure: $5K/year (Vercel, Supabase, Cloudflare)
+- Tools: $2K/year (Sentry, analytics, design tools)
+- Marketing: $10K/year (ads, content, ASO tools)
+- **Total costs:** $27K/year at 5K users
+- **Profit margin:** 95% at $500K revenue ($473K profit)
+
+**Time Commitment:**
+- Development: 10-20 hours/week (new features, bug fixes)
+- Support: 5-10 hours/week (email, chat, bug triage)
+- Marketing: 5-10 hours/week (content, social media, ASO)
+- **Total: 20-40 hours/week** (sustainable for solo dev)
+
+**When to Hire:**
+- Revenue > $100K/year: Hire VA for support (10 hours/week, $2K/month)
+- Revenue > $200K/year: Hire part-time marketer (20 hours/week, $4K/month)
+- Revenue > $300K/year: Hire full-time developer ($80K/year salary)
+
+---
+
+### 11.6 What Successful Solo Devs Actually Do
+
+**Examples:**
+- **Pieter Levels** (Nomad List, Remote OK): $500K+/year, solo, no team
+- **Danny Postma** (Headshot AI): $1M+/year, solo at first, then hired
+- **Marc Louvion** (ScreenshotOne): $50K/year, side project, solo
+- **Levelsio**: $3M+/year across portfolio, solo for years
+
+**Common Patterns:**
+1. ✅ Start solo, focus on ONE app
+2. ✅ Simple pricing: Freemium OR paid-only (no complexity)
+3. ✅ Minimal features, high quality (not feature bloat)
+4. ✅ AI for support automation (chatbots, canned responses)
+5. ✅ Hire only when revenue proves demand ($100K+ threshold)
+6. ✅ Stay small intentionally (lifestyle business, not unicorn)
+
+**What They DON'T Do:**
+- ❌ No marketplaces (too complex)
+- ❌ No social features (moderation hell)
+- ❌ No team plans initially (solo users first)
+- ❌ No free tier if costs are high (charge everyone)
+
+---
+
+### 11.7 Your Specific Advantages (Solo Dev + AI in 2025)
+
+**Why NOW is the best time:**
+1. **AI Pair Programming** (Claude/GPT): Build 3-5x faster than 2020
+2. **AI Design Tools** (v0, Midjourney): No designer needed
+3. **AI Marketing** (ChatGPT, Jasper): Content generation at scale
+4. **AI Support** (chatbots, canned responses): Handle 100x more users solo
+5. **No-Code Backend** (Supabase, Firebase): Backend in hours, not weeks
+
+**Your Competitive Edge:**
+- Solo = low overhead (95%+ margins, can undercut competitors)
+- AI = force multiplier (do work of 5-person team)
+- Fast iteration (no meetings, no consensus, ship daily)
+- Direct user connection (you talk to users, not support team)
+
+**Your Constraints:**
+- Time: Can't work 80 hours/week indefinitely
+- Energy: Support burnout is real (manage expectations)
+- Expertise: Can't be expert at everything (focus on strengths, AI for gaps)
+- Scale: Solo caps at ~5K-10K users before hiring required
+
+---
+
+### 11.8 Final Solo Dev Recommendations
+
+**DO:**
+- ✅ Launch with freemium (free tier = marketing, paid tier = revenue)
+- ✅ Keep free tier limited (prevent cost explosion)
+- ✅ Target 1,000 paid users in Year 1-2 ($100K+ revenue = sustainable)
+- ✅ Use AI for everything: coding, design, marketing, support
+- ✅ Stay laser-focused on core value (Tasks, Habits, AI productivity)
+- ✅ Charge what you're worth ($9.99/month is fair, don't undervalue)
+
+**DON'T:**
+- ❌ Build marketplace features (defer to Year 3+ or never)
+- ❌ Add social features (moderation nightmare)
+- ❌ Offer unlimited free tier (cost explosion risk)
+- ❌ Underprice ($4.99/month leaves no margin for error)
+- ❌ Try to do everything (focus on 1 app, not 10)
+- ❌ Burn out (20-40 hours/week sustainable, 80 hours/week isn't)
+
+**WHEN IN DOUBT:**
+- Ask: "Can I build and maintain this alone in 20 hours/week?"
+- If NO → defer to future when you have team/revenue
+- If YES → build it, but keep it simple
 
 ---
 

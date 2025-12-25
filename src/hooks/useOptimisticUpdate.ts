@@ -54,7 +54,7 @@ export function useOptimisticUpdate(): UseOptimisticUpdateReturn {
   const rollbackTimeouts = useRef<NodeJS.Timeout[]>([]);
 
   // Clean up any pending rollback timeouts on unmount
-  const clearTimeouts = useCallback(() => {
+  const _clearTimeouts = useCallback(() => {
     rollbackTimeouts.current.forEach(timeout => clearTimeout(timeout));
     rollbackTimeouts.current = [];
   }, []);

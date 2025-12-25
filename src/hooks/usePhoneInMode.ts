@@ -9,7 +9,6 @@ import { useState, useEffect, useCallback } from 'react';
 // TEMPORARILY DISABLED
 // import * as Notifications from 'expo-notifications';
 // import * as Haptics from 'expo-haptics';
-import { Platform } from 'react-native';
 
 interface UsePhoneInModeReturn {
   isEnabled: boolean;

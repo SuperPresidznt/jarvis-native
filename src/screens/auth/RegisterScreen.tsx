@@ -91,8 +91,9 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
         email: email.trim(),
         password,
       });
-    } catch (err: any) {
-      Alert.alert('Registration Failed', err.message || 'Could not create account');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Could not create account';
+      Alert.alert('Registration Failed', message);
     }
   };
 

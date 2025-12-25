@@ -25,7 +25,7 @@ export default function SampleDataPrompt({
   onAccept,
   onDecline,
 }: SampleDataPromptProps) {
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleAccept = async () => {

@@ -6,7 +6,7 @@
 
 export type UndoActionType = 'task' | 'habit' | 'event' | 'transaction';
 
-export interface UndoAction<T = any> {
+export interface UndoAction<T = unknown> {
   id: string;
   type: UndoActionType;
   data: T;
@@ -15,7 +15,7 @@ export interface UndoAction<T = any> {
 
 type ExpireCallback = () => void;
 
-interface QueueEntry<T = any> {
+interface QueueEntry<T = unknown> {
   action: UndoAction<T>;
   timeout: NodeJS.Timeout;
   onExpire: ExpireCallback;

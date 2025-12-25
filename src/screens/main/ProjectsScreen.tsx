@@ -21,7 +21,7 @@ import * as projectsDB from '../../database/projects';
 import type { Project } from '../../database/projects';
 import { ProjectCard } from '../../components/ProjectCard';
 import { ProjectFormModal } from '../../components/ProjectFormModal';
-import { LastUpdated, EmptyState } from '../../components/ui';
+import { LastUpdated } from '../../components/ui';
 import { typography, spacing, borderRadius, getColors } from '../../theme';
 import { useTheme } from '../../theme/ThemeProvider';
 import { haptic } from '../../utils/haptics';

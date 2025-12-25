@@ -10,7 +10,6 @@ import {
   ScrollView,
   RefreshControl,
   Alert,
-  TouchableOpacity,
   Text,
   SectionList,
 } from 'react-native';

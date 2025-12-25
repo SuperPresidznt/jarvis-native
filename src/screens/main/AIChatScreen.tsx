@@ -18,7 +18,6 @@ import {
   Modal,
 } from 'react-native';
 import {
-  TextInput,
   IconButton,
   Text,
   Card,

@@ -70,8 +70,9 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
 
     try {
       await login({ email: email.trim(), password });
-    } catch (err: any) {
-      Alert.alert('Login Failed', err.message || 'Invalid credentials');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Invalid credentials';
+      Alert.alert('Login Failed', message);
     }
   };
 

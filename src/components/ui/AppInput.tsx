@@ -44,10 +44,10 @@ export const AppInput: React.FC<AppInputProps> = ({
   ...textInputProps
 }) => {
   const { colors } = useTheme();
-  const [isFocused, setIsFocused] = useState(false);
+  const [_isFocused, setIsFocused] = useState(false);
   const focusAnim = useRef(new Animated.Value(0)).current;
 
-  const handleFocus = (e: any) => {
+  const handleFocus = (e: Parameters<NonNullable<typeof onFocus>>[0]) => {
     setIsFocused(true);
     Animated.timing(focusAnim, {
       toValue: 1,
@@ -57,7 +57,7 @@ export const AppInput: React.FC<AppInputProps> = ({
     onFocus?.(e);
   };
 
-  const handleBlur = (e: any) => {
+  const handleBlur = (e: Parameters<NonNullable<typeof onBlur>>[0]) => {
     setIsFocused(false);
     Animated.timing(focusAnim, {
       toValue: 0,

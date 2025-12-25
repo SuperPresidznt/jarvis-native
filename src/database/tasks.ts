@@ -463,13 +463,13 @@ export async function getTaskStats(): Promise<{
     FROM tasks
   `;
 
-  const result = await executeQuerySingle<any>(sql);
+  const result = await executeQuerySingle<Record<string, unknown>>(sql);
   return {
-    total: result?.total || 0,
-    todo: result?.todo || 0,
-    inProgress: result?.in_progress || 0,
-    completed: result?.completed || 0,
-    blocked: result?.blocked || 0,
+    total: (result?.total as number) || 0,
+    todo: (result?.todo as number) || 0,
+    inProgress: (result?.in_progress as number) || 0,
+    completed: (result?.completed as number) || 0,
+    blocked: (result?.blocked as number) || 0,
   };
 }
 

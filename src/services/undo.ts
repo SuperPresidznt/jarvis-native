@@ -9,7 +9,7 @@
 import Toast from 'react-native-toast-message';
 // TEMPORARILY DISABLED
 // import * as Haptics from 'expo-haptics';
-import { undoQueue, UndoAction } from './undoQueue';
+import { undoQueue } from './undoQueue';
 import * as tasksDB from '../database/tasks';
 import * as habitsDB from '../database/habits';
 import * as calendarDB from '../database/calendar';

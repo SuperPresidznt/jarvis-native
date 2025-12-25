@@ -51,6 +51,9 @@ Subagent definitions in `agentlab/subagents/`. Each has role, style, constraints
 | Max | Legal URL config | `src/constants/config.ts` |
 | Max | FAQ / Support docs | `docs/SUPPORT_FAQ.md` |
 | Max | Agent profiles system | `agentlab/profiles/` |
+| Max | Master Launch Checklist | `docs/LAUNCH_CHECKLIST.md` |
+| Copy Agent (Max team) | App name availability research | `docs/beta/APP_NAME_AVAILABILITY.md` |
+| Growth Agent (Max team) | App naming best practices research | `docs/beta/APP_NAME_RESEARCH.md` |
 | (unknown) | Full workstream report | `docs/beta/APP_STORE_LAUNCH_WORKSTREAMS.md` |
 
 ---

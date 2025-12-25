@@ -11,7 +11,6 @@ import {
   RefreshControl,
   Modal,
   TextInput,
-  Alert,
   Text,
   TouchableOpacity,
   Animated,

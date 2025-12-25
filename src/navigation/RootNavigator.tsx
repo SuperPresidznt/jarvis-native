@@ -24,7 +24,7 @@ import OnboardingFlow from '../screens/onboarding/OnboardingFlow';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 interface RootNavigatorProps {
-  navigationRef?: React.RefObject<NavigationContainerRef<any> | null>;
+  navigationRef?: React.RefObject<NavigationContainerRef<RootStackParamList> | null>;
 }
 
 export default function RootNavigator({ navigationRef }: RootNavigatorProps) {

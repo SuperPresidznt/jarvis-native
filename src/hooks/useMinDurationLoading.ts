@@ -39,7 +39,7 @@ export function useMinDurationLoading(
   const { minDuration = MIN_LOADING_DURATION } = options;
 
   const [isLoading, setIsLoading] = useState(initialLoading);
-  const [actualLoading, setActualLoading] = useState(initialLoading);
+  const [_actualLoading, setActualLoading] = useState(initialLoading);
   const loadingStartTime = useRef<number | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 

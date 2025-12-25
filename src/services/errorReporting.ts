@@ -15,7 +15,7 @@ interface ErrorContext {
   userId?: string;
   screen?: string;
   action?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 interface LoggedError {

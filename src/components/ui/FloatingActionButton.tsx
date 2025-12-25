@@ -81,7 +81,7 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
 
   const gradientColors = (variant === 'primary'
       ? colors.gradient.primary
-      : colors.gradient.cyan) as any;
+      : colors.gradient.cyan) as readonly [string, string, ...string[]];
 
   const styles = createStyles(colors);
 
@@ -136,7 +136,7 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
   );
 };
 
-const createStyles = (colors: ReturnType<typeof getColors>) => StyleSheet.create({
+const createStyles = (_colors: ReturnType<typeof getColors>) => StyleSheet.create({
   container: {
     position: 'absolute',
     zIndex: 1000,

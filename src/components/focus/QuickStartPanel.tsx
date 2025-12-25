@@ -46,8 +46,7 @@ export function QuickStartPanel({
   onPomodoroModeChange,
 }: QuickStartPanelProps) {
   const { colors } = useTheme();
-  const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
-  const [showTaskPicker, setShowTaskPicker] = useState(false);
+  const [_showTaskPicker, _setShowTaskPicker] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [showSettings, setShowSettings] = useState(false);
 
@@ -64,10 +63,11 @@ export function QuickStartPanel({
     });
   };
 
-  const handleTaskSelected = (task: Task | null) => {
-    setSelectedTask(task);
-    setShowTaskPicker(false);
-  };
+  // Commenting out unused function - may be needed for future task picker feature
+  // const handleTaskSelected = (task: Task | null) => {
+  //   setSelectedTask(task);
+  //   setShowTaskPicker(false);
+  // };
 
   return (
     <View style={styles.container}>
@@ -108,10 +108,7 @@ export function QuickStartPanel({
               styles.presetButton,
               {
                 backgroundColor: colors.background.secondary,
-                borderColor:
-                  selectedDuration === preset.minutes
-                    ? colors.primary.main
-                    : colors.border.subtle,
+                borderColor: colors.border.subtle,
               },
             ]}
             onPress={() => handleQuickStart(preset.minutes)}
@@ -141,7 +138,7 @@ export function QuickStartPanel({
             borderColor: selectedTask ? colors.primary.main : colors.border.subtle,
           },
         ]}
-        onPress={() => setShowTaskPicker(true)}
+        onPress={() => _setShowTaskPicker(true)}
       >
         <IconButton
           icon={selectedTask ? 'checkbox-marked-circle' : 'checkbox-blank-circle-outline'}

@@ -19,7 +19,7 @@ import * as tasksDB from '../database/tasks';
 import * as habitsDB from '../database/habits';
 import * as calendarDB from '../database/calendar';
 import * as financeDB from '../database/finance';
-import { AppCard, EmptyState } from '../components/ui';
+import { EmptyState } from '../components/ui';
 import {
   colors,
   typography,
