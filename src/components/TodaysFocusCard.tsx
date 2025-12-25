@@ -6,9 +6,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { IconButton } from 'react-native-paper';
-import { LinearGradient } from 'expo-linear-gradient';
 import { TodaysFocus, TodaysFocusItem } from '../database/dashboard';
-import { typography, spacing, borderRadius, shadows, getColors } from '../theme';
+import { typography, spacing, borderRadius, getColors } from '../theme';
 import { useTheme } from '../theme/ThemeProvider';
 import { AppCard } from './ui/AppCard';
 import { HIT_SLOP } from '../constants/ui';
@@ -24,7 +23,6 @@ interface TodaysFocusCardProps {
 export const TodaysFocusCard: React.FC<TodaysFocusCardProps> = ({
   focus,
   onNavigate,
-  onViewAll,
   onCompleteTask,
   onLogHabit,
 }) => {
@@ -55,92 +53,13 @@ export const TodaysFocusCard: React.FC<TodaysFocusCardProps> = ({
     }
   };
 
-  const renderItem = (item: TodaysFocusItem) => {
-    const icon =
-      item.type === 'task'
-        ? 'checkbox-blank-outline'
-        : item.type === 'habit'
-        ? 'refresh'
-        : 'calendar';
-
-    const priorityColor = item.priority ? getPriorityColor(item.priority) : undefined;
-
-    return (
-      <TouchableOpacity
-        key={item.id}
-        style={[
-          styles.focusItem,
-          item.isOverdue && styles.focusItemOverdue,
-          priorityColor && { borderLeftColor: priorityColor },
-        ]}
-        onPress={() => onNavigate(item.type, item.id)}
-        activeOpacity={0.7}
-      >
-        <View style={styles.itemIcon}>
-          <IconButton
-            icon={icon}
-            size={20}
-            iconColor={
-              item.isOverdue
-                ? colors.error
-                : priorityColor || colors.primary.main
-            }
-            style={styles.iconButton}
-          
-                hitSlop={HIT_SLOP}/>
-        </View>
-
-        <View style={styles.itemContent}>
-          <Text
-            style={[
-              styles.itemTitle,
-              item.isOverdue && styles.itemTitleOverdue,
-            ]}
-            numberOfLines={1}
-          >
-            {item.title}
-          </Text>
-
-          <View style={styles.itemMeta}>
-            {item.time && (
-              <Text style={styles.itemTime}>{formatTime(item.time)}</Text>
-            )}
-            {item.status && (
-              <Text style={styles.itemStatus}>{item.status}</Text>
-            )}
-            {item.project && (
-              <View style={styles.projectBadge}>
-                <Text style={styles.projectText} numberOfLines={1}>
-                  {item.project}
-                </Text>
-              </View>
-            )}
-            {item.isOverdue && (
-              <View style={styles.overdueBadge}>
-                <Text style={styles.overdueText}>Overdue</Text>
-              </View>
-            )}
-          </View>
-        </View>
-
-        <IconButton
-          icon="chevron-right"
-          size={20}
-          iconColor={colors.text.tertiary}
-          style={styles.chevron}
-        
-                hitSlop={HIT_SLOP}/>
-      </TouchableOpacity>
-    );
-  };
-
   // Get the single top priority item (UX research: single focus reduces cognitive load)
   const allItems = [...focus.tasks, ...focus.habits, ...focus.events];
   const topItem = allItems.sort((a, b) => {
     // Sort by: overdue > high priority > medium priority > low priority
     if (a.isOverdue && !b.isOverdue) return -1;
     if (!a.isOverdue && b.isOverdue) return 1;
-    const priorityOrder: any = { urgent: 0, high: 1, medium: 2, low: 3 };
+    const priorityOrder: Record<string, number> = { urgent: 0, high: 1, medium: 2, low: 3 };
     return (priorityOrder[a.priority || 'low'] || 3) - (priorityOrder[b.priority || 'low'] || 3);
   })[0];
 

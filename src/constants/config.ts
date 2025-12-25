@@ -21,10 +21,17 @@ export const AUTH_CONFIG = {
 
 // App Configuration
 export const APP_CONFIG = {
-  NAME: 'Jarvis',
+  NAME: '[APP_NAME]', // TODO: Replace with final app name
   VERSION: '1.0.0',
   DEFAULT_TIMEZONE: 'America/Chicago',
   DEFAULT_CURRENCY: 'USD',
+};
+
+// Legal URLs (TODO: Replace with your hosted URLs)
+export const LEGAL_URLS = {
+  PRIVACY_POLICY: 'https://example.com/privacy', // TODO: Replace with actual URL
+  TERMS_OF_SERVICE: 'https://example.com/terms', // TODO: Replace with actual URL
+  SUPPORT_EMAIL: 'support@example.com', // TODO: Replace with actual email
 };
 
 // Feature Flags

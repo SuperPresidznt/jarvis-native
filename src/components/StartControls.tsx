@@ -4,10 +4,9 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, TextInput, Modal, Animated, Alert } from 'react-native';
-import { Button, Text, Card, IconButton } from 'react-native-paper';
+import { View, StyleSheet, TextInput, Modal, Animated } from 'react-native';
+import { Button, Text, Card } from 'react-native-paper';
 import { MacroGoal } from '../database/dashboard';
-import { HIT_SLOP } from '../constants/ui';
 import { getColors } from '../theme';
 import { useTheme } from '../theme/ThemeProvider';
 
@@ -18,35 +17,30 @@ interface StartControlsProps {
 }
 
 export const StartControls: React.FC<StartControlsProps> = ({
-  macroGoals,
-  defaultDuration = 10,
   onStarted,
 }) => {
   const { colors } = useTheme();
   const styles = createStyles(colors);
 
   const [microWhy, setMicroWhy] = useState('');
-  const [selectedMacroId, setSelectedMacroId] = useState('');
   const [activeStart, setActiveStart] = useState<{ id: string; durationSec: number } | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const [completionModalVisible, setCompletionModalVisible] = useState(false);
   const [completionNote, setCompletionNote] = useState('');
   const [progress] = useState(new Animated.Value(0));
-  const [isStarting, setIsStarting] = useState(false);
 
   const handleStart = useCallback(
     (durationSec: number) => {
-      if (isStarting || activeStart) return;
+      if (activeStart) return;
 
       // Offline mode - just start the timer locally
       const id = `start-${Date.now()}`;
       setActiveStart({ id, durationSec });
       setElapsed(0);
       setMicroWhy('');
-      setSelectedMacroId('');
       onStarted?.();
     },
-    [isStarting, activeStart, onStarted]
+    [activeStart, onStarted]
   );
 
   useEffect(() => {
@@ -112,7 +106,7 @@ export const StartControls: React.FC<StartControlsProps> = ({
         <Button
           mode="contained"
           onPress={() => handleStart(10)}
-          disabled={!!activeStart || isStarting}
+          disabled={!!activeStart}
           style={styles.primaryButton}
           labelStyle={styles.buttonLabel}
         >
@@ -121,7 +115,7 @@ export const StartControls: React.FC<StartControlsProps> = ({
         <Button
           mode="outlined"
           onPress={() => handleStart(60)}
-          disabled={!!activeStart || isStarting}
+          disabled={!!activeStart}
           style={styles.secondaryButton}
           labelStyle={styles.buttonLabel}
         >
@@ -130,7 +124,7 @@ export const StartControls: React.FC<StartControlsProps> = ({
         <Button
           mode="outlined"
           onPress={() => handleStart(1800)}
-          disabled={!!activeStart || isStarting}
+          disabled={!!activeStart}
           style={styles.secondaryButton}
           labelStyle={styles.buttonLabel}
         >

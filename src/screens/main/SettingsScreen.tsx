@@ -44,6 +44,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import * as notificationService from '../../services/notifications';
 import { haptic } from '../../utils/haptics';
 import { confirmations, alertSuccess, alertError } from '../../utils/dialogs';
+import { APP_CONFIG, LEGAL_URLS } from '../../constants/config';
 
 // Import version from package.json
 const packageJson = require('../../../package.json');
@@ -589,6 +590,28 @@ export default function SettingsScreen() {
         </View>
       </View>
 
+      {/* Legal Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>LEGAL</Text>
+        <View style={styles.sectionContent}>
+          <SettingItem styles={styles}
+            icon="📜"
+            title="Privacy Policy"
+            subtitle="How we handle your data"
+            onPress={() => Linking.openURL(LEGAL_URLS.PRIVACY_POLICY)}
+            showChevron
+          />
+          <View style={styles.divider} />
+          <SettingItem styles={styles}
+            icon="📋"
+            title="Terms of Service"
+            subtitle="Usage terms and conditions"
+            onPress={() => Linking.openURL(LEGAL_URLS.TERMS_OF_SERVICE)}
+            showChevron
+          />
+        </View>
+      </View>
+
       {/* Logout Section */}
       <View style={styles.section}>
         <View style={styles.sectionContent}>
@@ -603,7 +626,7 @@ export default function SettingsScreen() {
 
       {/* App Info Footer */}
       <View style={styles.appInfo}>
-        <Text style={styles.appName}>Jarvis</Text>
+        <Text style={styles.appName}>{APP_CONFIG.NAME}</Text>
         <Text style={styles.appVersion}>Your Personal AI Assistant</Text>
         <Text style={styles.appBuild}>Build {packageJson.version}</Text>
         <Text style={styles.appCopyright}>

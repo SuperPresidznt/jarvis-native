@@ -16,7 +16,6 @@ interface HabitHeatmapProps {
 }
 
 export const HabitHeatmap: React.FC<HabitHeatmapProps> = ({
-  habitId,
   completions,
   weeks = 12,
   habitName,

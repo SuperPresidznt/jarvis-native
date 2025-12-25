@@ -33,6 +33,8 @@ import {
 import { dropAllTables, initDatabase } from '../../database';
 import { alertSuccess, alertError } from '../../utils/dialogs';
 import { haptic } from '../../utils/haptics';
+import { exportAllDataAsJSON } from '../../services/export';
+import { AppButton } from '../../components/ui';
 
 type DataManagementScreenProps = {
   navigation: NativeStackNavigationProp<SettingsStackParamList, 'DataManagement'>;
@@ -50,6 +52,7 @@ interface DatabaseStats {
 export default function DataManagementScreen({ navigation }: DataManagementScreenProps) {
   const insets = useSafeAreaInsets();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [stats, setStats] = useState<DatabaseStats>({
     tasks: 0,
     habits: 0,
@@ -90,6 +93,25 @@ export default function DataManagementScreen({ navigation }: DataManagementScree
   useEffect(() => {
     loadStats();
   }, [loadStats]);
+
+  const handleExportData = async () => {
+    try {
+      setIsExporting(true);
+      haptic.light();
+      const result = await exportAllDataAsJSON();
+
+      if (result.success) {
+        alertSuccess('Export Successful', result.message);
+      } else {
+        alertError('Export Failed', result.message);
+      }
+    } catch (error) {
+      console.error('Failed to export data:', error);
+      alertError('Error', 'Failed to export data. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const handleClearAllData = async () => {
     try {
@@ -138,6 +160,32 @@ export default function DataManagementScreen({ navigation }: DataManagementScree
           <Text style={styles.warningText}>
             These actions affect all your data. Proceed with caution.
           </Text>
+        </View>
+      </View>
+
+      {/* Export Data Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>BACKUP & EXPORT</Text>
+        <View style={styles.exportCard}>
+          <View style={styles.exportContent}>
+            <Text style={styles.exportTitle}>📦  Export All Data</Text>
+            <Text style={styles.exportSubtitle}>
+              Download a complete backup of all your data as JSON ({totalRecords} {totalRecords === 1 ? 'item' : 'items'})
+            </Text>
+            <Text style={styles.exportDescription}>
+              Includes tasks, habits, calendar events, transactions, budgets, and all settings. Perfect for backing up or migrating to another device.
+            </Text>
+
+            <View style={styles.exportButtonContainer}>
+              <AppButton
+                title={isExporting ? 'Exporting...' : 'Export JSON Backup'}
+                onPress={handleExportData}
+                loading={isExporting}
+                disabled={isExporting || loading}
+                variant="primary"
+              />
+            </View>
+          </View>
         </View>
       </View>
 
@@ -229,6 +277,37 @@ const styles = StyleSheet.create({
     letterSpacing: typography.letterSpacing.widest,
     paddingHorizontal: spacing.lg,
     marginBottom: spacing.sm,
+  },
+  exportCard: {
+    backgroundColor: colors.background.secondary,
+    marginHorizontal: spacing.lg,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    ...shadows.md,
+  },
+  exportContent: {
+    padding: spacing.lg,
+  },
+  exportTitle: {
+    fontSize: typography.size.lg,
+    fontWeight: typography.weight.bold,
+    color: colors.primary.main,
+    marginBottom: spacing.sm,
+  },
+  exportSubtitle: {
+    fontSize: typography.size.base,
+    color: colors.text.primary,
+    marginBottom: spacing.md,
+  },
+  exportDescription: {
+    fontSize: typography.size.sm,
+    color: colors.text.tertiary,
+    lineHeight: typography.size.sm * 1.5,
+    marginBottom: spacing.lg,
+  },
+  exportButtonContainer: {
+    alignItems: 'stretch',
   },
   dangerZone: {
     backgroundColor: colors.background.secondary,

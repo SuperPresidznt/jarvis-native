@@ -114,9 +114,10 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
 
       onSuccess();
       onClose();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[CategoryFormModal] Error saving category:', error);
-      Alert.alert('Error', error.message || 'Failed to save category');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save category';
+      Alert.alert('Error', errorMessage);
     } finally {
       setIsSubmitting(false);
     }

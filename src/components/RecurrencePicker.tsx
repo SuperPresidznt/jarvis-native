@@ -12,10 +12,8 @@ import {
   ScrollView,
   TextInput,
 } from 'react-native';
-import { IconButton } from 'react-native-paper';
 import type { RecurrenceRule, RecurrenceFrequency, RecurrenceEndType } from '../types';
 import { colors, typography, spacing, borderRadius } from '../theme';
-import { HIT_SLOP } from '../constants/ui';
 
 interface RecurrencePickerProps {
   value?: RecurrenceRule;

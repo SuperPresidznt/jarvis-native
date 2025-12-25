@@ -10,8 +10,6 @@ import {
   Modal,
   Text,
   TouchableOpacity,
-  ActivityIndicator,
-  Platform,
   Alert,
 } from 'react-native';
 import { IconButton } from 'react-native-paper';
@@ -25,7 +23,7 @@ import {
   type ExportFilters,
 } from '../../services/export';
 import { AppButton } from '../ui';
-import { typography, spacing, borderRadius, shadows, getColors } from '../../theme';
+import { typography, spacing, borderRadius, getColors } from '../../theme';
 import { useTheme } from '../../theme/ThemeProvider';
 import { HIT_SLOP } from '../../constants/ui';
 
@@ -40,8 +38,8 @@ export function ExportButton({ transactions, onExportComplete }: ExportButtonPro
 
   const [showModal, setShowModal] = useState(false);
   const [selectedRange, setSelectedRange] = useState<DateRangeFilter>('thisMonth');
-  const [customStartDate, setCustomStartDate] = useState('');
-  const [customEndDate, setCustomEndDate] = useState('');
+  const [customStartDate] = useState('');
+  const [customEndDate] = useState('');
   const [isExporting, setIsExporting] = useState(false);
   const insets = useSafeAreaInsets();
 

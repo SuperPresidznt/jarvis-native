@@ -19,7 +19,6 @@ import { IconButton } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as projectsDB from '../database/projects';
 import type { Project } from '../database/projects';
-import { AppButton } from './ui';
 import { colors, typography, spacing, borderRadius } from '../theme';
 import { HIT_SLOP } from '../constants/ui';
 

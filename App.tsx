@@ -15,7 +15,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import RootNavigator from './src/navigation/RootNavigator';
 import { initDatabase } from './src/database';
-import { needsSeeding, seedDatabase } from './src/database/seed';
 import { useThemeStore } from './src/store/themeStore';
 import { ThemeProvider } from './src/theme/ThemeProvider';
 import { getColors, spacing, typography } from './src/theme';
@@ -38,7 +37,7 @@ export default function App() {
   const [initError, setInitError] = useState<string | null>(null);
   const loadTheme = useThemeStore((state) => state.loadTheme);
   const getResolvedMode = useThemeStore((state) => state.getResolvedMode);
-  const navigationRef = useRef<NavigationContainerRef<any> | null>(null);
+  const navigationRef = useRef<NavigationContainerRef<Record<string, object | undefined>> | null>(null);
 
   useEffect(() => {
     async function prepare() {

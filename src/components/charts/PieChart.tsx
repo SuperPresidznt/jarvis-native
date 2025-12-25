@@ -115,7 +115,7 @@ export const PieChart: React.FC<PieChartProps> = ({
 };
 
 // Helper function to generate default colors
-function getDefaultColor(index: number, colors: any): string {
+function getDefaultColor(index: number, colors: { primary: { main: string } }): string {
   const palette = [
     colors.primary.main,
     '#F59E0B',

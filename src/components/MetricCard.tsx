@@ -171,7 +171,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
         accessible={accessible}
         accessibilityLabel={accessibilityLabel}
         accessibilityHint={accessibilityHint}
-        accessibilityRole={accessibilityRole as any}
+        accessibilityRole={accessibilityRole as 'button'}
       >
         {CardContent}
       </TouchableOpacity>
@@ -183,7 +183,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
       style={[styles.card, compact && styles.cardCompact, style]}
       accessible={accessible}
       accessibilityLabel={accessibilityLabel}
-      accessibilityRole={accessibilityRole as any}
+      accessibilityRole={accessibilityRole as 'text'}
     >
       {CardContent}
     </View>

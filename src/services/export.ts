@@ -1,11 +1,16 @@
 /**
  * Export Service
- * Handles exporting financial data to CSV format
+ * Handles exporting data to CSV and JSON formats
  */
 
 import { Paths, File } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import type { Transaction } from '../database/finance';
+import { getTasks } from '../database/tasks';
+import { getHabits } from '../database/habits';
+import { getEvents } from '../database/calendar';
+import { getTransactions, getAssets, getLiabilities } from '../database/finance';
+import { executeQuery } from '../database';
 
 export type DateRangeFilter =
   | 'thisMonth'
@@ -245,5 +250,102 @@ export function getDateRangeLabel(filter: DateRangeFilter): string {
       return 'Custom Range';
     default:
       return 'Unknown';
+  }
+}
+
+/**
+ * Get all habit logs (no date filter)
+ */
+async function getAllHabitLogs() {
+  const sql = 'SELECT * FROM habit_logs ORDER BY date DESC';
+  const rows = await executeQuery(sql, []);
+  return rows.map((row: unknown) => {
+    const r = row as Record<string, unknown>;
+    return {
+      id: r.id as string,
+      habitId: r.habit_id as string,
+      date: r.date as string,
+      completed: Boolean(r.completed),
+      notes: r.notes as string | undefined,
+      createdAt: r.created_at as string,
+    };
+  });
+}
+
+/**
+ * Export all data as JSON backup
+ */
+export async function exportAllDataAsJSON(): Promise<{ success: boolean; message: string }> {
+  try {
+    // Gather all data from database
+    const [tasks, habits, habitLogs, events, transactions, assets, liabilities] = await Promise.all([
+      getTasks(),
+      getHabits(),
+      getAllHabitLogs(),
+      getEvents(),
+      getTransactions(),
+      getAssets(),
+      getLiabilities(),
+    ]);
+
+    const exportData = {
+      version: '1.0.0',
+      exportDate: new Date().toISOString(),
+      data: {
+        tasks,
+        habits,
+        habitLogs,
+        events,
+        transactions,
+        assets,
+        liabilities,
+      },
+      stats: {
+        tasks: tasks.length,
+        habits: habits.length,
+        habitLogs: habitLogs.length,
+        events: events.length,
+        transactions: transactions.length,
+        assets: assets.length,
+        liabilities: liabilities.length,
+      },
+    };
+
+    // Generate filename
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0];
+    const filename = `jarvis_backup_${dateStr}.json`;
+
+    // Write to file
+    const file = new File(Paths.cache, filename);
+    await file.write(JSON.stringify(exportData, null, 2));
+
+    // Share the file
+    const isAvailable = await Sharing.isAvailableAsync();
+    if (!isAvailable) {
+      return {
+        success: false,
+        message: 'Sharing is not available on this device',
+      };
+    }
+
+    await Sharing.shareAsync(file.uri, {
+      mimeType: 'application/json',
+      dialogTitle: 'Export All Data',
+      UTI: 'public.json',
+    });
+
+    const totalRecords = Object.values(exportData.stats).reduce((sum, val) => sum + val, 0);
+
+    return {
+      success: true,
+      message: `Successfully exported ${totalRecords} records`,
+    };
+  } catch (error) {
+    console.error('[Export] Error exporting all data:', error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to export data',
+    };
   }
 }
