@@ -104,7 +104,7 @@ export const AppCard: React.FC<AppCardProps> = ({
     if (variant === 'glass') {
       return (
         <LinearGradient
-          colors={colors.gradient.glass as any}
+          colors={colors.gradient.glass as unknown as readonly [string, string, ...string[]]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={getCardStyles()}

@@ -39,7 +39,6 @@ export const PhoneInModal: React.FC<PhoneInModalProps> = ({
   const {
     elapsedSeconds,
     remainingSeconds,
-    isRunning,
     isPaused,
     progress,
     pause,
@@ -66,6 +65,7 @@ export const PhoneInModal: React.FC<PhoneInModalProps> = ({
       triggerCompletionHaptic();
       onComplete();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [remainingSeconds, elapsedSeconds]);
 
   // Break notification after 25 minutes
@@ -73,6 +73,7 @@ export const PhoneInModal: React.FC<PhoneInModalProps> = ({
     if (elapsedSeconds === 25 * 60) {
       triggerBreakNotification();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [elapsedSeconds]);
 
   const formatTime = (seconds: number) => {

@@ -27,7 +27,7 @@ export const TaskCelebration: React.FC<TaskCelebrationProps> = ({
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
-  const confettiRef = useRef<any>(null);
+  const confettiRef = useRef<ConfettiCannon>(null);
 
   useEffect(() => {
     if (visible) {

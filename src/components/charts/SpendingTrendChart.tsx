@@ -27,6 +27,7 @@ export const SpendingTrendChart: React.FC<SpendingTrendChartProps> = ({
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [days]);
 
   const loadData = async () => {

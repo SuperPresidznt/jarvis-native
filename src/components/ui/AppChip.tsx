@@ -135,7 +135,7 @@ export const AppChip: React.FC<AppChipProps> = ({
   return content;
 };
 
-const createStyles = (colors: ReturnType<typeof getColors>) => StyleSheet.create({
+const createStyles = (_colors: ReturnType<typeof getColors>) => StyleSheet.create({
   chip: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,

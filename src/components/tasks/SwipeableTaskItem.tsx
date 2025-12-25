@@ -26,7 +26,6 @@ interface SwipeableTaskItemProps {
 
 export const SwipeableTaskItem: React.FC<SwipeableTaskItemProps> = ({
   children,
-  taskId,
   taskTitle,
   isCompleted,
   onComplete,

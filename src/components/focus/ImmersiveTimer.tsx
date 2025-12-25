@@ -33,7 +33,7 @@ interface ImmersiveTimerProps {
   streak?: number;
 }
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export const ImmersiveTimer: React.FC<ImmersiveTimerProps> = ({
   focusBlock,

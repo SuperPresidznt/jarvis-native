@@ -28,6 +28,7 @@ export const HabitsComparisonChart: React.FC<HabitsComparisonChartProps> = ({
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [habitIds]);
 
   const loadData = async () => {
@@ -100,7 +101,7 @@ export const HabitsComparisonChart: React.FC<HabitsComparisonChartProps> = ({
                   chartConfig={{
                     ...baseChartConfig,
                     decimalPlaces: 0,
-                    color: (opacity = 1) => colors.primary.main,
+                    color: (_opacity = 1) => colors.primary.main,
                     fillShadowGradientFrom: colors.primary.main,
                     fillShadowGradientTo: colors.primary.main,
                   }}

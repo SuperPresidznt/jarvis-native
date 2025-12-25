@@ -10,7 +10,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   Platform,
-  ScrollView,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -47,7 +46,7 @@ export const EnhancedDatePicker: React.FC<EnhancedDatePickerProps> = ({
     onChange(dateString);
   };
 
-  const handleDateChange = (event: any, date?: Date) => {
+  const handleDateChange = (_event: unknown, date?: Date) => {
     if (Platform.OS === 'android') {
       setShowPicker(false);
     }

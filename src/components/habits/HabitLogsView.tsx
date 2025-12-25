@@ -74,6 +74,7 @@ export const HabitLogsView: React.FC<HabitLogsViewProps> = ({
 
   useEffect(() => {
     loadLogs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [habitId]);
 
   const onRefresh = async () => {

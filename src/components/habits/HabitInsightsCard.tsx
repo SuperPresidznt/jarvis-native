@@ -29,6 +29,7 @@ export function HabitInsightsCard({ insights, habitName }: HabitInsightsCardProp
 
   useEffect(() => {
     loadEnhancedAnalytics();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [insights.habitId]);
 
   const loadEnhancedAnalytics = async () => {

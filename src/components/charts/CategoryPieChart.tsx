@@ -28,6 +28,7 @@ export const CategoryPieChart: React.FC<CategoryPieChartProps> = ({
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [month]);
 
   const loadData = async () => {
@@ -65,7 +66,8 @@ export const CategoryPieChart: React.FC<CategoryPieChartProps> = ({
     value: data.data[index],
   })) || [];
 
-  const total = chartDataPoints.reduce((sum, point) => sum + point.value, 0);
+  // Total is calculated but not currently used - keeping for potential future use
+  // const total = chartDataPoints.reduce((sum, point) => sum + point.value, 0);
   const accessibilityDescription = data
     ? getChartDescription(chartDataPoints, {
         title: 'Category breakdown',

@@ -28,6 +28,7 @@ export const MonthlyComparisonChart: React.FC<MonthlyComparisonChartProps> = ({
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [months]);
 
   const loadData = async () => {

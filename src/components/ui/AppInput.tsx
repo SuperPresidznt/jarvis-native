@@ -15,7 +15,7 @@ import {
   TextInputProps,
 } from 'react-native';
 import { useTheme } from '../../theme/ThemeProvider';
-import { typography, spacing, borderRadius, shadows, getColors } from '../../theme';
+import { typography, spacing, borderRadius, getColors } from '../../theme';
 
 interface AppInputProps extends Omit<TextInputProps, 'style'> {
   label?: string;

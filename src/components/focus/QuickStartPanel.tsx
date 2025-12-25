@@ -12,7 +12,7 @@ import {
   Modal,
   Switch,
 } from 'react-native';
-import { IconButton, Surface } from 'react-native-paper';
+import { IconButton } from 'react-native-paper';
 import { useTheme } from '../../hooks/useTheme';
 import { typography, spacing, borderRadius, shadows } from '../../theme';
 import { Task } from '../../database/tasks';

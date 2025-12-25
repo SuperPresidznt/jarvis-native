@@ -65,6 +65,7 @@ export const CategoryPicker: React.FC<CategoryPickerProps> = ({
       loadCategories();
       setSearchQuery('');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, type]);
 
   useEffect(() => {

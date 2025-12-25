@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Skeleton, SkeletonCircle, SkeletonText } from '../ui/Skeleton';
+import { Skeleton, SkeletonCircle } from '../ui/Skeleton';
 import { colors, spacing, borderRadius, shadows } from '../../theme';
 
 export const TaskCardSkeleton: React.FC = () => {

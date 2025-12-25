@@ -49,6 +49,7 @@ export const DetailedChartModal: React.FC<DetailedChartModalProps> = ({
     if (visible) {
       loadData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, dataType]);
 
   const loadData = async () => {
@@ -90,8 +91,8 @@ export const DetailedChartModal: React.FC<DetailedChartModalProps> = ({
     backgroundGradientFrom: colors.background.secondary,
     backgroundGradientTo: colors.background.secondary,
     decimalPlaces: 0,
-    color: (opacity = 1) => `rgba(16, 185, 129, ${opacity})`,
-    labelColor: (opacity = 1) => colors.text.tertiary,
+    color: (_opacity = 1) => `rgba(16, 185, 129, ${_opacity})`,
+    labelColor: (_opacity = 1) => colors.text.tertiary,
     style: {
       borderRadius: borderRadius.lg,
     },
@@ -199,7 +200,7 @@ export const DetailedChartModal: React.FC<DetailedChartModalProps> = ({
                     datasets: [
                       {
                         data: trendData.data,
-                        color: (opacity = 1) => colors.primary.main,
+                        color: (_opacity = 1) => colors.primary.main,
                         strokeWidth: 2,
                       },
                     ],

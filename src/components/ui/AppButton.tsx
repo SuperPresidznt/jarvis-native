@@ -149,7 +149,7 @@ export const AppButton: React.FC<AppButtonProps> = ({
   const useGradient = variant === 'primary' || variant === 'danger';
   const gradientColors = (variant === 'primary'
     ? colors.gradient.primary
-    : ['#EF4444', '#DC2626'] as const) as any; // Danger gradient
+    : ['#EF4444', '#DC2626'] as const) as readonly [string, string, ...string[]]; // Danger gradient
 
   const buttonContent = (
     <>

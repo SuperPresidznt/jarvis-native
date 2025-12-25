@@ -68,7 +68,7 @@ export const HabitReminderPicker: React.FC<HabitReminderPickerProps> = ({
     }
   };
 
-  const handleTimeChange = (event: any, date?: Date) => {
+  const handleTimeChange = (_event: unknown, date?: Date) => {
     if (Platform.OS === 'android') {
       setShowPicker(false);
     }

@@ -6,7 +6,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { IconButton } from 'react-native-paper';
-import { TodaysFocus, TodaysFocusItem } from '../database/dashboard';
+import { TodaysFocus } from '../database/dashboard';
 import { typography, spacing, borderRadius, getColors } from '../theme';
 import { useTheme } from '../theme/ThemeProvider';
 import { AppCard } from './ui/AppCard';

@@ -28,6 +28,7 @@ export const WeeklyCompletionChart: React.FC<WeeklyCompletionChartProps> = ({
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [habitId]);
 
   const loadData = async () => {
@@ -53,7 +54,7 @@ export const WeeklyCompletionChart: React.FC<WeeklyCompletionChartProps> = ({
   // Custom chart config for compact view
   const compactConfig = {
     ...baseChartConfig,
-    color: (opacity = 1) => colors.primary.main,
+    color: (_opacity = 1) => colors.primary.main,
     fillShadowGradientFrom: colors.primary.main,
     fillShadowGradientTo: colors.primary.main,
     decimalPlaces: 0,

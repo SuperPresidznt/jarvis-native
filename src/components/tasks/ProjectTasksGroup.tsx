@@ -13,11 +13,6 @@ import {
   RefreshControl,
 } from 'react-native';
 import { IconButton, Badge } from 'react-native-paper';
-import Animated, {
-  useAnimatedStyle,
-  withTiming,
-  useSharedValue,
-} from 'react-native-reanimated';
 import { useTheme } from '../../hooks/useTheme';
 import { typography, spacing, borderRadius, shadows } from '../../theme';
 import { EmptyState } from '../ui';
@@ -65,10 +60,7 @@ interface ProjectTasksGroupProps {
 export function ProjectTasksGroup({
   tasks,
   projects,
-  onTaskPress,
-  onTaskComplete,
   onCreateTask,
-  onProjectPress,
   refreshing = false,
   onRefresh,
   renderTaskItem,
