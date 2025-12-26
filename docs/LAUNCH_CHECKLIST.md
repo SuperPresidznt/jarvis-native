@@ -3,7 +3,7 @@
 
 **Status:** IN PROGRESS
 **Created:** December 25, 2025
-**Last Updated:** December 25, 2025
+**Last Updated:** December 26, 2025
 **Owner:** Human (CEO)
 
 ---
@@ -12,8 +12,26 @@
 
 This is THE master checklist for launching Jarvis Native to App Store and Google Play. All tasks from all reports (technical, legal, marketing, beta roadmap) are consolidated here with clear ownership, dependencies, and status tracking.
 
-**Timeline:** 4-6 weeks to public launch
+**Timeline:** 6 weeks to public launch
 **Current Phase:** Phase 1 - Blockers
+**Target Launch Date:** February 10, 2026
+
+### Target Milestones
+| Phase | Target Date | Status |
+|-------|-------------|--------|
+| Phase 1: Blockers | Jan 5, 2026 | ⬜ Not Started |
+| Phase 2: Parallel Work | Jan 19, 2026 | ⬜ Not Started |
+| Phase 3: Integration/Beta | Feb 2, 2026 | ⬜ Not Started |
+| Phase 4: Submit | Feb 9, 2026 | ⬜ Not Started |
+| PUBLIC LAUNCH | Feb 10, 2026 | ⬜ Not Started |
+
+### Team Roster
+| Role | Agent | Status |
+|------|-------|--------|
+| CEO | Human | Active |
+| CTO | ??? | **OPEN - NEEDS FILL** |
+| CMO | Max | Active |
+| CFO | Finn | Active |
 
 ---
 
@@ -434,11 +452,11 @@ This is THE master checklist for launching Jarvis Native to App Store and Google
   - **Effort:** 4-6 hours (drafting posts, scheduling)
   - **Priority:** P2 (Nice to have for public launch)
 
-### 2.3 CFO TRACK (Pricing/Security)
+### 2.3 CFO TRACK (Pricing/Security) - Owner: Finn
 
 - [ ] **Decide Monetization Strategy**
-  - **Owner:** Human + CFO
-  - **Status:** ⬜ Not Started
+  - **Owner:** Human + Finn (CFO)
+  - **Status:** ✅ Research Done (see `docs/beta/MONETIZATION_STRATEGY_REPORT.md`)
   - **Depends on:** None
   - **Options:**
     - **Free (No monetization)** ✅ RECOMMENDED for beta
@@ -449,8 +467,8 @@ This is THE master checklist for launching Jarvis Native to App Store and Google
   - **Priority:** P1 (Needed before public launch, can defer for beta)
 
 - [ ] **Complete Data Safety Section (Play Store)**
-  - **Owner:** CFO + CTO
-  - **Status:** ⬜ Not Started
+  - **Owner:** Finn (CFO) + CTO
+  - **Status:** 🔄 In Progress (Finn preparing)
   - **Depends on:** Final feature set (AI chat included or not?)
   - **File:** Filled in Google Play Console UI
   - **Required declarations:**
@@ -463,7 +481,7 @@ This is THE master checklist for launching Jarvis Native to App Store and Google
   - **Rejection Risk:** BLOCKING
 
 - [ ] **Accessibility Audit**
-  - **Owner:** CFO (security/compliance focus) + CTO (implementation)
+  - **Owner:** Finn (CFO) + CTO (implementation)
   - **Status:** ⬜ Not Started
   - **Depends on:** None
   - **Tests:**
@@ -1077,11 +1095,11 @@ Week 9-10: Review period + public launch
 
 ## TEAM ASSIGNMENTS
 
-**Current team (from SYNC.md):**
+**Current team (from agentlab/SYNC.md):**
 - **Human (CEO):** Accounts, decisions, final approvals, coordination
 - **Max (CMO):** Legal, marketing, ASO, metadata, social media
-- **CTO (unclaimed):** Code, builds, DevOps, security, QA
-- **CFO (unclaimed):** Pricing, Data Safety, accessibility, compliance
+- **??? (CTO):** Code, builds, DevOps, security, QA - **OPEN, NEEDS FILL**
+- **Finn (CFO):** Pricing, Data Safety, accessibility, compliance - **ACTIVE**
 
 **Recommended delegation for faster execution:**
 - **Design work:** Commission external designer ($50-200) OR use Fiverr/99designs

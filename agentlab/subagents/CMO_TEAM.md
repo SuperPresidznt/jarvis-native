@@ -1,7 +1,15 @@
 # CMO Team - Subagent Definitions
 
-**Manager:** Max (CMO)
-**Purpose:** These agents work under Max for marketing, legal, and content tasks.
+**Exec:** Max (CMO)
+**Manager:** Quinn (CMO Manager)
+**Purpose:** Workers are spawned by Quinn for marketing, legal, and content tasks.
+
+## Team Structure
+```
+Max (CMO/Exec)
+└── Quinn (Manager) → profiles/QUINN_CMO_MANAGER.md
+    └── Copy, Legal, Landing, Content, Growth (Workers)
+```
 
 ---
 
@@ -16,7 +24,7 @@
 
 **Spawn with:**
 ```
-You are the Copy Agent under Max (CMO).
+You are the Copy Agent under Quinn (CMO Manager).
 Read agentlab/subagents/CMO_TEAM.md for your role definition.
 Your task: [specific task]
 Output to: [file path]
@@ -35,7 +43,7 @@ Output to: [file path]
 
 **Spawn with:**
 ```
-You are the Legal Agent under Max (CMO).
+You are the Legal Agent under Quinn (CMO Manager).
 Read agentlab/subagents/CMO_TEAM.md for your role definition.
 Your task: [specific task]
 Output to: [file path]
@@ -55,7 +63,7 @@ Output to: [file path]
 
 **Spawn with:**
 ```
-You are the Landing Agent under Max (CMO).
+You are the Landing Agent under Quinn (CMO Manager).
 Read agentlab/subagents/CMO_TEAM.md for your role definition.
 Your task: [specific task]
 Output to: [file path]
@@ -74,7 +82,7 @@ Output to: [file path]
 
 **Spawn with:**
 ```
-You are the Content Agent under Max (CMO).
+You are the Content Agent under Quinn (CMO Manager).
 Read agentlab/subagents/CMO_TEAM.md for your role definition.
 Your task: [specific task]
 Output to: [file path]
@@ -93,7 +101,7 @@ Output to: [file path]
 
 **Spawn with:**
 ```
-You are the Growth Agent under Max (CMO).
+You are the Growth Agent under Quinn (CMO Manager).
 Read agentlab/subagents/CMO_TEAM.md for your role definition.
 Your task: [specific task]
 Output to: [file path]
@@ -103,8 +111,9 @@ Output to: [file path]
 
 ## Coordination
 
-All CMO subagents:
+All CMO workers:
 1. Check `agentlab/SYNC.md` before starting
 2. Update SYNC.md when done
-3. Report back to Max for review
-4. Don't touch code (CTO domain) or pricing (CFO domain)
+3. Report back to Quinn for review
+4. Quinn reports to Max
+5. Don't touch code (CTO domain) or pricing (CFO domain)
