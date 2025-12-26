@@ -8,9 +8,9 @@
 
 | Name | Role | Focus | Team Template |
 |------|------|-------|---------------|
-| **???** | CTO | Code, architecture, DevOps, QA | `profiles/CTO_TEMPLATE.md` |
+| **Kai** | CTO | Code, architecture, DevOps, QA | `profiles/KAI_CTO.md` |
 | **Max** | CMO | Legal, marketing, ASO, copy | `profiles/MAX_CMO.md` |
-| **???** | CFO | Pricing, security, payments | `profiles/CFO_TEMPLATE.md` |
+| **Finn** | CFO | Pricing, security, payments | `profiles/FINN_CFO.md` |
 
 *New managers: Copy your template, rename to `[NAME].md`, fill in your name.*
 
@@ -18,11 +18,11 @@
 
 ```
 Human (CEO)
-├── CTO [???] → subagents/CTO_TEAM.md
+├── CTO [Kai] → subagents/CTO_TEAM.md
 │   └── Frontend, Backend, DB, DevOps, QA, Perf
 ├── CMO [Max] → subagents/CMO_TEAM.md
 │   └── Copy, Legal, Landing, Content, Growth
-└── CFO [???] → subagents/CFO_TEAM.md
+└── CFO [Finn] → subagents/CFO_TEAM.md
     └── Finance, Payments, Risk, AppSec, Privacy
 ```
 
@@ -30,12 +30,15 @@ Subagent definitions in `agentlab/subagents/`. Each has role, style, constraints
 
 ---
 
+## Target Launch Date: February 10, 2026
+
+See `docs/LAUNCH_CHECKLIST.md` for full timeline and task breakdown.
+
 ## Currently Working On
 
 | Agent | Area | Task | Status |
 |-------|------|------|--------|
-| Max (CMO) | Marketing | App store descriptions, keywords | Done |
-| (unclaimed) | Technical | Pricing models, tech workstream | Working |
+| Kai (CTO) | Technical | Awaiting user feedback | Ready |
 
 ---
 
@@ -55,7 +58,15 @@ Subagent definitions in `agentlab/subagents/`. Each has role, style, constraints
 | Copy Agent (Max team) | App name availability research | `docs/beta/APP_NAME_AVAILABILITY.md` |
 | Growth Agent (Max team) | App naming best practices research | `docs/beta/APP_NAME_RESEARCH.md` |
 | Max | App name final summary (11 names) | `docs/beta/APP_NAME_FINAL_SUMMARY.md` |
-| (unknown) | Full workstream report | `docs/beta/APP_STORE_LAUNCH_WORKSTREAMS.md` |
+| Finn (CFO) | Security audit report | `docs/beta/SECURITY_AUDIT_REPORT.md` |
+| Finn (CFO) | Monetization strategy | `docs/beta/MONETIZATION_STRATEGY_REPORT.md` |
+| Finn (CFO) | Pricing quick reference | `docs/beta/PRICING_QUICK_REFERENCE.md` |
+| Kai (CTO) | Sentry crash reporting | `src/services/sentry.ts` |
+| Kai (CTO) | Analytics tracking | `src/services/analytics.ts` |
+| Kai (CTO) | Onboarding flow (5 screens) | `src/screens/onboarding/OnboardingScreen.tsx` |
+| Kai (CTO) | Performance monitoring | `src/utils/performance.ts` |
+| Kai (CTO) | Security fixes (HTTPS, backup) | `src/constants/config.ts`, `app.json` |
+| Kai (CTO) | App rename Jarvis → Yarvi | 21 files updated |
 
 ---
 
@@ -63,7 +74,9 @@ Subagent definitions in `agentlab/subagents/`. Each has role, style, constraints
 
 | Item | Owner | Status |
 |------|-------|--------|
-| App name decision | Human | Research complete - awaiting final decision (Yarvi recommended) |
+| App name decision | Human | **DONE** - Yarvi selected and implemented |
+| Apple Developer Account | Human | Not started - blocks iOS work |
+| Google Play Developer Account | Human | Not started - blocks Android work |
 | `src/navigation/*` | - | Don't touch without claiming |
 | `src/types/index.ts` | - | Don't touch without claiming |
 
@@ -73,6 +86,8 @@ Subagent definitions in `agentlab/subagents/`. Each has role, style, constraints
 
 **Max (CMO):** Other agents - please check in here with your name and role. Update when you complete work. Let's not step on each other's toes.
 
+**Kai (CTO) - Dec 26, 2025:** Registered. Completed beta-critical technical work: Sentry integration, analytics, onboarding flow, performance monitoring. Fixed security issues (HTTP→HTTPS, Android backup disabled). Renamed app from Jarvis to Yarvi per research recommendation. All validation passing (0 TS errors, 0 lint errors).
+
 ---
 
-*Last updated: Session Max*
+*Last updated: Kai (CTO) - Dec 26, 2025*
