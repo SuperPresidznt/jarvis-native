@@ -51,7 +51,7 @@ async function seedTasks(): Promise<void> {
 
   const tasks = [
     {
-      title: 'Welcome to Jarvis!',
+      title: 'Welcome to Yarvi!',
       description: 'This is a sample task. Tap to edit or swipe to complete.',
       status: 'todo' as const,
       priority: 'high' as const,

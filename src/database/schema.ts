@@ -5,7 +5,7 @@
 
 import * as SQLite from 'expo-sqlite';
 
-export const DB_NAME = 'jarvis.db';
+export const DB_NAME = 'yarvi.db';
 export const DB_VERSION = 1;
 
 /**

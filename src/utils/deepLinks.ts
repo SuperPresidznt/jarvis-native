@@ -6,7 +6,7 @@
 import * as Clipboard from 'expo-clipboard';
 import { Alert } from 'react-native';
 
-const SCHEME = 'jarvis://';
+const SCHEME = 'yarvi://';
 
 /**
  * Generate a deep link for a task
@@ -115,7 +115,7 @@ export function parseDeepLink(url: string): {
 } {
   try {
     // Remove the scheme
-    const path = url.replace(SCHEME, '').replace('https://jarvis.app/', '');
+    const path = url.replace(SCHEME, '').replace('https://yarvi.app/', '');
 
     // Parse the path
     const segments = path.split('/').filter(Boolean);

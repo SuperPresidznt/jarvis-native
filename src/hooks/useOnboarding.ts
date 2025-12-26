@@ -6,8 +6,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const ONBOARDING_COMPLETE_KEY = '@jarvis:onboarding_complete';
-const SHOWN_TOOLTIPS_KEY = '@jarvis:shown_tooltips';
+const ONBOARDING_COMPLETE_KEY = '@yarvi:onboarding_complete';
+const SHOWN_TOOLTIPS_KEY = '@yarvi:shown_tooltips';
 
 export interface OnboardingState {
   isOnboardingComplete: boolean;

@@ -31,7 +31,7 @@ const FEATURES: Feature[] = [
   {
     id: 'welcome',
     icon: '👋',
-    title: 'Welcome to Jarvis!',
+    title: 'Welcome to Yarvi!',
     description:
       'Your personal command center for productivity, habits, and life tracking. Everything you need in one streamlined app.',
     color: '#10E87F',
@@ -57,7 +57,7 @@ const FEATURES: Feature[] = [
     icon: '🚀',
     title: "You're All Set!",
     description:
-      'Start exploring Jarvis and make it your own. Track what matters, build better habits, and stay focused on your goals.',
+      'Start exploring Yarvi and make it your own. Track what matters, build better habits, and stay focused on your goals.',
     color: '#FF4081',
   },
 ];

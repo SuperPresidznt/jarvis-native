@@ -47,9 +47,9 @@ export default function WelcomeScreen({ onGetStarted, onSkip }: WelcomeScreenPro
               },
             ]}
           >
-            <Text style={styles.logoText}>J</Text>
+            <Text style={styles.logoText}>Y</Text>
           </View>
-          <Text style={[styles.appName, { color: colors.text.primary }]}>Jarvis</Text>
+          <Text style={[styles.appName, { color: colors.text.primary }]}>Yarvi</Text>
           <Text style={[styles.tagline, { color: colors.text.secondary }]}>
             Your Personal Assistant
           </Text>

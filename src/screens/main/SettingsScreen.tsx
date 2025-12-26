@@ -348,7 +348,7 @@ export default function SettingsScreen() {
           <SettingItem
             styles={styles}
             icon="👤"
-            title={user?.email || 'demo@jarvis.app'}
+            title={user?.email || 'demo@yarvi.app'}
             subtitle="Email address"
           />
           <View style={styles.divider} />

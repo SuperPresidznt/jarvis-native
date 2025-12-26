@@ -319,7 +319,7 @@ export default function AIChatScreen() {
             onPress={() => setShowConversationList(true)}
             hitSlop={HIT_SLOP}
           />
-          <Text style={styles.headerTitle}>Jarvis AI</Text>
+          <Text style={styles.headerTitle}>Yarvi AI</Text>
           <IconButton
             icon="plus"
             size={24}
@@ -336,7 +336,7 @@ export default function AIChatScreen() {
           >
             <EmptyState
               icon="💬"
-              title="Hi, I'm Jarvis"
+              title="Hi, I'm Yarvi"
               description="Your AI-powered personal assistant. I can help you manage tasks, track habits, schedule events, plan finances, and organize your life. Ask me anything to get started!"
             />
 
@@ -383,7 +383,7 @@ export default function AIChatScreen() {
             
                 hitSlop={HIT_SLOP}/>
             <RNTextInput
-              placeholder="Ask Jarvis anything..."
+              placeholder="Ask Yarvi anything..."
               placeholderTextColor={colors.text.placeholder}
               value={inputText}
               onChangeText={setInputText}
@@ -409,7 +409,7 @@ export default function AIChatScreen() {
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="small" color={colors.primary.main} />
             <Text variant="bodySmall" style={styles.loadingText}>
-              Jarvis is thinking...
+              Yarvi is thinking...
             </Text>
           </View>
         )}
@@ -438,7 +438,7 @@ export default function AIChatScreen() {
                   <EmptyState
                     icon="💬"
                     title="No conversations yet"
-                    description="Start a new conversation to chat with Jarvis"
+                    description="Start a new conversation to chat with Yarvi"
                   />
                 ) : (
                   conversations.map((conv) => {

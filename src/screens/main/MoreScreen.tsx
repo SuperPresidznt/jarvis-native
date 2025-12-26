@@ -153,7 +153,7 @@ export default function MoreScreen() {
 
         <View style={styles.footer}>
           <Text style={[styles.footerText, { color: colors.text.tertiary }]}>
-            Jarvis v1.0.0
+            Yarvi v1.0.0
           </Text>
         </View>
       </ScrollView>

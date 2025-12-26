@@ -19,8 +19,8 @@ interface ThemeStore {
   getResolvedMode: () => ResolvedThemeMode;
 }
 
-const THEME_MODE_STORAGE_KEY = '@jarvis_theme_mode';
-const THEME_PRESET_STORAGE_KEY = '@jarvis_theme_preset';
+const THEME_MODE_STORAGE_KEY = '@yarvi_theme_mode';
+const THEME_PRESET_STORAGE_KEY = '@yarvi_theme_preset';
 
 export const useThemeStore = create<ThemeStore>((set, get) => ({
   mode: 'system', // Default to system preference

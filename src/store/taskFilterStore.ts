@@ -22,7 +22,7 @@ export interface TaskFilters {
   sortDirection: SortDirection;
 }
 
-const STORAGE_KEY = '@jarvis:taskFilters';
+const STORAGE_KEY = '@yarvi:taskFilters';
 
 const defaultFilters: TaskFilters = {
   sortField: 'dueDate',

@@ -166,7 +166,7 @@ export function generateCSV(transactions: Transaction[]): string {
 function generateFilename(): string {
   const now = new Date();
   const dateStr = now.toISOString().split('T')[0];
-  return `jarvis_transactions_${dateStr}.csv`;
+  return `yarvi_transactions_${dateStr}.csv`;
 }
 
 /**
@@ -314,7 +314,7 @@ export async function exportAllDataAsJSON(): Promise<{ success: boolean; message
     // Generate filename
     const now = new Date();
     const dateStr = now.toISOString().split('T')[0];
-    const filename = `jarvis_backup_${dateStr}.json`;
+    const filename = `yarvi_backup_${dateStr}.json`;
 
     // Write to file
     const file = new File(Paths.cache, filename);

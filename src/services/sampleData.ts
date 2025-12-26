@@ -36,7 +36,7 @@ async function generateSampleTasks(): Promise<void> {
   const tasks = [
     {
       title: 'Complete onboarding tutorial',
-      description: 'Explore all the features Jarvis has to offer',
+      description: 'Explore all the features Yarvi has to offer',
       status: 'in_progress' as const,
       priority: 'high' as const,
       tags: ['getting-started'],

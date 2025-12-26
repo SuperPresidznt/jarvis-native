@@ -35,7 +35,7 @@ export function useRefreshControl({
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   // Storage key for this screen's last refresh timestamp
-  const storageKey = `@jarvis:last_refresh:${screenName}`;
+  const storageKey = `@yarvi:last_refresh:${screenName}`;
 
   /**
    * Load last updated timestamp from AsyncStorage

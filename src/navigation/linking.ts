@@ -7,7 +7,7 @@ import { LinkingOptions } from '@react-navigation/native';
 import { RootStackParamList } from '../types';
 
 export const linking: LinkingOptions<RootStackParamList> = {
-  prefixes: ['jarvis://', 'https://jarvis.app'],
+  prefixes: ['yarvi://', 'https://yarvi.app'],
   config: {
     screens: {
       Main: {

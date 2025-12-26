@@ -116,10 +116,10 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.logoContainer}>
-            <Text style={styles.logo}>J</Text>
+            <Text style={styles.logo}>Y</Text>
           </View>
           <Text style={styles.title}>Create Account</Text>
-          <Text style={styles.subtitle}>Join Jarvis to boost your productivity</Text>
+          <Text style={styles.subtitle}>Join Yarvi to boost your productivity</Text>
         </View>
 
         {/* Form */}

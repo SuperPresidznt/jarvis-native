@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "jarvis-native",
-    "slug": "jarvis-native",
+    "name": "Yarvi",
+    "slug": "yarvi",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "scheme": "jarvis",
+    "scheme": "yarvi",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -15,10 +15,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.jarvis.assistant"
+      "bundleIdentifier": "com.yarvi.app"
     },
     "android": {
-      "package": "com.jarvis.assistant",
+      "package": "com.yarvi.app",
       "allowBackup": false,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
@@ -30,7 +30,7 @@
           "autoVerify": true,
           "data": [
             {
-              "scheme": "jarvis"
+              "scheme": "yarvi"
             }
           ],
           "category": ["BROWSABLE", "DEFAULT"]

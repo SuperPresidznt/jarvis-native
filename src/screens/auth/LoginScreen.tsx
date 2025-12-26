@@ -95,9 +95,9 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
         {/* Logo & Header */}
         <View style={styles.header}>
           <View style={styles.logoContainer}>
-            <Text style={styles.logo}>J</Text>
+            <Text style={styles.logo}>Y</Text>
           </View>
-          <Text style={styles.title}>Jarvis</Text>
+          <Text style={styles.title}>Yarvi</Text>
           <Text style={styles.subtitle}>Your Personal AI Assistant</Text>
         </View>
 

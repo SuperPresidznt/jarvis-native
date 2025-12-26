@@ -263,9 +263,9 @@ function WelcomeStep({ colors, onNext, onSkip }: WelcomeStepProps) {
               },
             ]}
           >
-            <Text style={styles.logoText}>J</Text>
+            <Text style={styles.logoText}>Y</Text>
           </View>
-          <Text style={[styles.title, { color: colors.text.primary }]}>Welcome to Jarvis</Text>
+          <Text style={[styles.title, { color: colors.text.primary }]}>Welcome to Yarvi</Text>
           <Text style={[styles.subtitle, { color: colors.text.secondary }]}>
             Your Personal AI Productivity Assistant
           </Text>
@@ -517,7 +517,7 @@ function ReadyStep({ colors, onFinish, isLoading }: ReadyStepProps) {
 
         <Text style={[styles.title, { color: colors.text.primary }]}>You're All Set!</Text>
         <Text style={[styles.description, { color: colors.text.secondary }]}>
-          Your dashboard is ready. Start exploring Jarvis and make it your own.
+          Your dashboard is ready. Start exploring Yarvi and make it your own.
         </Text>
 
         <AppCard variant="glass" style={styles.tipCard}>
@@ -529,7 +529,7 @@ function ReadyStep({ colors, onFinish, isLoading }: ReadyStepProps) {
         </AppCard>
 
         <AppButton
-          title="Start Using Jarvis"
+          title="Start Using Yarvi"
           onPress={onFinish}
           fullWidth
           size="large"
