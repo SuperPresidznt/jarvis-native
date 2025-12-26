@@ -5,9 +5,9 @@
 
 // Backend API Configuration
 export const API_CONFIG = {
-  // Use local IP for both dev and release builds during testing
-  // Change this to your deployed backend URL when ready for production
-  BASE_URL: 'http://172.27.178.137:800',
+  // Use environment variable for production, fallback to local dev URL
+  // WARNING: Never use HTTP in production - always use HTTPS
+  BASE_URL: process.env.EXPO_PUBLIC_API_URL || 'https://172.27.178.137:800',
   TIMEOUT: 30000, // 30 seconds
   RETRY_ATTEMPTS: 3,
 };
