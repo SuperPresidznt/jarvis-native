@@ -145,15 +145,17 @@ export const LineChart: React.FC<LineChartProps> = ({
                 animate={{ type: 'timing', duration: 300 }}
               />
               {showDots &&
-                points.y.map((point, index) => (
-                  <Circle
-                    key={index}
-                    cx={point.x}
-                    cy={point.y}
-                    r={4}
-                    color={colors.primary.main}
-                  />
-                ))}
+                points.y
+                  .filter((point) => point.y !== undefined)
+                  .map((point, index) => (
+                    <Circle
+                      key={index}
+                      cx={point.x}
+                      cy={point.y as number}
+                      r={4}
+                      color={colors.primary.main}
+                    />
+                  ))}
               {isActive && (
                 <ActivePointIndicator
                   x={state.x.position.value}

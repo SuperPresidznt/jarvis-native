@@ -152,7 +152,8 @@ export type CreateBudgetInput = z.infer<typeof createBudgetSchema>;
 // Calendar Event Schemas
 // ============================================================================
 
-export const createEventSchema = z.object({
+// Base event schema without refinement (for partial updates)
+const createEventBaseSchema = z.object({
   title: z
     .string()
     .min(1, 'Title is required')
@@ -166,12 +167,16 @@ export const createEventSchema = z.object({
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
   reminderMinutes: z.number().int().min(0).max(10080).optional(), // Max 1 week
   recurrence: recurrenceRuleSchema,
-}).refine(
+});
+
+// Full create schema with date validation
+export const createEventSchema = createEventBaseSchema.refine(
   (data) => new Date(data.endDate) >= new Date(data.startDate),
   { message: 'End date must be after start date', path: ['endDate'] }
 );
 
-export const updateEventSchema = createEventSchema.partial();
+// Update schema uses base without refinement (partial updates may not have both dates)
+export const updateEventSchema = createEventBaseSchema.partial();
 
 export type CreateEventInput = z.infer<typeof createEventSchema>;
 export type UpdateEventInput = z.infer<typeof updateEventSchema>;

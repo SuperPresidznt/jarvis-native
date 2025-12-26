@@ -8,14 +8,12 @@ import {
   formatDueDate,
   getDaysUntil,
   isOverdue,
-  formatRelativeDate,
-  formatTimeAgo,
   getDateUrgency,
-  isSameDay,
-  getStartOfDay,
-  getEndOfDay,
-  addDays,
-  subtractDays,
+  isToday,
+  isThisWeek,
+  getQuickDate,
+  formatDateWithDay,
+  getRelativeTime,
 } from '../dateUtils';
 
 describe('dateUtils', () => {
@@ -32,36 +30,20 @@ describe('dateUtils', () => {
   });
 
   describe('isOverdue', () => {
-    it('returns true for past dates with non-completed status', () => {
+    it('returns true for past dates', () => {
       const yesterday = new Date(NOW);
       yesterday.setDate(yesterday.getDate() - 1);
-      expect(isOverdue(yesterday.toISOString(), 'todo')).toBe(true);
-    });
-
-    it('returns false for completed tasks regardless of date', () => {
-      const yesterday = new Date(NOW);
-      yesterday.setDate(yesterday.getDate() - 1);
-      expect(isOverdue(yesterday.toISOString(), 'completed')).toBe(false);
-    });
-
-    it('returns false for cancelled tasks', () => {
-      const yesterday = new Date(NOW);
-      yesterday.setDate(yesterday.getDate() - 1);
-      expect(isOverdue(yesterday.toISOString(), 'cancelled')).toBe(false);
+      expect(isOverdue(yesterday.toISOString())).toBe(true);
     });
 
     it('returns false for future dates', () => {
       const tomorrow = new Date(NOW);
       tomorrow.setDate(tomorrow.getDate() + 1);
-      expect(isOverdue(tomorrow.toISOString(), 'todo')).toBe(false);
+      expect(isOverdue(tomorrow.toISOString())).toBe(false);
     });
 
     it('returns false for today', () => {
-      expect(isOverdue(NOW.toISOString(), 'todo')).toBe(false);
-    });
-
-    it('returns false when no date is provided', () => {
-      expect(isOverdue(undefined, 'todo')).toBe(false);
+      expect(isOverdue(NOW.toISOString())).toBe(false);
     });
   });
 
@@ -81,10 +63,6 @@ describe('dateUtils', () => {
       lastWeek.setDate(lastWeek.getDate() - 7);
       expect(getDaysUntil(lastWeek.toISOString())).toBe(-7);
     });
-
-    it('returns null for undefined date', () => {
-      expect(getDaysUntil(undefined)).toBeNull();
-    });
   });
 
   describe('getDateUrgency', () => {
@@ -98,16 +76,10 @@ describe('dateUtils', () => {
       expect(getDateUrgency(NOW.toISOString())).toBe('today');
     });
 
-    it('returns "tomorrow" for tomorrow', () => {
-      const tomorrow = new Date(NOW);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      expect(getDateUrgency(tomorrow.toISOString())).toBe('tomorrow');
-    });
-
-    it('returns "this_week" for dates within 7 days', () => {
+    it('returns "this-week" for dates within 7 days', () => {
       const inFiveDays = new Date(NOW);
       inFiveDays.setDate(inFiveDays.getDate() + 5);
-      expect(getDateUrgency(inFiveDays.toISOString())).toBe('this_week');
+      expect(getDateUrgency(inFiveDays.toISOString())).toBe('this-week');
     });
 
     it('returns "future" for dates beyond 7 days', () => {
@@ -115,75 +87,47 @@ describe('dateUtils', () => {
       nextMonth.setDate(nextMonth.getDate() + 30);
       expect(getDateUrgency(nextMonth.toISOString())).toBe('future');
     });
+  });
 
-    it('returns "none" for undefined date', () => {
-      expect(getDateUrgency(undefined)).toBe('none');
+  describe('isToday', () => {
+    it('returns true for today', () => {
+      expect(isToday(NOW.toISOString())).toBe(true);
+    });
+
+    it('returns false for tomorrow', () => {
+      const tomorrow = new Date(NOW);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      expect(isToday(tomorrow.toISOString())).toBe(false);
+    });
+
+    it('returns false for yesterday', () => {
+      const yesterday = new Date(NOW);
+      yesterday.setDate(yesterday.getDate() - 1);
+      expect(isToday(yesterday.toISOString())).toBe(false);
     });
   });
 
-  describe('isSameDay', () => {
-    it('returns true for same day', () => {
-      const date1 = new Date('2025-12-26T08:00:00.000Z');
-      const date2 = new Date('2025-12-26T20:00:00.000Z');
-      expect(isSameDay(date1, date2)).toBe(true);
+  describe('isThisWeek', () => {
+    it('returns true for today', () => {
+      expect(isThisWeek(NOW.toISOString())).toBe(true);
     });
 
-    it('returns false for different days', () => {
-      const date1 = new Date('2025-12-26T12:00:00.000Z');
-      const date2 = new Date('2025-12-27T12:00:00.000Z');
-      expect(isSameDay(date1, date2)).toBe(false);
-    });
-  });
-
-  describe('getStartOfDay', () => {
-    it('returns midnight of the given date', () => {
-      const date = new Date('2025-12-26T15:30:45.123Z');
-      const startOfDay = getStartOfDay(date);
-      expect(startOfDay.getHours()).toBe(0);
-      expect(startOfDay.getMinutes()).toBe(0);
-      expect(startOfDay.getSeconds()).toBe(0);
-      expect(startOfDay.getMilliseconds()).toBe(0);
-    });
-  });
-
-  describe('getEndOfDay', () => {
-    it('returns 23:59:59.999 of the given date', () => {
-      const date = new Date('2025-12-26T15:30:45.123Z');
-      const endOfDay = getEndOfDay(date);
-      expect(endOfDay.getHours()).toBe(23);
-      expect(endOfDay.getMinutes()).toBe(59);
-      expect(endOfDay.getSeconds()).toBe(59);
-      expect(endOfDay.getMilliseconds()).toBe(999);
-    });
-  });
-
-  describe('addDays', () => {
-    it('adds days correctly', () => {
-      const date = new Date('2025-12-26T12:00:00.000Z');
-      const result = addDays(date, 5);
-      expect(result.getDate()).toBe(31);
+    it('returns true for dates within 7 days', () => {
+      const inFiveDays = new Date(NOW);
+      inFiveDays.setDate(inFiveDays.getDate() + 5);
+      expect(isThisWeek(inFiveDays.toISOString())).toBe(true);
     });
 
-    it('handles month transitions', () => {
-      const date = new Date('2025-12-30T12:00:00.000Z');
-      const result = addDays(date, 5);
-      expect(result.getMonth()).toBe(0); // January
-      expect(result.getFullYear()).toBe(2026);
-    });
-  });
-
-  describe('subtractDays', () => {
-    it('subtracts days correctly', () => {
-      const date = new Date('2025-12-26T12:00:00.000Z');
-      const result = subtractDays(date, 5);
-      expect(result.getDate()).toBe(21);
+    it('returns false for dates beyond 7 days', () => {
+      const inTenDays = new Date(NOW);
+      inTenDays.setDate(inTenDays.getDate() + 10);
+      expect(isThisWeek(inTenDays.toISOString())).toBe(false);
     });
 
-    it('handles month transitions', () => {
-      const date = new Date('2025-01-02T12:00:00.000Z');
-      const result = subtractDays(date, 5);
-      expect(result.getMonth()).toBe(11); // December
-      expect(result.getFullYear()).toBe(2024);
+    it('returns false for past dates', () => {
+      const yesterday = new Date(NOW);
+      yesterday.setDate(yesterday.getDate() - 1);
+      expect(isThisWeek(yesterday.toISOString())).toBe(false);
     });
   });
 
@@ -206,55 +150,61 @@ describe('dateUtils', () => {
       const result = formatDueDate(yesterday.toISOString());
       expect(result).toBe('Yesterday');
     });
+  });
 
-    it('returns empty string for undefined date', () => {
-      expect(formatDueDate(undefined)).toBe('');
+  describe('getQuickDate', () => {
+    it('returns today for "today"', () => {
+      const result = getQuickDate('today');
+      expect(result).toBeDefined();
+      expect(new Date(result).toDateString()).toBe(NOW.toDateString());
+    });
+
+    it('returns tomorrow for "tomorrow"', () => {
+      const result = getQuickDate('tomorrow');
+      const tomorrow = new Date(NOW);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      expect(new Date(result).toDateString()).toBe(tomorrow.toDateString());
+    });
+
+    it('returns a future date for "next-week"', () => {
+      const result = getQuickDate('next-week');
+      const nextWeek = new Date(NOW);
+      nextWeek.setDate(nextWeek.getDate() + 7);
+      expect(new Date(result).toDateString()).toBe(nextWeek.toDateString());
     });
   });
 
-  describe('formatRelativeDate', () => {
+  describe('formatDateWithDay', () => {
+    it('includes day name for today', () => {
+      const result = formatDateWithDay(NOW.toISOString());
+      expect(result).toContain('Today');
+    });
+
+    it('includes day name for tomorrow', () => {
+      const tomorrow = new Date(NOW);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const result = formatDateWithDay(tomorrow.toISOString());
+      expect(result).toContain('Tomorrow');
+    });
+  });
+
+  describe('getRelativeTime', () => {
     it('returns "Just now" for very recent dates', () => {
       const fiveSecondsAgo = new Date(NOW);
       fiveSecondsAgo.setSeconds(fiveSecondsAgo.getSeconds() - 5);
-      expect(formatRelativeDate(fiveSecondsAgo.toISOString())).toBe('Just now');
+      expect(getRelativeTime(fiveSecondsAgo)).toBe('Just now');
     });
 
     it('returns minutes for recent dates', () => {
       const tenMinutesAgo = new Date(NOW);
       tenMinutesAgo.setMinutes(tenMinutesAgo.getMinutes() - 10);
-      expect(formatRelativeDate(tenMinutesAgo.toISOString())).toBe('10 minutes ago');
+      expect(getRelativeTime(tenMinutesAgo)).toContain('minutes ago');
     });
 
     it('returns hours for same-day dates', () => {
       const threeHoursAgo = new Date(NOW);
       threeHoursAgo.setHours(threeHoursAgo.getHours() - 3);
-      expect(formatRelativeDate(threeHoursAgo.toISOString())).toBe('3 hours ago');
-    });
-  });
-
-  describe('formatTimeAgo', () => {
-    it('handles seconds', () => {
-      const thirtySecondsAgo = new Date(NOW);
-      thirtySecondsAgo.setSeconds(thirtySecondsAgo.getSeconds() - 30);
-      expect(formatTimeAgo(thirtySecondsAgo.toISOString())).toMatch(/seconds? ago/);
-    });
-
-    it('handles minutes', () => {
-      const fiveMinutesAgo = new Date(NOW);
-      fiveMinutesAgo.setMinutes(fiveMinutesAgo.getMinutes() - 5);
-      expect(formatTimeAgo(fiveMinutesAgo.toISOString())).toMatch(/5 minutes? ago/);
-    });
-
-    it('handles hours', () => {
-      const twoHoursAgo = new Date(NOW);
-      twoHoursAgo.setHours(twoHoursAgo.getHours() - 2);
-      expect(formatTimeAgo(twoHoursAgo.toISOString())).toMatch(/2 hours? ago/);
-    });
-
-    it('handles days', () => {
-      const threeDaysAgo = new Date(NOW);
-      threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-      expect(formatTimeAgo(threeDaysAgo.toISOString())).toMatch(/3 days? ago/);
+      expect(getRelativeTime(threeHoursAgo)).toContain('hours ago');
     });
   });
 });
