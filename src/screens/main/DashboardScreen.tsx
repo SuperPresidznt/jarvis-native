@@ -42,6 +42,7 @@ import * as undoService from '../../services/undo';
 import { navigateToItem, navigateToViewAll } from '../../utils/navigation';
 import { calculatePercentageChange } from '../../utils/chartUtils';
 import { useRefreshControl } from '../../hooks/useRefreshControl';
+import { analytics } from '../../services/analytics';
 import {
   typography,
   spacing,
@@ -111,6 +112,8 @@ export default function DashboardScreen() {
 
   useEffect(() => {
     loadData();
+    // Track screen view
+    analytics.trackScreenView('Dashboard');
   }, [loadData]);
 
   // Pull-to-refresh with haptics and timestamp
@@ -153,6 +156,8 @@ export default function DashboardScreen() {
         priority: 'low',
       },
       async (task) => {
+        // Track task creation
+        analytics.trackTaskCreated(task.id, 'low', { source: 'quick_capture' });
         // On successful creation, refresh dashboard data
         await loadData();
       },
@@ -179,6 +184,13 @@ export default function DashboardScreen() {
         description: 'Quick capture from dashboard',
       },
       async (transaction) => {
+        // Track transaction creation
+        analytics.trackTransactionCreated(
+          transaction.type,
+          transaction.amount,
+          transaction.category,
+          { source: 'quick_capture' }
+        );
         // On successful creation, refresh dashboard data
         await loadData();
       },
@@ -201,6 +213,13 @@ export default function DashboardScreen() {
 
       // Start the focus block immediately
       await focusSessionsDB.startFocusSession(focusBlock.id);
+
+      // Track feature usage
+      analytics.trackFeature('focus_session_started', {
+        duration_minutes: 25,
+        has_task: !!taskId,
+        source: 'dashboard',
+      });
 
       // Navigate to Focus screen to show the active timer
       // @ts-expect-error - Navigation type compatibility
@@ -230,6 +249,8 @@ export default function DashboardScreen() {
       haptic.success();
       await tasksDB.updateTask(taskId, { status: 'completed' });
       announceForAccessibility('Task completed');
+      // Track task completion
+      analytics.trackTaskCompleted(taskId, { source: 'dashboard' });
       await loadData();
     } catch (error) {
       console.error('[Dashboard] Error completing task:', error);
@@ -243,6 +264,8 @@ export default function DashboardScreen() {
       haptic.success();
       await habitsDB.logHabitCompletion(habitId, new Date().toISOString().split('T')[0], true);
       announceForAccessibility('Habit logged');
+      // Track habit logging
+      analytics.trackHabitLogged(habitId, undefined, { source: 'dashboard' });
       await loadData();
     } catch (error) {
       console.error('[Dashboard] Error logging habit:', error);
