@@ -61,6 +61,7 @@ import {
 } from '../../utils/accessibility';
 import { HIT_SLOP } from '../../constants/ui';
 import { getLayoutConfig, responsiveSpacing } from '../../utils/responsive';
+import * as performance from '../../utils/performance';
 
 export default function DashboardScreen() {
   const { colors } = useTheme();
@@ -84,6 +85,9 @@ export default function DashboardScreen() {
   // Load dashboard data
   const loadData = useCallback(async () => {
     try {
+      // Measure dashboard data loading time
+      performance.markStart('dashboard-load', 'screen-load');
+
       const [metricsData, goalsData, alertsData, focusData, trendsData, tasksData, habitsData, focusSessionsData] = await Promise.all([
         dashboardDB.getTodayMetrics(),
         dashboardDB.getMacroGoals(),
@@ -102,8 +106,15 @@ export default function DashboardScreen() {
       setActiveTasks(tasksData);
       setActiveHabits(habitsData);
       setRecentFocusSessions(focusSessionsData);
+
+      performance.markEnd('dashboard-load', 'screen-load', {
+        dataPoints: 8,
+        tasksCount: tasksData.length,
+        habitsCount: habitsData.length,
+      });
     } catch (error) {
       console.error('[Dashboard] Error loading data:', error);
+      performance.markEnd('dashboard-load', 'screen-load', { error: true });
       Alert.alert('Error', 'Failed to load dashboard data');
     } finally {
       setIsLoading(false);

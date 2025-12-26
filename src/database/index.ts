@@ -5,6 +5,7 @@
 
 import * as SQLite from 'expo-sqlite';
 import { DB_NAME, CREATE_TABLES, CREATE_INDEXES, DROP_TABLES } from './schema';
+import * as performance from '../utils/performance';
 
 let database: SQLite.SQLiteDatabase | null = null;
 
@@ -324,34 +325,52 @@ export async function initDatabase(): Promise<SQLite.SQLiteDatabase> {
   }
 
   try {
+    performance.markStart('database-initialization', 'database-init');
     console.log('[DB] Initializing database...');
+
+    performance.markStart('database-open', 'database-init');
     database = await SQLite.openDatabaseAsync(DB_NAME);
+    performance.markEnd('database-open', 'database-init');
 
     // Enable foreign keys
     await database.execAsync('PRAGMA foreign_keys = ON;');
 
     // Create all tables
+    performance.markStart('database-create-tables', 'database-init');
     for (const [tableName, createSQL] of Object.entries(CREATE_TABLES)) {
       console.log(`[DB] Creating table: ${tableName}`);
       await database.execAsync(createSQL);
     }
+    performance.markEnd('database-create-tables', 'database-init', {
+      tableCount: Object.keys(CREATE_TABLES).length,
+    });
 
     // Create indexes
+    performance.markStart('database-create-indexes', 'database-init');
     for (const [indexName, createSQL] of Object.entries(CREATE_INDEXES)) {
       console.log(`[DB] Creating index: ${indexName}`);
       await database.execAsync(createSQL);
     }
+    performance.markEnd('database-create-indexes', 'database-init', {
+      indexCount: Object.keys(CREATE_INDEXES).length,
+    });
 
     // Run migrations for existing databases
+    performance.markStart('database-migrations', 'database-init');
     await runMigrations(database);
+    performance.markEnd('database-migrations', 'database-init');
 
     // Seed default categories
+    performance.markStart('database-seed-categories', 'database-init');
     await seedDefaultCategories(database);
+    performance.markEnd('database-seed-categories', 'database-init');
 
+    performance.markEnd('database-initialization', 'database-init');
     console.log('[DB] Database initialized successfully');
     return database;
   } catch (error) {
     console.error('[DB] Failed to initialize database:', error);
+    performance.markEnd('database-initialization', 'database-init', { error: true });
     throw error;
   }
 }
@@ -441,8 +460,15 @@ export async function executeQuery<T>(
 ): Promise<T[]> {
   const db = await getDatabase();
   try {
-    const result = await db.getAllAsync<T>(sql, params);
-    return result ?? [];  // Ensure we always return an array
+    return await performance.measureAsync(
+      `query:${sql.substring(0, 50)}...`,
+      'database-query',
+      async () => {
+        const result = await db.getAllAsync<T>(sql, params);
+        return result ?? [];  // Ensure we always return an array
+      },
+      { paramCount: params.length }
+    );
   } catch (error) {
     console.error('[DB] Query error:', error);
     throw error;

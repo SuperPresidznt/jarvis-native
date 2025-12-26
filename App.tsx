@@ -22,6 +22,7 @@ import * as notificationService from './src/services/notifications';
 import { toastConfig } from './src/components/ui/UndoToast';
 import { RootStackParamList } from './src/types';
 import { initSentry, SentryErrorBoundary } from './src/services/sentry';
+import * as performance from './src/utils/performance';
 
 // Create React Query client
 const queryClient = new QueryClient({
@@ -44,13 +45,17 @@ function App() {
   useEffect(() => {
     async function prepare() {
       try {
+        // Start measuring app startup time
+        performance.markStart('app-initialization', 'app-startup');
         console.log('[App] Initializing...');
 
         // Initialize Sentry error tracking (production only)
         initSentry();
 
         // Load theme preference
+        performance.markStart('theme-load', 'app-startup');
         await loadTheme();
+        performance.markEnd('theme-load', 'app-startup');
         console.log('[App] Theme loaded');
 
         // Initialize database
@@ -68,9 +73,12 @@ function App() {
         //   console.log('[App] Database seeded successfully');
         // }
 
+        // End measuring app startup time
+        performance.markEnd('app-initialization', 'app-startup');
         setIsReady(true);
       } catch (error) {
         console.error('[App] Failed to initialize:', error);
+        performance.markEnd('app-initialization', 'app-startup', { error: true });
         setInitError(error instanceof Error ? error.message : 'Failed to initialize app');
         setIsReady(true); // Still show app, but with error state
       }
