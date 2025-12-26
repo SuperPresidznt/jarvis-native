@@ -21,6 +21,7 @@ import { getColors, spacing, typography } from './src/theme';
 import * as notificationService from './src/services/notifications';
 import { toastConfig } from './src/components/ui/UndoToast';
 import { RootStackParamList } from './src/types';
+import { initSentry, SentryErrorBoundary } from './src/services/sentry';
 
 // Create React Query client
 const queryClient = new QueryClient({
@@ -33,7 +34,7 @@ const queryClient = new QueryClient({
   },
 });
 
-export default function App() {
+function App() {
   const [isReady, setIsReady] = useState(false);
   const [initError, setInitError] = useState<string | null>(null);
   const loadTheme = useThemeStore((state) => state.loadTheme);
@@ -44,6 +45,9 @@ export default function App() {
     async function prepare() {
       try {
         console.log('[App] Initializing...');
+
+        // Initialize Sentry error tracking (production only)
+        initSentry();
 
         // Load theme preference
         await loadTheme();
@@ -162,3 +166,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing['2xl'],
   },
 });
+
+// Wrap app with Sentry error boundary for crash reporting
+export default SentryErrorBoundary(App);

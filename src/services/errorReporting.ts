@@ -2,14 +2,11 @@
  * Error Reporting Service
  * Centralized error logging and reporting
  *
- * In production, this would integrate with services like:
- * - Sentry
- * - Bugsnag
- * - Firebase Crashlytics
- * - Custom logging backend
+ * Integrates with Sentry for production error tracking
  */
 
 import { Platform } from 'react-native';
+import * as SentryService from './sentry';
 
 interface ErrorContext {
   userId?: string;
@@ -34,21 +31,13 @@ class ErrorReportingService {
 
   /**
    * Initialize error reporting service
-   * In production, this would initialize Sentry/Bugsnag/etc.
+   * Note: Sentry is initialized separately in App.tsx via initSentry()
    */
-  initialize(config?: { enabled?: boolean; dsn?: string }): void {
+  initialize(config?: { enabled?: boolean }): void {
     this.enabled = config?.enabled ?? true;
 
     if (this.enabled) {
       console.log('[ErrorReporting] Service initialized');
-
-      // In production, initialize your error reporting service here:
-      // Example with Sentry:
-      // Sentry.init({
-      //   dsn: config?.dsn,
-      //   enableInExpoDevelopment: true,
-      //   debug: __DEV__,
-      // });
     }
   }
 
@@ -85,8 +74,8 @@ class ErrorReportingService {
       });
     }
 
-    // In production, send to error reporting service:
-    // Sentry.captureException(error, { contexts: { custom: context } });
+    // Send to Sentry in production
+    SentryService.captureException(error, context);
   }
 
   /**
@@ -102,8 +91,8 @@ class ErrorReportingService {
       console.warn('[ErrorReporting] Warning:', message, context);
     }
 
-    // In production, log to service:
-    // Sentry.captureMessage(message, { level: 'warning', contexts: { custom: context } });
+    // Send warning to Sentry in production
+    SentryService.captureMessage(message, 'warning', context);
   }
 
   /**
@@ -190,8 +179,8 @@ class ErrorReportingService {
   setUser(userId: string, userInfo?: Record<string, any>): void {
     if (!this.enabled) return;
 
-    // In production:
-    // Sentry.setUser({ id: userId, ...userInfo });
+    // Set user context in Sentry
+    SentryService.setSentryUser(userId, userInfo);
 
     if (__DEV__) {
       console.log('[ErrorReporting] User context set:', userId, userInfo);
@@ -204,8 +193,8 @@ class ErrorReportingService {
   clearUser(): void {
     if (!this.enabled) return;
 
-    // In production:
-    // Sentry.setUser(null);
+    // Clear user context in Sentry
+    SentryService.clearSentryUser();
 
     if (__DEV__) {
       console.log('[ErrorReporting] User context cleared');
@@ -222,8 +211,8 @@ class ErrorReportingService {
   ): void {
     if (!this.enabled) return;
 
-    // In production:
-    // Sentry.addBreadcrumb({ message, category, data });
+    // Add breadcrumb to Sentry
+    SentryService.addSentryBreadcrumb(message, category, 'info', data);
 
     if (__DEV__) {
       console.log('[ErrorReporting] Breadcrumb:', { message, category, data });
