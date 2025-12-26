@@ -5,14 +5,15 @@
 
 ## Executive Summary
 
-Comprehensive availability check across 8 candidate names: Jarvi, Javi, Yarvi, Yarvis, Yavi, Harve, Harvis, Havi
+Comprehensive availability check across 11 candidate names: Jarvi, Javi, Yarvi, Yarvis, Yavi, Harve, Harvis, Havi, Harvey, Harvee, Harvi
 
-**Key Finding:** Three names have significant existing conflicts in the productivity/software space. Five names show cleaner paths forward.
+**Key Finding:** Most names have significant existing conflicts. Only 2 names show clean paths forward.
 
-**Top 3 Recommendations (cleanest availability):**
+**Top 2 Recommendations (cleanest availability):**
 1. **Yarvi** - No conflicts found across any platform
 2. **Javi** - Minimal conflicts (only IT services company in India)
-3. **Harve** - No direct productivity conflicts (some similar names exist)
+
+**AVOID:** Harvey (critical), Harvee (high), Harvi (medium), and 5 others with conflicts
 
 ---
 
@@ -28,6 +29,9 @@ Comprehensive availability check across 8 candidate names: Jarvi, Javi, Yarvi, Y
 | **Harve** | Unknown | None | None | Similar: Harvey (legal AI, $8B valuation), Harver (HR software), Harvest (time tracking) | MEDIUM - Confusable with Harvey | MEDIUM RISK |
 | **Harvis** | Unknown | None | None | EXISTS: Harvis.work (healthcare management platform with AI features) | HIGH - Direct software conflict | HIGH RISK |
 | **Havi** | Unknown | None | Google Play App exists | MAJOR: HAVI App (supply chain company, 10K+ employees), Havi Propel (product configurator) | HIGH - Established brand | HIGH RISK |
+| **Harvey** | N/A | N/A | N/A | CRITICAL: Harvey AI ($8B valuation, legal AI leader) | CRITICAL - Major tech brand | **DO NOT USE** |
+| **Harvee** | harvee.app TAKEN | App Store app exists | None | MAJOR: Harvee Stress Monitor (iOS app), Harvee.tech (software company), Harvee Designs | HIGH - Active app on store | HIGH RISK |
+| **Harvi** | Unknown | None | None | MEDIUM: Harvi Academy (medical education), Harvie (recruitment software), Harvi Enterprises (India) | MEDIUM - Educational/similar names | MEDIUM RISK |
 
 ---
 
@@ -280,7 +284,126 @@ Comprehensive availability check across 8 candidate names: Jarvi, Javi, Yarvi, Y
 
 ---
 
+### 9. HARVEY
+
+**Domain Availability**
+- .com: TAKEN (harvey.com - major brand)
+- .app: TAKEN
+- .io: TAKEN
+
+**App Store Conflicts**
+- iOS: Harvey AI app exists
+- Android: Harvey AI app exists
+
+**Existing Products**
+- **Harvey AI** - CRITICAL CONFLICT
+  - Legal AI platform
+  - $8 BILLION valuation (as of 2024-2025)
+  - Major press coverage (NYT, WSJ, TechCrunch)
+  - Used by top law firms globally
+  - One of the most prominent AI companies
+  - Active marketing and brand presence
+
+**Social Media**
+- All handles taken by Harvey AI
+
+**Trademark Status**
+- CRITICAL - Major tech brand with active enforcement
+
+**Verdict:** **DO NOT USE** - This would be like naming your app "Google" or "Slack"
+
+---
+
+### 10. HARVEE
+
+**Domain Availability**
+- .com: Unknown
+- .app: **TAKEN** (harvee.app - active product)
+- .io: Unknown
+
+**App Store Conflicts**
+- iOS: **Harvee: Stress Monitor & Coach** - ACTIVE APP
+  - Apple Watch integration
+  - HRV tracking, stress monitoring
+  - Regular updates (iOS 18 support, Liquid Glass UI)
+  - Direct productivity/health app competitor
+
+**Existing Products**
+- **Harvee App** (harvee.app)
+  - Stress monitoring and coaching
+  - Active iOS app on App Store
+  - Regular development and updates
+
+- **Harvee Technology** (harvee.tech)
+  - Software development company
+  - AI-powered platforms, SaaS products
+  - Custom software development
+
+- **Harvee Designs** (harveedesigns.com)
+  - Software development (healthcare focus)
+  - Based in Coimbatore, India
+
+- **Harvee Corporate Services**
+  - Talent acquisition company (India)
+
+**Social Media**
+- Likely taken by existing Harvee products
+
+**Trademark Status**
+- HIGH RISK - Active iOS app with same name in productivity/health space
+
+**Verdict:** HIGH RISK - Active app on App Store, domain taken, multiple companies
+
+---
+
+### 11. HARVI
+
+**Domain Availability**
+- .com: Unknown (requires direct check)
+- .app: Unknown
+- .io: Unknown
+
+**App Store Conflicts**
+- iOS: No direct matches found
+- Android: No direct matches found
+
+**Existing Products**
+- **Harvi Academy**
+  - Medical education platform
+  - Cardiovascular physiology simulations
+  - Textbook and simulation environment
+  - Different vertical (education vs productivity)
+
+- **Harvie** (similar spelling)
+  - Recruitment software
+  - Cloud-based, $170/month
+  - Job posting automation
+  - Different vertical but phonetically identical
+
+- **Harvin Technologies**
+  - IT solutions company
+  - AI-powered services, web/app development
+
+- **Harvi Enterprises Private Limited**
+  - India-based company
+  - Incorporated March 2025
+  - Limited information available
+
+**Social Media**
+- May have some availability
+- Requires direct verification
+
+**Trademark Status**
+- MEDIUM RISK - Educational product exists, similar-sounding recruitment software
+
+**Verdict:** MEDIUM RISK - Some conflicts but less severe than others. Educational focus of Harvi Academy is different vertical. Main concern is phonetic similarity to Harvie (recruitment software).
+
+---
+
 ## Risk Assessment Summary
+
+### CRITICAL (Do Not Use)
+- **Harvey** - $8B legal AI company, major tech brand
 
 ### HIGH RISK (Avoid)
 - **Jarvi** - Recruitment software with 800+ customers
@@ -288,9 +411,11 @@ Comprehensive availability check across 8 candidate names: Jarvi, Javi, Yarvi, Y
 - **Yavi** - Two productivity software companies
 - **Harvis** - Healthcare software platform
 - **Havi** - 10K employee global corporation
+- **Harvee** - Active iOS app on App Store, domain taken
 
 ### MEDIUM RISK (Caution)
 - **Harve** - Confusable with Harvey ($8B legal AI company)
+- **Harvi** - Medical education platform, similar to Harvie (recruitment)
 
 ### LOW RISK (Viable)
 - **Javi** - Only conflict is IT services in India (different market)
@@ -428,13 +553,28 @@ Since direct .com availability couldn't be verified via search:
 
 **Yarvi** emerges as the cleanest option with zero conflicts, followed by **Javi** with minimal risk from an unrelated B2B company.
 
-Avoid: Jarvi, Yarvis, Yavi, Harvis, Havi (all have significant existing software products)
+### Full Name Status (11 candidates):
 
-**Final recommendation:** Proceed with domain verification for **Yarvi** and **Javi** as top two candidates. Move quickly - clean names in the productivity space don't stay available long.
+| Name | Risk Level | Primary Conflict |
+|------|------------|------------------|
+| **Yarvi** | LOW | None found |
+| **Javi** | LOW | IT services (India, different market) |
+| **Harvi** | MEDIUM | Medical education, Harvie recruitment software |
+| **Harve** | MEDIUM | Confusable with Harvey |
+| **Jarvi** | HIGH | Jarvi.tech (800+ customers) |
+| **Yarvis** | HIGH | AI workplace assistant + domain taken |
+| **Yavi** | HIGH | Yavi.ai + enterprise messaging |
+| **Harvis** | HIGH | Healthcare software platform |
+| **Havi** | HIGH | 10K employee corporation |
+| **Harvee** | HIGH | iOS app on App Store |
+| **Harvey** | CRITICAL | $8B legal AI company |
+
+**Final recommendation:** Proceed with domain verification for **Yarvi** and **Javi** as top two candidates. **Harvi** is a distant third if you want more options. Move quickly - clean names in the productivity space don't stay available long.
 
 ---
 
-**Report prepared by:** Copy Agent
-**For:** Max (CMO)
+**Report prepared by:** Copy Agent (updated by Max)
+**For:** Human (CEO)
 **Date:** December 25, 2025
+**Last Updated:** December 25, 2025
 **Status:** Ready for human decision

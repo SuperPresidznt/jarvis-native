@@ -20,6 +20,7 @@ import { ThemeProvider } from './src/theme/ThemeProvider';
 import { getColors, spacing, typography } from './src/theme';
 import * as notificationService from './src/services/notifications';
 import { toastConfig } from './src/components/ui/UndoToast';
+import { RootStackParamList } from './src/types';
 
 // Create React Query client
 const queryClient = new QueryClient({
@@ -37,7 +38,7 @@ export default function App() {
   const [initError, setInitError] = useState<string | null>(null);
   const loadTheme = useThemeStore((state) => state.loadTheme);
   const getResolvedMode = useThemeStore((state) => state.getResolvedMode);
-  const navigationRef = useRef<NavigationContainerRef<Record<string, object | undefined>> | null>(null);
+  const navigationRef = useRef<NavigationContainerRef<RootStackParamList> | null>(null);
 
   useEffect(() => {
     async function prepare() {
@@ -82,7 +83,8 @@ export default function App() {
       // Handle habit reminders
       if (data.type === 'habit' && navigationRef.current) {
         // Navigate to Habits tab
-        navigationRef.current.navigate('Main', {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (navigationRef.current as any).navigate('Main', {
           screen: 'Habits',
         });
       }
@@ -90,7 +92,8 @@ export default function App() {
       // Handle event reminders
       if (data.type === 'event' && navigationRef.current) {
         // Navigate to Calendar tab
-        navigationRef.current.navigate('Main', {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (navigationRef.current as any).navigate('Main', {
           screen: 'Calendar',
         });
       }

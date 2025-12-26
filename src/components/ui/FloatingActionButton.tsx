@@ -81,7 +81,7 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
 
   const gradientColors = (variant === 'primary'
       ? colors.gradient.primary
-      : colors.gradient.cyan) as readonly [string, string, ...string[]];
+      : colors.gradient.cyan) as unknown as readonly [string, string, ...string[]];
 
   const styles = createStyles(colors);
 

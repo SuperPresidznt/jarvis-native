@@ -380,10 +380,11 @@ export async function getHabitStats(habitId: string): Promise<{
     WHERE habit_id = ?
   `;
 
-  const result = await executeQuerySingle<Record<string, unknown>>(sql, [habitId]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const result = await executeQuerySingle<any>(sql, [habitId]);
 
-  const totalDays = result?.total_days || 0;
-  const completedDays = result?.completed_days || 0;
+  const totalDays = Number(result?.total_days) || 0;
+  const completedDays = Number(result?.completed_days) || 0;
   const completionRate = totalDays > 0 ? (completedDays / totalDays) * 100 : 0;
 
   return {
@@ -784,7 +785,8 @@ export async function getHabitsWithStats(): Promise<HabitWithStats[]> {
     ORDER BY h.created_at DESC
   `;
 
-  const rows = await executeQuery<Record<string, unknown>>(sql, [today, startDate, today]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rows = await executeQuery<any>(sql, [today, startDate, today]);
 
   // Map to HabitWithStats
   return rows.map(row => {
@@ -803,13 +805,13 @@ export async function getHabitsWithStats(): Promise<HabitWithStats[]> {
       synced: row.synced,
     });
 
-    const completedLast30Days = row.completedLast30Days || 0;
-    const totalDays = row.totalDays || 0;
-    const completedDays = row.completedDays || 0;
+    const completedLast30Days = Number(row.completedLast30Days) || 0;
+    const totalDays = Number(row.totalDays) || 0;
+    const completedDays = Number(row.completedDays) || 0;
 
     return {
       ...habit,
-      completionsToday: row.completionsToday || 0,
+      completionsToday: Number(row.completionsToday) || 0,
       completionRate30Days: Math.round((completedLast30Days / 30) * 100),
       stats: {
         totalDays,

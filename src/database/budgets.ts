@@ -113,11 +113,12 @@ async function calculateBudgetSpending(
       AND type = 'expense'
   `;
 
-  const result = await executeQuerySingle<Record<string, unknown>>(sql, [category, startDate, endDate]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const result = await executeQuerySingle<any>(sql, [category, startDate, endDate]);
 
   return {
-    spent: result?.total_spent || 0,
-    transactionCount: result?.transaction_count || 0,
+    spent: Number(result?.total_spent) || 0,
+    transactionCount: Number(result?.transaction_count) || 0,
   };
 }
 

@@ -54,6 +54,7 @@ Subagent definitions in `agentlab/subagents/`. Each has role, style, constraints
 | Max | Master Launch Checklist | `docs/LAUNCH_CHECKLIST.md` |
 | Copy Agent (Max team) | App name availability research | `docs/beta/APP_NAME_AVAILABILITY.md` |
 | Growth Agent (Max team) | App naming best practices research | `docs/beta/APP_NAME_RESEARCH.md` |
+| Max | App name final summary (11 names) | `docs/beta/APP_NAME_FINAL_SUMMARY.md` |
 | (unknown) | Full workstream report | `docs/beta/APP_STORE_LAUNCH_WORKSTREAMS.md` |
 
 ---
@@ -62,7 +63,7 @@ Subagent definitions in `agentlab/subagents/`. Each has role, style, constraints
 
 | Item | Owner | Status |
 |------|-------|--------|
-| App name decision | Human | Pending - needed for placeholders |
+| App name decision | Human | Research complete - awaiting final decision (Yarvi recommended) |
 | `src/navigation/*` | - | Don't touch without claiming |
 | `src/types/index.ts` | - | Don't touch without claiming |
 

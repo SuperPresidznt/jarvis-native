@@ -473,17 +473,18 @@ export async function getFocusStats(includePomodoro: boolean = true): Promise<Fo
     sql += ' WHERE is_pomodoro = 0';
   }
 
-  const result = await executeQuerySingle<Record<string, unknown>>(sql, params);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const result = await executeQuerySingle<any>(sql, params);
   return {
-    total: result?.total || 0,
-    scheduled: result?.scheduled || 0,
-    inProgress: result?.in_progress || 0,
-    completed: result?.completed || 0,
-    cancelled: result?.cancelled || 0,
-    totalFocusMinutes: result?.total_focus_minutes || 0,
-    avgSessionMinutes: Math.round(result?.avg_session_minutes || 0),
-    pomodoroCount: result?.pomodoro_count || 0,
-    focusBlockCount: result?.focus_block_count || 0,
+    total: Number(result?.total) || 0,
+    scheduled: Number(result?.scheduled) || 0,
+    inProgress: Number(result?.in_progress) || 0,
+    completed: Number(result?.completed) || 0,
+    cancelled: Number(result?.cancelled) || 0,
+    totalFocusMinutes: Number(result?.total_focus_minutes) || 0,
+    avgSessionMinutes: Math.round(Number(result?.avg_session_minutes) || 0),
+    pomodoroCount: Number(result?.pomodoro_count) || 0,
+    focusBlockCount: Number(result?.focus_block_count) || 0,
   };
 }
 
@@ -515,12 +516,13 @@ export async function getFocusTimeByDate(
 
   sql += ' GROUP BY DATE(start_time) ORDER BY date ASC';
 
-  const rows = await executeQuery<Record<string, unknown>>(sql, params);
-  return rows.map(row => ({
-    date: row.date,
-    minutes: row.minutes || 0,
-    pomodoroMinutes: row.pomodoro_minutes || 0,
-    focusMinutes: row.focus_minutes || 0,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rows = await executeQuery<any>(sql, params);
+  return rows.map((row: any) => ({
+    date: String(row.date),
+    minutes: Number(row.minutes) || 0,
+    pomodoroMinutes: Number(row.pomodoro_minutes) || 0,
+    focusMinutes: Number(row.focus_minutes) || 0,
   }));
 }
 
@@ -685,12 +687,13 @@ export async function getTodayStats(
     sql += ' AND is_pomodoro = 0';
   }
 
-  const result = await executeQuerySingle<Record<string, unknown>>(sql, params);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const result = await executeQuerySingle<any>(sql, params);
 
   return {
-    completedCount: result?.count || 0,
-    totalMinutes: result?.totalMinutes || 0,
-    avgSessionMinutes: result?.avgMinutes || 0,
+    completedCount: Number(result?.count) || 0,
+    totalMinutes: Number(result?.totalMinutes) || 0,
+    avgSessionMinutes: Number(result?.avgMinutes) || 0,
   };
 }
 
@@ -720,12 +723,13 @@ export async function getWeeklyStats(
     sql += ' AND is_pomodoro = 0';
   }
 
-  const result = await executeQuerySingle<Record<string, unknown>>(sql, params);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const result = await executeQuerySingle<any>(sql, params);
 
   return {
-    completedCount: result?.count || 0,
-    totalMinutes: result?.totalMinutes || 0,
-    avgSessionMinutes: result?.avgMinutes || 0,
+    completedCount: Number(result?.count) || 0,
+    totalMinutes: Number(result?.totalMinutes) || 0,
+    avgSessionMinutes: Number(result?.avgMinutes) || 0,
   };
 }
 
@@ -737,19 +741,20 @@ export async function getWeeklyStats(
  * Get pomodoro settings (creates default if not exists)
  */
 export async function getPomodoroSettings(): Promise<PomodoroSettings> {
-  const result = await executeQuerySingle<Record<string, unknown>>('SELECT * FROM pomodoro_settings LIMIT 1');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const result = await executeQuerySingle<any>('SELECT * FROM pomodoro_settings LIMIT 1');
 
   if (result) {
     return {
-      id: result.id,
-      workDuration: result.work_duration,
-      shortBreak: result.short_break,
-      longBreak: result.long_break,
-      sessionsUntilLongBreak: result.sessions_until_long_break,
-      autoStartBreaks: result.auto_start_breaks,
-      autoStartPomodoros: result.auto_start_pomodoros,
-      notificationSound: result.notification_sound,
-      updatedAt: result.updated_at,
+      id: String(result.id),
+      workDuration: Number(result.work_duration),
+      shortBreak: Number(result.short_break),
+      longBreak: Number(result.long_break),
+      sessionsUntilLongBreak: Number(result.sessions_until_long_break),
+      autoStartBreaks: Number(result.auto_start_breaks),
+      autoStartPomodoros: Number(result.auto_start_pomodoros),
+      notificationSound: Number(result.notification_sound),
+      updatedAt: String(result.updated_at),
     };
   }
 
