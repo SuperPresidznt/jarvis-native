@@ -8,11 +8,14 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { ProjectsStackParamList } from '../types';
 import ProjectsScreen from '../screens/main/ProjectsScreen';
 import ProjectDetailScreen from '../screens/main/ProjectDetailScreen';
-import { colors, typography } from '../theme';
+import { useTheme } from '../hooks/useTheme';
+import { typography } from '../theme';
 
 const Stack = createNativeStackNavigator<ProjectsStackParamList>();
 
 export default function ProjectsNavigator() {
+  const { colors } = useTheme();
+
   return (
     <Stack.Navigator
       screenOptions={{

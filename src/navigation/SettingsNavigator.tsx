@@ -11,11 +11,14 @@ import StorageOverviewScreen from '../screens/settings/StorageOverviewScreen';
 import DataManagementScreen from '../screens/settings/DataManagementScreen';
 import CategoryManagementScreen from '../screens/CategoryManagementScreen';
 import CustomColorsScreen from '../screens/settings/CustomColorsScreen';
-import { colors, typography } from '../theme';
+import { useTheme } from '../hooks/useTheme';
+import { typography } from '../theme';
 
 const Stack = createNativeStackNavigator<SettingsStackParamList>();
 
 export default function SettingsNavigator() {
+  const { colors } = useTheme();
+
   return (
     <Stack.Navigator
       screenOptions={{

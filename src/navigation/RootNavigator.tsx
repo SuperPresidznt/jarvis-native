@@ -6,10 +6,11 @@
 import React, { useEffect } from 'react';
 import { NavigationContainer, NavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { ActivityIndicator, View, StyleSheet } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 
 import { useAuthStore } from '../store/authStore';
 import { useOnboardingStore } from '../store/onboardingStore';
+import { useTheme } from '../hooks/useTheme';
 import { RootStackParamList } from '../types';
 import { FEATURES } from '../constants/config';
 import { linking } from './linking';
@@ -30,6 +31,7 @@ interface RootNavigatorProps {
 export default function RootNavigator({ navigationRef }: RootNavigatorProps) {
   const { isAuthenticated, isLoading, restoreSession } = useAuthStore();
   const { isOnboardingComplete, isLoading: isOnboardingLoading, loadOnboardingState } = useOnboardingStore();
+  const { colors } = useTheme();
 
   useEffect(() => {
     // Load onboarding state
@@ -43,8 +45,8 @@ export default function RootNavigator({ navigationRef }: RootNavigatorProps) {
   // Show loading while checking onboarding and auth status
   if ((isLoading && !FEATURES.DEMO_MODE) || isOnboardingLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background.primary }}>
+        <ActivityIndicator size="large" color={colors.primary.main} />
       </View>
     );
   }
@@ -120,12 +122,3 @@ export default function RootNavigator({ navigationRef }: RootNavigatorProps) {
     </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-  },
-});
