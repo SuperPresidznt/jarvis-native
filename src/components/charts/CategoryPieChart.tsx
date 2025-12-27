@@ -5,10 +5,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { View, Dimensions, StyleSheet, Text } from 'react-native';
-import { PieChart } from 'react-native-chart-kit';
+import { Pie, PolarChart } from 'victory-native';
 import { BaseChart } from './BaseChart';
 import { ChartCard } from './ChartCard';
-import { baseChartConfig } from '../../utils/charts/chartConfig';
 import { getCategoryBreakdownData, CategoryBreakdownData } from '../../utils/charts/financeCharts';
 import { colors, typography, spacing } from '../../theme';
 import { getChartDescription, getChartDataTable } from '../../utils/chartAccessibility';
@@ -49,14 +48,12 @@ export const CategoryPieChart: React.FC<CategoryPieChartProps> = ({
 
   const isEmpty = !data;
 
-  // Format data for PieChart
+  // Format data for PolarChart
   const pieData = data
     ? data.labels.map((label, index) => ({
-        name: label,
-        population: data.data[index],
+        label,
+        value: data.data[index],
         color: data.colors[index],
-        legendFontColor: colors.text.secondary,
-        legendFontSize: 12,
       }))
     : [];
 
@@ -66,8 +63,6 @@ export const CategoryPieChart: React.FC<CategoryPieChartProps> = ({
     value: data.data[index],
   })) || [];
 
-  // Total is calculated but not currently used - keeping for potential future use
-  // const total = chartDataPoints.reduce((sum, point) => sum + point.value, 0);
   const accessibilityDescription = data
     ? getChartDescription(chartDataPoints, {
         title: 'Category breakdown',
@@ -103,19 +98,16 @@ export const CategoryPieChart: React.FC<CategoryPieChartProps> = ({
               <View
                 accessible={false}
                 importantForAccessibility="no-hide-descendants"
+                style={[styles.chartWrapper, { width: screenWidth - 64, height: 220 }]}
               >
-                <PieChart
+                <PolarChart
                   data={pieData}
-                  width={screenWidth - 64}
-                  height={220}
-                  chartConfig={baseChartConfig}
-                  accessor="population"
-                  backgroundColor="transparent"
-                  paddingLeft="15"
-                  absolute
-                  hasLegend={false}
-                  style={styles.chart}
-                />
+                  labelKey="label"
+                  valueKey="value"
+                  colorKey="color"
+                >
+                  <Pie.Chart innerRadius={0} />
+                </PolarChart>
               </View>
               <View
                 style={styles.legend}
@@ -151,7 +143,7 @@ export const CategoryPieChart: React.FC<CategoryPieChartProps> = ({
 };
 
 const styles = StyleSheet.create({
-  chart: {
+  chartWrapper: {
     marginVertical: 8,
     borderRadius: 16,
   },

@@ -5,10 +5,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { View, Dimensions, StyleSheet, Text } from 'react-native';
-import { BarChart } from 'react-native-chart-kit';
+import { CartesianChart, Bar } from 'victory-native';
+import { useFont } from '@shopify/react-native-skia';
 import { BaseChart } from './BaseChart';
 import { ChartCard } from './ChartCard';
-import { baseChartConfig } from '../../utils/charts/chartConfig';
 import { getMonthlyComparisonData, MonthlyComparisonData } from '../../utils/charts/financeCharts';
 import { colors, typography, spacing } from '../../theme';
 import { getMonthlyComparisonDescription, getChartDataTable } from '../../utils/chartAccessibility';
@@ -25,6 +25,7 @@ export const MonthlyComparisonChart: React.FC<MonthlyComparisonChartProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<MonthlyComparisonData | null>(null);
+  const font = useFont(null, 10);
 
   useEffect(() => {
     loadData();
@@ -66,6 +67,21 @@ export const MonthlyComparisonChart: React.FC<MonthlyComparisonChartProps> = ({
   const allPoints = [...incomePoints, ...expensePoints];
   const dataTable = data ? getChartDataTable(allPoints, { unit: '$' }) : '';
 
+  // Transform data for Victory Native - combine income and expenses
+  // Victory Native doesn't support grouped bars natively, so we show income only with legend
+  const chartData = data?.labels.map((label, index) => ({
+    x: index,
+    label: label as string,
+    income: (data.datasets[0]?.data[index] as number) || 0,
+    expenses: (data.datasets[1]?.data[index] as number) || 0,
+  })) || [];
+
+  // Calculate max for domain
+  const maxValue = data ? Math.max(
+    ...data.datasets[0].data,
+    ...data.datasets[1].data
+  ) : 100;
+
   return (
     <ChartCard
       title="Income vs Expenses"
@@ -91,26 +107,48 @@ export const MonthlyComparisonChart: React.FC<MonthlyComparisonChartProps> = ({
               <View
                 accessible={false}
                 importantForAccessibility="no-hide-descendants"
+                style={[styles.chartWrapper, { width: screenWidth - 64, height: 220 }]}
               >
-                <BarChart
-                  data={{
-                    labels: data.labels,
-                    datasets: data.datasets,
+                <CartesianChart
+                  data={chartData}
+                  xKey="x"
+                  yKeys={['income', 'expenses']}
+                  domainPadding={{ left: 30, right: 30, top: 20, bottom: 20 }}
+                  domain={{ y: [0, maxValue * 1.1] }}
+                  axisOptions={{
+                    font,
+                    tickCount: { x: data.labels.length, y: 5 },
+                    formatXLabel: (value: number) => {
+                      const index = Math.round(value);
+                      return data.labels[index] || '';
+                    },
+                    formatYLabel: (value: number) => `$${Math.round(value / 1000)}k`,
+                    labelColor: colors.text.tertiary,
+                    lineColor: colors.border.subtle,
                   }}
-                  width={screenWidth - 64}
-                  height={220}
-                  chartConfig={{
-                    ...baseChartConfig,
-                    decimalPlaces: 0,
-                  }}
-                  yAxisLabel="$"
-                  yAxisSuffix="k"
-                  fromZero
-                  showBarTops={false}
-                  withInnerLines
-                  style={styles.chart}
-                  verticalLabelRotation={0}
-                />
+                >
+                  {({ points, chartBounds }) => (
+                    <>
+                      <Bar
+                        points={points.income}
+                        chartBounds={chartBounds}
+                        color={colors.success}
+                        roundedCorners={{ topLeft: 4, topRight: 4 }}
+                        barWidth={12}
+                      />
+                      <Bar
+                        points={points.expenses.map((p) => ({
+                          ...p,
+                          x: p.x + 14, // Offset for grouped appearance
+                        }))}
+                        chartBounds={chartBounds}
+                        color={colors.error}
+                        roundedCorners={{ topLeft: 4, topRight: 4 }}
+                        barWidth={12}
+                      />
+                    </>
+                  )}
+                </CartesianChart>
               </View>
               <View
                 style={styles.legend}
@@ -150,7 +188,7 @@ export const MonthlyComparisonChart: React.FC<MonthlyComparisonChartProps> = ({
 };
 
 const styles = StyleSheet.create({
-  chart: {
+  chartWrapper: {
     marginVertical: 8,
     borderRadius: 16,
   },

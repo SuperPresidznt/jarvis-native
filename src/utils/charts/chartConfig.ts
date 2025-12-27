@@ -1,52 +1,47 @@
 /**
  * Chart Configuration
- * Shared configuration for all charts using react-native-chart-kit
+ * Shared configuration for all charts using Victory Native
  */
 
-import { AbstractChartConfig } from 'react-native-chart-kit/dist/AbstractChart';
 import { colors } from '../../theme';
 
 /**
- * Base chart configuration
+ * Base chart theme for Victory Native
  * Applied to all charts for consistent theming
  */
-export const baseChartConfig: AbstractChartConfig = {
-  backgroundColor: colors.background.secondary,
-  backgroundGradientFrom: colors.background.secondary,
-  backgroundGradientTo: colors.background.secondary,
-
-  // Label colors
-  color: (opacity = 1) => `rgba(156, 163, 175, ${opacity})`, // text.tertiary
-  labelColor: (opacity = 1) => `rgba(229, 231, 235, ${opacity})`, // text.secondary
-
-  // Data colors
-  fillShadowGradientFrom: colors.primary.main,
-  fillShadowGradientTo: colors.primary.main,
-  fillShadowGradientFromOpacity: 0.4,
-  fillShadowGradientToOpacity: 0.1,
-
-  // Style
-  strokeWidth: 2,
-  barPercentage: 0.6,
-  useShadowColorFromDataset: false,
-
-  // Decorators
-  propsForDots: {
-    r: '4',
-    strokeWidth: '2',
+export const chartTheme = {
+  background: colors.background.secondary,
+  text: colors.text.tertiary,
+  axis: {
+    style: {
+      axis: {
+        stroke: colors.border.subtle,
+        strokeWidth: 1,
+      },
+      tickLabels: {
+        fill: colors.text.tertiary,
+        fontSize: 11,
+        fontFamily: 'System',
+      },
+      grid: {
+        stroke: colors.border.subtle,
+        strokeWidth: 1,
+        strokeDasharray: '',
+      },
+    },
+  },
+  line: {
     stroke: colors.primary.main,
+    strokeWidth: 2,
+  },
+  bar: {
+    fill: colors.primary.main,
+  },
+  scatter: {
     fill: colors.background.secondary,
-  },
-
-  propsForBackgroundLines: {
-    strokeDasharray: '', // solid lines
-    stroke: colors.border.subtle,
-    strokeWidth: 1,
-  },
-
-  propsForLabels: {
-    fontSize: 11,
-    fontFamily: 'System',
+    stroke: colors.primary.main,
+    strokeWidth: 2,
+    size: 4,
   },
 };
 
@@ -117,7 +112,7 @@ export function formatChartDate(date: string | Date, format: 'short' | 'month' =
 }
 
 export default {
-  baseChartConfig,
+  chartTheme,
   chartColors,
   getCategoryColor,
   getChartDimensions,

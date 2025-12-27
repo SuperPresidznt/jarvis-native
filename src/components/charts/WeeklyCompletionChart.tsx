@@ -6,9 +6,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { View, Dimensions, StyleSheet, Text } from 'react-native';
-import { BarChart } from 'react-native-chart-kit';
+import { CartesianChart, Bar } from 'victory-native';
+import { useFont } from '@shopify/react-native-skia';
 import { BaseChart } from './BaseChart';
-import { baseChartConfig } from '../../utils/charts/chartConfig';
 import { getWeeklyCompletionData, WeeklyCompletionData } from '../../utils/charts/habitCharts';
 import { colors } from '../../theme';
 import { getChartDescription, getChartDataTable } from '../../utils/chartAccessibility';
@@ -25,6 +25,7 @@ export const WeeklyCompletionChart: React.FC<WeeklyCompletionChartProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<WeeklyCompletionData | null>(null);
+  const font = useFont(null, compact ? 9 : 11);
 
   useEffect(() => {
     loadData();
@@ -51,22 +52,6 @@ export const WeeklyCompletionChart: React.FC<WeeklyCompletionChartProps> = ({
 
   const isEmpty = !data || data.datasets[0].data.every((v) => v === 0);
 
-  // Custom chart config for compact view
-  const compactConfig = {
-    ...baseChartConfig,
-    color: (_opacity = 1) => colors.primary.main,
-    fillShadowGradientFrom: colors.primary.main,
-    fillShadowGradientTo: colors.primary.main,
-    decimalPlaces: 0,
-    barPercentage: 0.7,
-    propsForBackgroundLines: {
-      strokeWidth: 0, // Hide grid lines in compact mode
-    },
-    propsForLabels: {
-      fontSize: compact ? 10 : 12,
-    },
-  };
-
   // Generate accessibility description
   const chartDataPoints = data?.labels.map((label, index) => ({
     label: label as string,
@@ -83,6 +68,16 @@ export const WeeklyCompletionChart: React.FC<WeeklyCompletionChartProps> = ({
     : 'No weekly completion data available';
 
   const dataTable = data ? getChartDataTable(chartDataPoints, { unit: ' completions' }) : '';
+
+  // Transform data for Victory Native
+  const chartData = data?.labels.map((label, index) => ({
+    x: index,
+    label: label as string,
+    value: data.datasets[0].data[index] as number,
+  })) || [];
+
+  // Calculate max for domain
+  const maxValue = data ? Math.max(...data.datasets[0].data, 1) : 1;
 
   return (
     <View
@@ -102,23 +97,35 @@ export const WeeklyCompletionChart: React.FC<WeeklyCompletionChartProps> = ({
             <View
               accessible={false}
               importantForAccessibility="no-hide-descendants"
+              style={[styles.chartWrapper, { width: chartWidth, height: chartHeight }]}
             >
-              <BarChart
-                data={{
-                  labels: data.labels,
-                  datasets: data.datasets,
+              <CartesianChart
+                data={chartData}
+                xKey="x"
+                yKeys={['value']}
+                domainPadding={{ left: 15, right: 15, top: 10, bottom: 10 }}
+                domain={{ y: [0, maxValue + 0.5] }}
+                axisOptions={{
+                  font,
+                  tickCount: { x: 7, y: compact ? 2 : 4 },
+                  formatXLabel: (value: number) => {
+                    const index = Math.round(value);
+                    return data.labels[index] || '';
+                  },
+                  formatYLabel: (value: number) => Math.round(value).toString(),
+                  labelColor: colors.text.tertiary,
+                  lineColor: compact ? 'transparent' : colors.border.subtle,
                 }}
-                width={chartWidth}
-                height={chartHeight}
-                chartConfig={compactConfig}
-                yAxisLabel=""
-                yAxisSuffix=""
-                fromZero
-                showBarTops={false}
-                withInnerLines={!compact}
-                style={styles.chart}
-                verticalLabelRotation={0}
-              />
+              >
+                {({ points, chartBounds }) => (
+                  <Bar
+                    points={points.value}
+                    chartBounds={chartBounds}
+                    color={colors.primary.main}
+                    roundedCorners={{ topLeft: 3, topRight: 3 }}
+                  />
+                )}
+              </CartesianChart>
             </View>
 
             {/* Hidden text alternative for screen readers */}
@@ -137,7 +144,7 @@ export const WeeklyCompletionChart: React.FC<WeeklyCompletionChartProps> = ({
 };
 
 const styles = StyleSheet.create({
-  chart: {
+  chartWrapper: {
     marginVertical: 4,
     borderRadius: 8,
   },

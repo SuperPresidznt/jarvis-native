@@ -5,10 +5,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { View, Dimensions, StyleSheet, Text } from 'react-native';
-import { BarChart } from 'react-native-chart-kit';
+import { CartesianChart, Bar } from 'victory-native';
+import { useFont } from '@shopify/react-native-skia';
 import { BaseChart } from './BaseChart';
 import { ChartCard } from './ChartCard';
-import { baseChartConfig } from '../../utils/charts/chartConfig';
 import { getHabitComparisonData, HabitComparisonData } from '../../utils/charts/habitCharts';
 import { colors, typography, spacing } from '../../theme';
 import { getChartDescription, getChartDataTable } from '../../utils/chartAccessibility';
@@ -25,6 +25,7 @@ export const HabitsComparisonChart: React.FC<HabitsComparisonChartProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<HabitComparisonData | null>(null);
+  const font = useFont(null, 10);
 
   useEffect(() => {
     loadData();
@@ -65,6 +66,13 @@ export const HabitsComparisonChart: React.FC<HabitsComparisonChartProps> = ({
 
   const dataTable = data ? getChartDataTable(chartDataPoints, { unit: '%' }) : '';
 
+  // Transform data for Victory Native
+  const chartData = data?.labels.map((label, index) => ({
+    x: index,
+    label: label as string,
+    value: data.datasets[0].data[index] as number,
+  })) || [];
+
   return (
     <ChartCard
       title="Habit Comparison"
@@ -90,29 +98,40 @@ export const HabitsComparisonChart: React.FC<HabitsComparisonChartProps> = ({
               <View
                 accessible={false}
                 importantForAccessibility="no-hide-descendants"
+                style={[styles.chartWrapper, { width: screenWidth - 64, height: 220 }]}
               >
-                <BarChart
-                  data={{
-                    labels: data.labels,
-                    datasets: data.datasets,
+                <CartesianChart
+                  data={chartData}
+                  xKey="x"
+                  yKeys={['value']}
+                  domainPadding={{ left: 30, right: 30, top: 20, bottom: 20 }}
+                  domain={{ y: [0, 100] }}
+                  axisOptions={{
+                    font,
+                    tickCount: { x: data.labels.length, y: 5 },
+                    formatXLabel: (value: number) => {
+                      const index = Math.round(value);
+                      const label = data.labels[index];
+                      // Truncate long labels
+                      if (label && label.length > 8) {
+                        return label.substring(0, 7) + '...';
+                      }
+                      return label || '';
+                    },
+                    formatYLabel: (value: number) => `${Math.round(value)}%`,
+                    labelColor: colors.text.tertiary,
+                    lineColor: colors.border.subtle,
                   }}
-                  width={screenWidth - 64}
-                  height={220}
-                  chartConfig={{
-                    ...baseChartConfig,
-                    decimalPlaces: 0,
-                    color: (_opacity = 1) => colors.primary.main,
-                    fillShadowGradientFrom: colors.primary.main,
-                    fillShadowGradientTo: colors.primary.main,
-                  }}
-                  yAxisLabel=""
-                  yAxisSuffix="%"
-                  fromZero
-                  showBarTops={false}
-                  withInnerLines
-                  style={styles.chart}
-                  verticalLabelRotation={data.labels.length > 3 ? 30 : 0}
-                />
+                >
+                  {({ points, chartBounds }) => (
+                    <Bar
+                      points={points.value}
+                      chartBounds={chartBounds}
+                      color={colors.primary.main}
+                      roundedCorners={{ topLeft: 4, topRight: 4 }}
+                    />
+                  )}
+                </CartesianChart>
               </View>
               <View
                 style={styles.legend}
@@ -149,7 +168,7 @@ export const HabitsComparisonChart: React.FC<HabitsComparisonChartProps> = ({
 };
 
 const styles = StyleSheet.create({
-  chart: {
+  chartWrapper: {
     marginVertical: 8,
     borderRadius: 16,
   },

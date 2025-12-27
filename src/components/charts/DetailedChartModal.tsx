@@ -14,7 +14,8 @@ import {
   ScrollView,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { LineChart } from 'react-native-chart-kit';
+import { CartesianChart, Line } from 'victory-native';
+import { Circle, useFont } from '@shopify/react-native-skia';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ActivityIndicator } from 'react-native-paper';
 import {
@@ -44,6 +45,7 @@ export const DetailedChartModal: React.FC<DetailedChartModalProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [trendData, setTrendData] = useState<ExtendedTrendData | null>(null);
+  const font = useFont(null, 11);
 
   useEffect(() => {
     if (visible) {
@@ -85,42 +87,24 @@ export const DetailedChartModal: React.FC<DetailedChartModalProps> = ({
 
   const statistics = trendData ? calculateTrendStatistics(trendData.data) : null;
 
-  // Chart configuration
-  const chartConfig = {
-    backgroundColor: colors.background.secondary,
-    backgroundGradientFrom: colors.background.secondary,
-    backgroundGradientTo: colors.background.secondary,
-    decimalPlaces: 0,
-    color: (_opacity = 1) => `rgba(16, 185, 129, ${_opacity})`,
-    labelColor: (_opacity = 1) => colors.text.tertiary,
-    style: {
-      borderRadius: borderRadius.lg,
-    },
-    propsForDots: {
-      r: '3',
-      strokeWidth: '2',
-      stroke: colors.primary.main,
-    },
-    propsForBackgroundLines: {
-      strokeDasharray: '',
-      strokeWidth: 1,
-      stroke: colors.border.subtle,
-    },
-  };
-
-  const getYAxisSuffix = () => {
-    if (dataType === 'spending') {
-      return '';
-    }
-    return '';
-  };
-
   const formatValue = (value: number) => {
     if (dataType === 'spending') {
       return `$${(value / 100).toFixed(0)}`;
     }
     return value.toString();
   };
+
+  // Transform data for Victory Native
+  const chartData = trendData?.labels.map((label, index) => ({
+    x: index,
+    label,
+    value: trendData.data[index] || 0,
+  })) || [];
+
+  // Calculate domain
+  const allValues = trendData?.data || [0];
+  const maxValue = Math.max(...allValues);
+  const domainPadding = maxValue * 0.1 || 10;
 
   return (
     <Modal
@@ -194,31 +178,58 @@ export const DetailedChartModal: React.FC<DetailedChartModalProps> = ({
               </View>
             ) : trendData && trendData.data.length > 0 ? (
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <LineChart
-                  data={{
-                    labels: trendData.labels.filter((_, i) => i % 3 === 0), // Show every 3rd label
-                    datasets: [
-                      {
-                        data: trendData.data,
-                        color: (_opacity = 1) => colors.primary.main,
-                        strokeWidth: 2,
+                <View style={{ width: Math.max(chartWidth, 600), height: 300 }}>
+                  <CartesianChart
+                    data={chartData}
+                    xKey="x"
+                    yKeys={['value']}
+                    domainPadding={{ left: 20, right: 20, top: 20, bottom: 20 }}
+                    domain={{ y: [0, maxValue + domainPadding] }}
+                    axisOptions={{
+                      font,
+                      tickCount: { x: 10, y: 5 },
+                      formatXLabel: (value: number) => {
+                        const index = Math.round(value);
+                        // Show every 3rd label
+                        if (index % 3 === 0 && trendData?.labels[index]) {
+                          return trendData.labels[index];
+                        }
+                        return '';
                       },
-                    ],
-                  }}
-                  width={Math.max(chartWidth, 600)} // Ensure minimum width for scrolling
-                  height={300}
-                  chartConfig={chartConfig}
-                  bezier
-                  style={styles.chart}
-                  yAxisSuffix={getYAxisSuffix()}
-                  withInnerLines={true}
-                  withOuterLines={true}
-                  withVerticalLines={false}
-                  withHorizontalLines={true}
-                  withDots={true}
-                  withShadow={false}
-                  fromZero
-                />
+                      formatYLabel: (value: number) => {
+                        if (dataType === 'spending') {
+                          return `$${Math.round(value / 100)}`;
+                        }
+                        return Math.round(value).toString();
+                      },
+                      labelColor: colors.text.tertiary,
+                      lineColor: colors.border.subtle,
+                    }}
+                  >
+                    {({ points }) => (
+                      <>
+                        <Line
+                          points={points.value}
+                          color={colors.primary.main}
+                          strokeWidth={2}
+                          curveType="natural"
+                        />
+                        {points.value
+                          .filter((point): point is typeof point & { x: number; y: number } =>
+                            point.x !== undefined && point.y !== undefined)
+                          .map((point, index) => (
+                            <Circle
+                              key={index}
+                              cx={point.x}
+                              cy={point.y}
+                              r={3}
+                              color={colors.primary.main}
+                            />
+                          ))}
+                      </>
+                    )}
+                  </CartesianChart>
+                </View>
               </ScrollView>
             ) : (
               <View style={styles.emptyContainer}>
@@ -313,10 +324,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     marginBottom: spacing.lg,
     ...shadows.md,
-  },
-  chart: {
-    marginVertical: spacing.sm,
-    borderRadius: borderRadius.lg,
   },
   loadingContainer: {
     height: 300,

@@ -1,14 +1,15 @@
 /**
  * Generic PieChart Component
- * Reusable pie chart using react-native-chart-kit
+ * Reusable pie chart using Victory Native
  */
 
 import React from 'react';
-import { View, Dimensions } from 'react-native';
-import { PieChart as RNPieChart } from 'react-native-chart-kit';
+import { View, Dimensions, StyleSheet, Text } from 'react-native';
+import { Pie, PolarChart } from 'victory-native';
 import { useTheme } from '../../hooks/useTheme';
 import { BaseChart } from './BaseChart';
 import { getChartDescription, ChartDataPoint } from '../../utils/chartAccessibility';
+import { typography, spacing } from '../../theme';
 
 export interface PieChartDataItem {
   name: string;
@@ -42,10 +43,10 @@ export const PieChart: React.FC<PieChartProps> = ({
   error = null,
   emptyMessage = 'No data to display',
   showLegend = true,
-  accessor = 'value',
+  accessor: _accessor = 'value',
   centerLabelComponent: _centerLabelComponent,
   hasLegend = true,
-  paddingLeft = '15',
+  paddingLeft: _paddingLeft = '15',
   title = 'Pie Chart',
   accessibilityLabel,
 }) => {
@@ -55,10 +56,9 @@ export const PieChart: React.FC<PieChartProps> = ({
 
   // Apply default colors if not provided
   const chartData = data.map((item, index) => ({
-    ...item,
+    label: item.name,
+    value: item.value,
     color: item.color || getDefaultColor(index, colors),
-    legendFontColor: item.legendFontColor || colors.text.tertiary,
-    legendFontSize: item.legendFontSize || 12,
   }));
 
   // Generate accessibility description
@@ -78,37 +78,37 @@ export const PieChart: React.FC<PieChartProps> = ({
       error={error}
       isEmpty={isEmpty}
       emptyMessage={emptyMessage}
-      height={height}
+      height={height + (hasLegend && showLegend ? 60 : 0)}
     >
       <View
         accessible={true}
         accessibilityLabel={description}
         accessibilityRole="image"
         accessibilityHint="Double tap to view distribution breakdown"
+        style={styles.container}
       >
-        <RNPieChart
-        data={chartData}
-        width={width}
-        height={height}
-        chartConfig={{
-          backgroundColor: colors.background.secondary,
-          backgroundGradientFrom: colors.background.secondary,
-          backgroundGradientTo: colors.background.secondary,
-          color: () => colors.primary.main,
-          labelColor: () => colors.text.tertiary,
-          style: {
-            borderRadius: 16,
-          },
-        }}
-        accessor={accessor}
-        backgroundColor="transparent"
-        paddingLeft={paddingLeft}
-        center={[0, 0]}
-        hasLegend={hasLegend && showLegend}
-        style={{
-          borderRadius: 16,
-        }}
-      />
+        <View style={[styles.chartContainer, { width, height }]}>
+          <PolarChart
+            data={chartData}
+            labelKey="label"
+            valueKey="value"
+            colorKey="color"
+          >
+            <Pie.Chart innerRadius={0} />
+          </PolarChart>
+        </View>
+        {hasLegend && showLegend && (
+          <View style={styles.legend}>
+            {chartData.map((item) => (
+              <View key={item.label} style={styles.legendItem}>
+                <View style={[styles.legendDot, { backgroundColor: item.color }]} />
+                <Text style={[styles.legendText, { color: colors.text.tertiary }]}>
+                  {item.label}
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
       </View>
     </BaseChart>
   );
@@ -130,5 +130,36 @@ function getDefaultColor(index: number, colors: { primary: { main: string } }): 
   ];
   return palette[index % palette.length];
 }
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: 'center',
+  },
+  chartContainer: {
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  legend: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginTop: spacing.md,
+    gap: spacing.sm,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: spacing.xs,
+  },
+  legendDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: spacing.xs,
+  },
+  legendText: {
+    fontSize: typography.size.xs,
+  },
+});
 
 export default PieChart;

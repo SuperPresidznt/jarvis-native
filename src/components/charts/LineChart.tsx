@@ -1,11 +1,12 @@
 /**
  * Generic LineChart Component
- * Reusable line chart using react-native-chart-kit
+ * Reusable line chart using Victory Native
  */
 
 import React from 'react';
-import { View, Dimensions } from 'react-native';
-import { LineChart as RNLineChart } from 'react-native-chart-kit';
+import { View, Dimensions, StyleSheet } from 'react-native';
+import { CartesianChart, Line, useChartPressState } from 'victory-native';
+import { Circle, useFont } from '@shopify/react-native-skia';
 import { useTheme } from '../../hooks/useTheme';
 import { BaseChart } from './BaseChart';
 import { getChartDescription, ChartDataPoint } from '../../utils/chartAccessibility';
@@ -45,15 +46,17 @@ export const LineChart: React.FC<LineChartProps> = ({
   error = null,
   emptyMessage = 'No data to display',
   showDots = true,
-  bezier = false,
+  bezier: _bezier = false,
   yAxisSuffix = '',
-  yAxisLabel = '',
+  yAxisLabel: _yAxisLabel = '',
   fromZero = true,
-  fillShadowGradient = true,
+  fillShadowGradient: _fillShadowGradient = true,
   title = 'Line Chart',
   accessibilityLabel,
 }) => {
   const { colors } = useTheme();
+  const font = useFont(null, 11);
+  const { state } = useChartPressState({ x: 0, y: { value: 0 } });
 
   const isEmpty = !data.labels.length || !data.datasets.length || data.datasets[0].data.length === 0;
 
@@ -69,6 +72,19 @@ export const LineChart: React.FC<LineChartProps> = ({
     unit: yAxisSuffix,
   });
 
+  // Transform data for Victory Native
+  const chartData = data.labels.map((label, index) => ({
+    x: index,
+    label,
+    value: data.datasets[0]?.data[index] || 0,
+  }));
+
+  // Calculate domain
+  const allValues = data.datasets.flatMap(ds => ds.data);
+  const minValue = fromZero ? 0 : Math.min(...allValues);
+  const maxValue = Math.max(...allValues);
+  const padding = (maxValue - minValue) * 0.1 || 10;
+
   return (
     <BaseChart
       isLoading={isLoading}
@@ -82,54 +98,67 @@ export const LineChart: React.FC<LineChartProps> = ({
         accessibilityLabel={description}
         accessibilityRole="image"
         accessibilityHint="Double tap to view trend details and data table"
+        style={[styles.chartContainer, { width, height }]}
       >
-        <RNLineChart
-        data={data}
-        width={width}
-        height={height}
-        yAxisLabel={yAxisLabel}
-        yAxisSuffix={yAxisSuffix}
-        fromZero={fromZero}
-        bezier={bezier}
-        withDots={showDots}
-        withInnerLines={true}
-        withOuterLines={true}
-        withVerticalLines={false}
-        withHorizontalLines={true}
-        withVerticalLabels={true}
-        withHorizontalLabels={true}
-        withShadow={fillShadowGradient}
-        chartConfig={{
-          backgroundColor: colors.background.secondary,
-          backgroundGradientFrom: colors.background.secondary,
-          backgroundGradientTo: colors.background.secondary,
-          decimalPlaces: 0,
-          color: () => colors.primary.main,
-          labelColor: () => colors.text.tertiary,
-          style: {
-            borderRadius: 16,
-          },
-          propsForDots: {
-            r: '4',
-            strokeWidth: '2',
-            stroke: colors.primary.main,
-          },
-          propsForLabels: {
-            fontSize: 10,
-          },
-          propsForBackgroundLines: {
-            stroke: colors.border.subtle,
-            strokeWidth: 1,
-            strokeDasharray: '0',
-          },
-        }}
-        style={{
-          borderRadius: 16,
-        }}
-      />
+        <CartesianChart
+          data={chartData}
+          xKey="x"
+          yKeys={['value']}
+          domainPadding={{ left: 20, right: 20, top: 20, bottom: 20 }}
+          domain={{ y: [minValue, maxValue + padding] }}
+          axisOptions={{
+            font,
+            tickCount: { x: Math.min(data.labels.length, 6), y: 5 },
+            formatXLabel: (value: number) => {
+              const index = Math.round(value);
+              return data.labels[index] || '';
+            },
+            formatYLabel: (value: number) => `${Math.round(value)}${yAxisSuffix}`,
+            labelColor: colors.text.tertiary,
+            lineColor: colors.border.subtle,
+          }}
+        >
+          {({ points }) => (
+            <>
+              <Line
+                points={points.value}
+                color={colors.primary.main}
+                strokeWidth={2}
+                curveType="natural"
+              />
+              {showDots && points.value
+                .filter((point): point is typeof point & { x: number; y: number } =>
+                  point.x !== undefined && point.y !== undefined)
+                .map((point, index) => (
+                  <Circle
+                    key={index}
+                    cx={point.x}
+                    cy={point.y}
+                    r={4}
+                    color={colors.primary.main}
+                  />
+                ))}
+              {state.isActive && state.x.position !== undefined && state.y.value.position !== undefined && (
+                <Circle
+                  cx={state.x.position.value}
+                  cy={state.y.value.position.value}
+                  r={8}
+                  color={colors.primary.main}
+                />
+              )}
+            </>
+          )}
+        </CartesianChart>
       </View>
     </BaseChart>
   );
 };
+
+const styles = StyleSheet.create({
+  chartContainer: {
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+});
 
 export default LineChart;
