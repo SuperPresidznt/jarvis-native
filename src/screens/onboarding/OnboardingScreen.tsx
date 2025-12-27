@@ -19,7 +19,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../hooks/useTheme';
 import { useThemeStore } from '../../store/themeStore';
-import { useOnboarding } from '../../hooks/useOnboarding';
+import { useOnboardingStore } from '../../store/onboardingStore';
 import { AppButton } from '../../components/ui/AppButton';
 import { AppCard } from '../../components/ui/AppCard';
 import { generateSampleData } from '../../services/sampleData';
@@ -49,7 +49,7 @@ const STEPS: StepData[] = [
 
 export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
   const { colors } = useTheme();
-  const { completeOnboarding } = useOnboarding();
+  const { completeOnboarding } = useOnboardingStore();
   const { setPreset } = useThemeStore();
   const flatListRef = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(0);

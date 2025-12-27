@@ -1,13 +1,11 @@
 /**
  * Onboarding Hook
- * Manages onboarding state using AsyncStorage
+ * Re-exports from the Zustand store for backwards compatibility
+ * @deprecated Use useOnboardingStore from '../store/onboardingStore' directly
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const ONBOARDING_COMPLETE_KEY = '@yarvi:onboarding_complete';
-const SHOWN_TOOLTIPS_KEY = '@yarvi:shown_tooltips';
+import { useEffect } from 'react';
+import { useOnboardingStore } from '../store/onboardingStore';
 
 export interface OnboardingState {
   isOnboardingComplete: boolean;
@@ -23,101 +21,22 @@ export interface OnboardingActions {
 }
 
 export function useOnboarding(): OnboardingState & OnboardingActions {
-  const [isOnboardingComplete, setIsOnboardingComplete] = useState(false);
-  const [shownTooltips, setShownTooltips] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const store = useOnboardingStore();
 
-  // Load onboarding state on mount
+  // Load state on mount for backwards compatibility
   useEffect(() => {
-    loadOnboardingState();
-  }, []);
-
-  /**
-   * Load onboarding state from AsyncStorage
-   */
-  const loadOnboardingState = async () => {
-    try {
-      const [onboardingComplete, tooltipsData] = await Promise.all([
-        AsyncStorage.getItem(ONBOARDING_COMPLETE_KEY),
-        AsyncStorage.getItem(SHOWN_TOOLTIPS_KEY),
-      ]);
-
-      setIsOnboardingComplete(onboardingComplete === 'true');
-      setShownTooltips(tooltipsData ? JSON.parse(tooltipsData) : []);
-    } catch (error) {
-      console.error('[useOnboarding] Failed to load state:', error);
-    } finally {
-      setIsLoading(false);
+    if (store.isLoading) {
+      store.loadOnboardingState();
     }
-  };
-
-  /**
-   * Mark onboarding as complete
-   */
-  const completeOnboarding = useCallback(async () => {
-    try {
-      await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, 'true');
-      setIsOnboardingComplete(true);
-      console.log('[useOnboarding] Onboarding completed');
-    } catch (error) {
-      console.error('[useOnboarding] Failed to complete onboarding:', error);
-      throw error;
-    }
-  }, []);
-
-  /**
-   * Reset onboarding state (for testing/demo purposes)
-   */
-  const resetOnboarding = useCallback(async () => {
-    try {
-      await Promise.all([
-        AsyncStorage.removeItem(ONBOARDING_COMPLETE_KEY),
-        AsyncStorage.removeItem(SHOWN_TOOLTIPS_KEY),
-      ]);
-      setIsOnboardingComplete(false);
-      setShownTooltips([]);
-      console.log('[useOnboarding] Onboarding reset');
-    } catch (error) {
-      console.error('[useOnboarding] Failed to reset onboarding:', error);
-      throw error;
-    }
-  }, []);
-
-  /**
-   * Mark a tooltip as shown
-   */
-  const markTooltipShown = useCallback(
-    async (tooltipId: string) => {
-      try {
-        const updatedTooltips = [...shownTooltips, tooltipId];
-        await AsyncStorage.setItem(SHOWN_TOOLTIPS_KEY, JSON.stringify(updatedTooltips));
-        setShownTooltips(updatedTooltips);
-        console.log(`[useOnboarding] Tooltip "${tooltipId}" marked as shown`);
-      } catch (error) {
-        console.error('[useOnboarding] Failed to mark tooltip as shown:', error);
-        throw error;
-      }
-    },
-    [shownTooltips]
-  );
-
-  /**
-   * Check if a tooltip has been shown
-   */
-  const hasShownTooltip = useCallback(
-    (tooltipId: string) => {
-      return shownTooltips.includes(tooltipId);
-    },
-    [shownTooltips]
-  );
+  }, [store.isLoading]);
 
   return {
-    isOnboardingComplete,
-    shownTooltips,
-    isLoading,
-    completeOnboarding,
-    resetOnboarding,
-    markTooltipShown,
-    hasShownTooltip,
+    isOnboardingComplete: store.isOnboardingComplete,
+    shownTooltips: store.shownTooltips,
+    isLoading: store.isLoading,
+    completeOnboarding: store.completeOnboarding,
+    resetOnboarding: store.resetOnboarding,
+    markTooltipShown: store.markTooltipShown,
+    hasShownTooltip: store.hasShownTooltip,
   };
 }

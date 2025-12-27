@@ -9,7 +9,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
 
 import { useAuthStore } from '../store/authStore';
-import { useOnboarding } from '../hooks/useOnboarding';
+import { useOnboardingStore } from '../store/onboardingStore';
 import { RootStackParamList } from '../types';
 import { FEATURES } from '../constants/config';
 import { linking } from './linking';
@@ -29,9 +29,11 @@ interface RootNavigatorProps {
 
 export default function RootNavigator({ navigationRef }: RootNavigatorProps) {
   const { isAuthenticated, isLoading, restoreSession } = useAuthStore();
-  const { isOnboardingComplete, isLoading: isOnboardingLoading } = useOnboarding();
+  const { isOnboardingComplete, isLoading: isOnboardingLoading, loadOnboardingState } = useOnboardingStore();
 
   useEffect(() => {
+    // Load onboarding state
+    loadOnboardingState();
     // Skip session restore in demo mode
     if (!FEATURES.DEMO_MODE) {
       restoreSession();
