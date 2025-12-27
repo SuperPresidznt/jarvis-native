@@ -13,15 +13,12 @@ Personal memory bank. Append new entries at the bottom.
   Execution failed for task ':app:createBundleReleaseJsAndAssets_SentryUpload_com.yarvi.app@1.0.0+1_1'.
   > Process 'command '.../sentry-cli'' finished with non-zero exit value 1
   ```
-  **Fix:** Disable in `app.json` plugin config:
-  ```json
-  ["@sentry/react-native", {
-    "uploadNativeSymbols": false,
-    "uploadSourceMaps": false,
-    "includeNativeSources": false
-  }]
+  **Fix:** app.json config alone doesn't work! Must also set env var in CI:
+  ```yaml
+  env:
+    SENTRY_DISABLE_AUTO_UPLOAD: "true"
   ```
-  When Sentry is configured with real credentials, set these to `true` and add `organization` and `project`.
+  When Sentry is configured with real credentials, remove this and add `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT` secrets to GitHub.
 
 - **Dec 27, 2025:** Onboarding state wasn't shared between components because `useOnboarding` hook created separate instances. Fixed by converting to Zustand store (`useOnboardingStore`).
 
