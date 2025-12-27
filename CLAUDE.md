@@ -54,6 +54,16 @@ If you need to touch something already claimed, note it under "Need to Coordinat
 - If an Exec is reading files or doing research, they're doing it wrong
 - Preserves Exec context for strategy/decisions
 
+**How to spawn Managers:**
+Use `subagent_type="general-purpose"` with identity prompt:
+```
+"You are [Manager Name], the [Role] Manager under [Exec].
+Read agentlab/profiles/[MANAGER].md for your role.
+Your task: [task]
+Check agentlab/SYNC.md before starting."
+```
+NOTE: Don't use exec subagent types (cmo, cto, cfo) to spawn managers - those spawn the exec, not the manager.
+
 ---
 
 ## Validation

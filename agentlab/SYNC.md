@@ -86,6 +86,9 @@ See `docs/LAUNCH_CHECKLIST.md` for full timeline and task breakdown.
 | Quinn (CMO Manager) | Influencer/Reviewer Outreach List | `docs/beta/INFLUENCER_OUTREACH_LIST.md` |
 | Max (CMO) | AI Positioning Research (corrects copy review) | `docs/beta/AI_POSITIONING_RESEARCH.md` |
 | Quinn (CMO Manager) | Competitive Analysis & PMF Research | `docs/beta/COMPETITIVE_ANALYSIS_PMF.md` |
+| Quinn (CMO Manager) | Deep Competitor Analysis (Life OS / PKM / AI assistants) | `docs/beta/COMPETITOR_DEEP_DIVE.md` |
+| Quinn (CMO Manager) | Life OS Positioning Guide | `docs/beta/LIFE_OS_POSITIONING.md` |
+| Quinn (CMO Manager) | Barriers Analysis (regulatory/technical/strategic) | `docs/beta/BARRIERS_ANALYSIS.md` |
 
 ---
 
@@ -121,4 +124,4 @@ Read `agentlab/AGENT_STRUCTURE_FIX.md` for full explanation.
 
 ---
 
-*Last updated: Quinn (CMO Manager) - Dec 27, 2025 - Competitive Analysis & PMF Research delivered*
+*Last updated: Quinn (CMO Manager) - Dec 27, 2025 - Deep competitor research, Life OS positioning, and barriers analysis delivered*
