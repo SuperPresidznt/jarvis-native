@@ -64,3 +64,13 @@ PATTERN_CONSISTENCY_AUDIT.md
 PATTERN_CONSISTENCY_FIXES.md
 PRODUCTION_READINESS_ASSESSMENT.md
 UI_IMPROVEMENT_CHECKLIST.md
+scripts/
+__mocks__/
+__tests__/
+.husky/
+CHANGELOG.md
+eslintrc.js.backup
+jest.config.js
+jest.setup.js
+.npmrc
+eslint.config.js
