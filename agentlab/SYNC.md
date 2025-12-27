@@ -84,6 +84,8 @@ See `docs/LAUNCH_CHECKLIST.md` for full timeline and task breakdown.
 | Quinn (CMO Manager) | Press Kit template | `docs/beta/PRESS_KIT.md` |
 | Quinn (CMO Manager) | Launch Day Runbook | `docs/beta/LAUNCH_DAY_RUNBOOK.md` |
 | Quinn (CMO Manager) | Influencer/Reviewer Outreach List | `docs/beta/INFLUENCER_OUTREACH_LIST.md` |
+| Max (CMO) | AI Positioning Research (corrects copy review) | `docs/beta/AI_POSITIONING_RESEARCH.md` |
+| Quinn (CMO Manager) | Competitive Analysis & PMF Research | `docs/beta/COMPETITIVE_ANALYSIS_PMF.md` |
 
 ---
 
@@ -119,4 +121,4 @@ Read `agentlab/AGENT_STRUCTURE_FIX.md` for full explanation.
 
 ---
 
-*Last updated: Quinn (CMO Manager) - Dec 27, 2025 - Influencer/Reviewer Outreach List delivered*
+*Last updated: Quinn (CMO Manager) - Dec 27, 2025 - Competitive Analysis & PMF Research delivered*

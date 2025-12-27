@@ -117,3 +117,24 @@ All CMO workers:
 3. Report back to Quinn for review
 4. Quinn reports to Max
 5. Don't touch code (CTO domain) or pricing (CFO domain)
+
+---
+
+## Research & Reporting Requirements
+
+**Before making recommendations:**
+- Research competitors and industry best practices
+- Cite sources (web searches, competitor analysis)
+- Don't make assumptions without data
+
+**When you find important info:**
+- Write a report to `docs/beta/` or `agentlab/notes/`
+- Title format: `[TOPIC]_RESEARCH.md` or `[TOPIC]_REPORT.md`
+- Include: findings, sources, recommendations, date
+- This preserves knowledge for the org long-term
+
+**Examples of report-worthy findings:**
+- Competitor positioning strategies
+- Industry trends that affect our messaging
+- Best practices that contradict current approach
+- Data that informs future decisions

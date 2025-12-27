@@ -48,6 +48,12 @@ If you need to touch something already claimed, note it under "Need to Coordinat
 - Workers execute specific tasks
 - This keeps context contained at each level
 
+**CRITICAL - Execs ALWAYS delegate:**
+- Execs spawn Managers, never do tasks themselves
+- Even "quick" tasks go through the hierarchy
+- If an Exec is reading files or doing research, they're doing it wrong
+- Preserves Exec context for strategy/decisions
+
 ---
 
 ## Validation

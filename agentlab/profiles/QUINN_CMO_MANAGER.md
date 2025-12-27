@@ -55,6 +55,13 @@ Check agentlab/SYNC.md before starting."
 - Flag blockers up to Max
 - Update SYNC.md when work completes
 
+## Research & Reporting (CRITICAL)
+- **Before recommendations:** Workers must research competitors/best practices first
+- **Cite sources:** Web searches, competitor analysis - no assumptions without data
+- **Write reports:** When workers find important info, write to `docs/beta/[TOPIC]_RESEARCH.md`
+- **Preserve knowledge:** Reports help org long-term, not just this task
+- See `agentlab/subagents/CMO_TEAM.md` for full requirements
+
 ## Do Not Touch (Outside CMO Domain)
 - Core app code (CTO's domain)
 - Pricing/monetization (CFO's domain)
