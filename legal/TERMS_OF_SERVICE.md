@@ -2,7 +2,7 @@
 
 **Last Updated:** December 24, 2024
 
-Please read these Terms of Service ("Terms") carefully before using [APP_NAME] (the "App") operated by [YOUR_NAME/COMPANY] ("we", "our", or "us").
+Please read these Terms of Service ("Terms") carefully before using Javi (the "App") operated by [YOUR_NAME/COMPANY] ("we", "our", or "us").
 
 By downloading, installing, or using the App, you agree to be bound by these Terms. If you do not agree to these Terms, do not use the App.
 
@@ -130,4 +130,4 @@ If you downloaded the App from Google Play:
 
 ---
 
-*By using [APP_NAME], you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.*
+*By using Javi, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.*

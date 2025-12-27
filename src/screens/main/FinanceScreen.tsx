@@ -53,6 +53,7 @@ import {
   announceForAccessibility,
 } from '../../utils/accessibility';
 import { HIT_SLOP } from '../../constants/ui';
+import { triggerEasterEggIfNeeded } from '../../utils/easterEggs';
 
 type ViewMode = 'overview' | 'transactions' | 'budgets';
 type TimeFilter = 'month' | 'lastMonth' | 'all';
@@ -65,6 +66,8 @@ export default function FinanceScreen() {
   const [showLiabilityModal, setShowLiabilityModal] = useState(false);
   const [showTransactionModal, setShowTransactionModal] = useState(false);
   const [showBudgetModal, setShowBudgetModal] = useState(false);
+  const [showTransactionDetails, setShowTransactionDetails] = useState(false);
+  const [viewedTransaction, setViewedTransaction] = useState<financeDB.Transaction | null>(null);
   const [selectedAsset, setSelectedAsset] = useState<financeDB.Asset | null>(null);
   const [selectedLiability, setSelectedLiability] = useState<financeDB.Liability | null>(null);
   const [selectedTransaction, setSelectedTransaction] = useState<financeDB.Transaction | null>(null);
@@ -110,6 +113,19 @@ export default function FinanceScreen() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Easter egg check - triggers when viewing totals that equal $64
+  useEffect(() => {
+    if (summary) {
+      // Check various financial values for the magic number
+      triggerEasterEggIfNeeded({
+        income: summary.monthlyIncome,
+        expenses: summary.monthlyExpenses,
+        net: summary.monthlyIncome - summary.monthlyExpenses,
+        total: summary.netWorth,
+      }, true); // Values are in cents
+    }
+  }, [summary]);
 
   // Filter transactions based on time filter and search
   useEffect(() => {
@@ -677,14 +693,31 @@ export default function FinanceScreen() {
             ) : (
               <View style={styles.transactionList}>
                 {filteredTransactions.map((transaction) => (
-                  <View key={transaction.id} style={styles.transactionCard}>
+                  <TouchableOpacity
+                    key={transaction.id}
+                    style={styles.transactionCard}
+                    onPress={() => {
+                      setViewedTransaction(transaction);
+                      setShowTransactionDetails(true);
+                    }}
+                    activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel={makeTransactionLabel({
+                      type: transaction.type,
+                      amount: transaction.amount,
+                      description: transaction.description || transaction.category,
+                      category: { name: transaction.category },
+                      date: transaction.date,
+                    })}
+                    accessibilityHint="Tap to view transaction details"
+                  >
                     <View style={styles.transactionContent}>
                       <View style={styles.transactionInfo}>
                         <Text style={styles.transactionCategory}>
                           {transaction.category}
                         </Text>
                         {transaction.description && (
-                          <Text style={styles.transactionDescription}>
+                          <Text style={styles.transactionDescription} numberOfLines={1}>
                             {transaction.description}
                           </Text>
                         )}
@@ -696,22 +729,25 @@ export default function FinanceScreen() {
                           })}
                         </Text>
                       </View>
-                      <Text
-                        style={[
-                          styles.transactionAmount,
-                          {
-                            color:
-                              transaction.type === 'income'
-                                ? colors.success
-                                : colors.error,
-                          },
-                        ]}
-                      >
-                        {transaction.type === 'income' ? '+' : '-'}
-                        {formatCurrency(transaction.amount)}
-                      </Text>
+                      <View style={styles.transactionRight}>
+                        <Text
+                          style={[
+                            styles.transactionAmount,
+                            {
+                              color:
+                                transaction.type === 'income'
+                                  ? colors.success
+                                  : colors.error,
+                            },
+                          ]}
+                        >
+                          {transaction.type === 'income' ? '+' : '-'}
+                          {formatCurrency(transaction.amount)}
+                        </Text>
+                        <Icon name="chevron-right" size={16} color={colors.text.tertiary} />
+                      </View>
                     </View>
-                  </View>
+                  </TouchableOpacity>
                 ))}
               </View>
             )}
@@ -769,6 +805,22 @@ export default function FinanceScreen() {
         onSuccess={() => {
           loadData();
         }}
+      />
+
+      {/* Transaction Details Modal */}
+      <TransactionDetailsModal
+        visible={showTransactionDetails}
+        transaction={viewedTransaction}
+        onClose={() => {
+          setShowTransactionDetails(false);
+          setViewedTransaction(null);
+        }}
+        onEdit={() => {
+          setShowTransactionDetails(false);
+          setSelectedTransaction(viewedTransaction);
+          setShowTransactionModal(true);
+        }}
+        formatCurrency={formatCurrency}
       />
     </View>
   );
@@ -1271,6 +1323,178 @@ const LiabilityFormModal: React.FC<LiabilityFormModalProps> = ({
   );
 };
 
+// Transaction Details Modal
+interface TransactionDetailsModalProps {
+  visible: boolean;
+  transaction: financeDB.Transaction | null;
+  onClose: () => void;
+  onEdit: () => void;
+  formatCurrency: (value: number | undefined | null) => string;
+}
+
+const TransactionDetailsModal: React.FC<TransactionDetailsModalProps> = ({
+  visible,
+  transaction,
+  onClose,
+  onEdit,
+  formatCurrency,
+}) => {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
+  const insets = useSafeAreaInsets();
+
+  if (!transaction) return null;
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  const formatDateTime = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+  };
+
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <View style={styles.modalOverlay}>
+        <View style={[styles.modalContent, { paddingBottom: Math.max(insets.bottom, spacing.base) }]}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Transaction Details</Text>
+            <IconButton icon="close" onPress={onClose} iconColor={colors.text.tertiary} hitSlop={HIT_SLOP} />
+          </View>
+
+          <ScrollView style={styles.modalBody}>
+            {/* Amount - Prominent Display */}
+            <View style={styles.detailsAmountContainer}>
+              <Text
+                style={[
+                  styles.detailsAmount,
+                  { color: transaction.type === 'income' ? colors.success : colors.error },
+                ]}
+              >
+                {transaction.type === 'income' ? '+' : '-'}
+                {formatCurrency(transaction.amount)}
+              </Text>
+              <View
+                style={[
+                  styles.detailsTypeBadge,
+                  { backgroundColor: transaction.type === 'income' ? `${colors.success}20` : `${colors.error}20` },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.detailsTypeText,
+                    { color: transaction.type === 'income' ? colors.success : colors.error },
+                  ]}
+                >
+                  {transaction.type === 'income' ? 'Income' : 'Expense'}
+                </Text>
+              </View>
+            </View>
+
+            {/* Details Grid */}
+            <View style={styles.detailsGrid}>
+              {/* Category */}
+              <View style={styles.detailsRow}>
+                <View style={styles.detailsIconContainer}>
+                  <Icon name="tag" size={20} color={colors.primary.main} />
+                </View>
+                <View style={styles.detailsRowContent}>
+                  <Text style={styles.detailsLabel}>Category</Text>
+                  <Text style={styles.detailsValue}>{transaction.category}</Text>
+                </View>
+              </View>
+
+              {/* Date */}
+              <View style={styles.detailsRow}>
+                <View style={styles.detailsIconContainer}>
+                  <Icon name="calendar" size={20} color={colors.primary.main} />
+                </View>
+                <View style={styles.detailsRowContent}>
+                  <Text style={styles.detailsLabel}>Date</Text>
+                  <Text style={styles.detailsValue}>{formatDate(transaction.date)}</Text>
+                </View>
+              </View>
+
+              {/* Description */}
+              {transaction.description && (
+                <View style={styles.detailsRow}>
+                  <View style={styles.detailsIconContainer}>
+                    <Icon name="text" size={20} color={colors.primary.main} />
+                  </View>
+                  <View style={styles.detailsRowContent}>
+                    <Text style={styles.detailsLabel}>Description</Text>
+                    <Text style={styles.detailsValue}>{transaction.description}</Text>
+                  </View>
+                </View>
+              )}
+
+              {/* Currency */}
+              <View style={styles.detailsRow}>
+                <View style={styles.detailsIconContainer}>
+                  <Icon name="currency-usd" size={20} color={colors.primary.main} />
+                </View>
+                <View style={styles.detailsRowContent}>
+                  <Text style={styles.detailsLabel}>Currency</Text>
+                  <Text style={styles.detailsValue}>{transaction.currency}</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Metadata Section */}
+            <View style={styles.detailsMetadataSection}>
+              <Text style={styles.detailsMetadataTitle}>Record Information</Text>
+              <View style={styles.detailsMetadataRow}>
+                <Text style={styles.detailsMetadataLabel}>Created</Text>
+                <Text style={styles.detailsMetadataValue}>{formatDateTime(transaction.createdAt)}</Text>
+              </View>
+              <View style={styles.detailsMetadataRow}>
+                <Text style={styles.detailsMetadataLabel}>Last Updated</Text>
+                <Text style={styles.detailsMetadataValue}>{formatDateTime(transaction.updatedAt)}</Text>
+              </View>
+              <View style={styles.detailsMetadataRow}>
+                <Text style={styles.detailsMetadataLabel}>Sync Status</Text>
+                <View style={styles.detailsSyncBadge}>
+                  <Icon
+                    name={transaction.synced ? 'cloud-check' : 'cloud-off-outline'}
+                    size={14}
+                    color={transaction.synced ? colors.success : colors.warning}
+                  />
+                  <Text
+                    style={[
+                      styles.detailsSyncText,
+                      { color: transaction.synced ? colors.success : colors.warning },
+                    ]}
+                  >
+                    {transaction.synced ? 'Synced' : 'Pending'}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </ScrollView>
+
+          <View style={styles.modalFooter}>
+            <AppButton title="Close" onPress={onClose} variant="outline" style={styles.modalButton} />
+            <AppButton title="Edit" onPress={onEdit} style={styles.modalButton} />
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
 const createStyles = (colors: ReturnType<typeof getColors>) => StyleSheet.create({
   container: {
     flex: 1,
@@ -1736,5 +1960,103 @@ const createStyles = (colors: ReturnType<typeof getColors>) => StyleSheet.create
   },
   quickActionButton: {
     flex: 1,
+  },
+  transactionRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  // Transaction Details Modal Styles
+  detailsAmountContainer: {
+    alignItems: 'center',
+    paddingVertical: spacing.lg,
+    marginBottom: spacing.md,
+  },
+  detailsAmount: {
+    fontSize: typography.size['4xl'],
+    fontWeight: typography.weight.bold,
+    marginBottom: spacing.sm,
+  },
+  detailsTypeBadge: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.full,
+  },
+  detailsTypeText: {
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.semibold,
+    textTransform: 'uppercase',
+    letterSpacing: typography.letterSpacing.wider,
+  },
+  detailsGrid: {
+    gap: spacing.sm,
+  },
+  detailsRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: colors.background.primary,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+  },
+  detailsIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: borderRadius.md,
+    backgroundColor: `${colors.primary.main}15`,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.md,
+  },
+  detailsRowContent: {
+    flex: 1,
+  },
+  detailsLabel: {
+    fontSize: typography.size.xs,
+    color: colors.text.tertiary,
+    marginBottom: spacing.xs,
+    textTransform: 'uppercase',
+    letterSpacing: typography.letterSpacing.wider,
+  },
+  detailsValue: {
+    fontSize: typography.size.base,
+    color: colors.text.primary,
+    fontWeight: typography.weight.medium,
+  },
+  detailsMetadataSection: {
+    marginTop: spacing.lg,
+    paddingTop: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.border.subtle,
+  },
+  detailsMetadataTitle: {
+    fontSize: typography.size.xs,
+    fontWeight: typography.weight.semibold,
+    color: colors.text.tertiary,
+    textTransform: 'uppercase',
+    letterSpacing: typography.letterSpacing.widest,
+    marginBottom: spacing.md,
+  },
+  detailsMetadataRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+  },
+  detailsMetadataLabel: {
+    fontSize: typography.size.sm,
+    color: colors.text.tertiary,
+  },
+  detailsMetadataValue: {
+    fontSize: typography.size.sm,
+    color: colors.text.secondary,
+  },
+  detailsSyncBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  detailsSyncText: {
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.medium,
   },
 });

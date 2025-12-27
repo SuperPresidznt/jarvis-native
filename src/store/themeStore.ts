@@ -1,6 +1,6 @@
 /**
  * Theme Store
- * Manages app theme with preset support and persistence
+ * Manages app theme with preset support, custom colors, and persistence
  */
 
 import { create } from 'zustand';
@@ -10,21 +10,32 @@ import { Appearance } from 'react-native';
 type ThemeMode = 'dark' | 'light' | 'system';
 type ResolvedThemeMode = 'dark' | 'light';
 
+export interface CustomColors {
+  primaryMain: string;
+  accentCyan?: string;
+  accentPurple?: string;
+  accentPink?: string;
+}
+
 interface ThemeStore {
   mode: ThemeMode;
   presetId: string;
+  customColors: CustomColors | null;
   setMode: (mode: ThemeMode) => Promise<void>;
   setPreset: (presetId: string) => Promise<void>;
+  setCustomColors: (colors: CustomColors | null) => Promise<void>;
   loadTheme: () => Promise<void>;
   getResolvedMode: () => ResolvedThemeMode;
 }
 
 const THEME_MODE_STORAGE_KEY = '@yarvi_theme_mode';
 const THEME_PRESET_STORAGE_KEY = '@yarvi_theme_preset';
+const CUSTOM_COLORS_STORAGE_KEY = '@yarvi_custom_colors';
 
 export const useThemeStore = create<ThemeStore>((set, get) => ({
   mode: 'system', // Default to system preference
   presetId: 'neon-dark', // Default preset
+  customColors: null, // Custom color overrides
 
   getResolvedMode: () => {
     const state = get();
@@ -59,11 +70,25 @@ export const useThemeStore = create<ThemeStore>((set, get) => ({
     }
   },
 
+  setCustomColors: async (colors: CustomColors | null) => {
+    try {
+      if (colors) {
+        await AsyncStorage.setItem(CUSTOM_COLORS_STORAGE_KEY, JSON.stringify(colors));
+      } else {
+        await AsyncStorage.removeItem(CUSTOM_COLORS_STORAGE_KEY);
+      }
+      set({ customColors: colors });
+    } catch (error) {
+      console.error('Failed to save custom colors:', error);
+    }
+  },
+
   loadTheme: async () => {
     try {
-      const [savedMode, savedPreset] = await Promise.all([
+      const [savedMode, savedPreset, savedCustomColors] = await Promise.all([
         AsyncStorage.getItem(THEME_MODE_STORAGE_KEY),
         AsyncStorage.getItem(THEME_PRESET_STORAGE_KEY),
+        AsyncStorage.getItem(CUSTOM_COLORS_STORAGE_KEY),
       ]);
 
       const updates: Partial<ThemeStore> = {};
@@ -74,6 +99,14 @@ export const useThemeStore = create<ThemeStore>((set, get) => ({
 
       if (savedPreset) {
         updates.presetId = savedPreset;
+      }
+
+      if (savedCustomColors) {
+        try {
+          updates.customColors = JSON.parse(savedCustomColors) as CustomColors;
+        } catch {
+          // Invalid JSON, ignore
+        }
       }
 
       if (Object.keys(updates).length > 0) {

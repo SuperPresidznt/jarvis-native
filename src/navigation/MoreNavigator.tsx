@@ -13,12 +13,14 @@ import { ErrorBoundary } from '../components/ErrorBoundary';
 import MoreScreen from '../screens/main/MoreScreen';
 import FinanceScreen from '../screens/main/FinanceScreen';
 import AIChatScreen from '../screens/main/AIChatScreen';
+import GoalsScreen from '../screens/main/GoalsScreen';
 import SettingsNavigator from './SettingsNavigator';
 
 export type MoreStackParamList = {
   MoreMenu: undefined;
   Finance: undefined;
   AIChat: undefined | { conversationId?: string };
+  Goals: undefined;
   Settings: undefined;
 };
 
@@ -77,6 +79,20 @@ export default function MoreNavigator() {
         {() => (
           <ErrorBoundary>
             <AIChatScreen />
+          </ErrorBoundary>
+        )}
+      </Stack.Screen>
+
+      <Stack.Screen
+        name="Goals"
+        options={{
+          title: 'Goals',
+          headerShown: false, // GoalsScreen has its own header
+        }}
+      >
+        {() => (
+          <ErrorBoundary>
+            <GoalsScreen />
           </ErrorBoundary>
         )}
       </Stack.Screen>

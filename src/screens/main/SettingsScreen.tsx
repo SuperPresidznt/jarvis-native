@@ -45,6 +45,7 @@ import * as notificationService from '../../services/notifications';
 import { haptic } from '../../utils/haptics';
 import { confirmations, alertSuccess, alertError } from '../../utils/dialogs';
 import { APP_CONFIG, LEGAL_URLS } from '../../constants/config';
+import { isFunnyModeEnabled, setFunnyModeEnabled, EASTER_EGG_INFO } from '../../utils/easterEggs';
 
 // Import version from package.json
 const packageJson = require('../../../package.json');
@@ -70,6 +71,7 @@ export default function SettingsScreen() {
   const [habitNotificationsEnabled, setHabitNotificationsEnabled] = useState(true);
   const [calendarNotificationsEnabled, setCalendarNotificationsEnabled] = useState(true);
   const [habitNotesPrompt, setHabitNotesPrompt] = useState(false);
+  const [funnyModeEnabled, setFunnyModeEnabledState] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [totalRecords, setTotalRecords] = useState(0);
   const insets = useSafeAreaInsets();
@@ -94,6 +96,10 @@ export default function SettingsScreen() {
       // Load habit notes prompt preference
       const notesPromptPref = await storage.getItem('habit_notes_prompt_enabled');
       setHabitNotesPrompt(notesPromptPref === 'true');
+
+      // Load funny mode preference
+      const funnyModePref = await isFunnyModeEnabled();
+      setFunnyModeEnabledState(funnyModePref);
 
       // Load per-feature notification preferences (default to true)
       const habitNotifPref = await storage.getItem('notifications_habits_enabled');
@@ -285,6 +291,12 @@ export default function SettingsScreen() {
     haptic.light();
   };
 
+  const handleFunnyModeToggle = async (value: boolean) => {
+    setFunnyModeEnabledState(value);
+    await setFunnyModeEnabled(value);
+    haptic.light();
+  };
+
   const handleLogout = () => {
     confirmations.logout(async () => {
       await logout();
@@ -414,6 +426,17 @@ export default function SettingsScreen() {
             </TouchableOpacity>
           ))}
         </View>
+        {/* Custom Colors Link */}
+        <View style={[styles.sectionContent, { marginTop: spacing.md }]}>
+          <SettingItem
+            styles={styles}
+            icon="🎨"
+            title="Custom Colors"
+            subtitle="Pick your own accent colors"
+            onPress={() => navigation.navigate('CustomColors')}
+            showChevron
+          />
+        </View>
       </View>
 
       {/* Notifications Section */}
@@ -542,6 +565,33 @@ export default function SettingsScreen() {
               No data is sent to external servers unless you explicitly use AI features or export your data.
             </Text>
           </View>
+        </View>
+      </View>
+
+      {/* Fun Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>FUN</Text>
+        <View style={styles.sectionContent}>
+          <SettingItem styles={styles}
+            icon="🎮"
+            title={EASTER_EGG_INFO.name}
+            subtitle={
+              funnyModeEnabled
+                ? EASTER_EGG_INFO.description
+                : EASTER_EGG_INFO.hint
+            }
+            rightElement={
+              <Switch
+                value={funnyModeEnabled}
+                onValueChange={handleFunnyModeToggle}
+                trackColor={{
+                  false: colors.background.tertiary,
+                  true: `${colors.primary.main}80`,
+                }}
+                thumbColor={funnyModeEnabled ? colors.primary.main : colors.text.disabled}
+              />
+            }
+          />
         </View>
       </View>
 

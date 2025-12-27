@@ -10,6 +10,7 @@ import SettingsScreen from '../screens/main/SettingsScreen';
 import StorageOverviewScreen from '../screens/settings/StorageOverviewScreen';
 import DataManagementScreen from '../screens/settings/DataManagementScreen';
 import CategoryManagementScreen from '../screens/CategoryManagementScreen';
+import CustomColorsScreen from '../screens/settings/CustomColorsScreen';
 import { colors, typography } from '../theme';
 
 const Stack = createNativeStackNavigator<SettingsStackParamList>();
@@ -66,6 +67,15 @@ export default function SettingsNavigator() {
         component={CategoryManagementScreen}
         options={{
           title: 'Category Management',
+          headerShown: true,
+          animation: 'slide_from_right',
+        }}
+      />
+      <Stack.Screen
+        name="CustomColors"
+        component={CustomColorsScreen}
+        options={{
+          title: 'Custom Colors',
           headerShown: true,
           animation: 'slide_from_right',
         }}

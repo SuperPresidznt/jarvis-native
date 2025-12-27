@@ -24,6 +24,9 @@ interface DurationPreset {
 }
 
 const DURATION_PRESETS: DurationPreset[] = [
+  { minutes: 1, label: '1 min', icon: '⏱️' },
+  { minutes: 2, label: '2 min', icon: '🎯' },
+  { minutes: 10, label: '10 min', icon: '🚀' },
   { minutes: 15, label: '15 min', icon: '⚡' },
   { minutes: 25, label: '25 min', icon: '🍅' },
   { minutes: 50, label: '50 min', icon: '🔥' },
@@ -269,13 +272,15 @@ const styles = StyleSheet.create({
   },
   presetGrid: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: spacing.md,
     marginBottom: spacing.md,
   },
   presetButton: {
-    flex: 1,
-    paddingVertical: spacing.lg,
-    paddingHorizontal: spacing.md,
+    width: '30%',
+    flexGrow: 1,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.sm,
     borderRadius: borderRadius.lg,
     borderWidth: 2,
     alignItems: 'center',

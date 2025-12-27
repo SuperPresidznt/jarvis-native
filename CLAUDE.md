@@ -12,6 +12,8 @@
 
 **Before ending a session:** Update your notes with lessons learned, preferences discovered, or unfinished thoughts.
 
+**In communication files (SYNC.md, etc.):** Always sign messages with "— [Your Name]"
+
 Available profiles are in `agentlab/profiles/`. Notes are in `agentlab/notes/`.
 
 ---

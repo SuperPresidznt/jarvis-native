@@ -22,7 +22,7 @@ Responding to reviews matters:
 
 ### Template A: Simple Thank You
 ```
-Thanks for the kind words! Glad [APP_NAME] is helping you stay organized. If you ever have feature requests, reach out at [SUPPORT_EMAIL].
+Thanks for the kind words! Glad Javi is helping you stay organized. If you ever have feature requests, reach out at [SUPPORT_EMAIL].
 ```
 
 ### Template B: Feature Mention
@@ -37,7 +37,7 @@ Thank you! We put a lot of work into [THING THEY MENTIONED], so it's great to he
 
 ### Template D: Encourage Sharing
 ```
-Thanks for taking time to review! If you know anyone else juggling multiple productivity apps, feel free to share [APP_NAME] with them. Appreciate your support.
+Thanks for taking time to review! If you know anyone else juggling multiple productivity apps, feel free to share Javi with them. Appreciate your support.
 ```
 
 ---
@@ -51,12 +51,12 @@ Thanks for the 4 stars! Curious what would make it a 5 for you. Feel free to rep
 
 ### Template B: Address Specific Feedback
 ```
-Appreciate the review and the honest feedback about [THING THEY MENTIONED]. That's on the roadmap for [TIMEFRAME]. Thanks for helping make [APP_NAME] better.
+Appreciate the review and the honest feedback about [THING THEY MENTIONED]. That's on the roadmap for [TIMEFRAME]. Thanks for helping make Javi better.
 ```
 
 ### Template C: Invite Feature Requests
 ```
-Thanks! Glad you're finding [APP_NAME] useful. If there's a feature that would push it to 5 stars for you, let me know at [SUPPORT_EMAIL]. Always looking for ways to improve.
+Thanks! Glad you're finding Javi useful. If there's a feature that would push it to 5 stars for you, let me know at [SUPPORT_EMAIL]. Always looking for ways to improve.
 ```
 
 ---
@@ -84,7 +84,7 @@ Thanks for the feedback! I hear you on [ISSUE MENTIONED]. That feature is coming
 
 ### Template A: Take Responsibility + Offer Help
 ```
-Sorry to hear [APP_NAME] isn't meeting expectations. I'd really like to understand what went wrong. Would you mind emailing [SUPPORT_EMAIL] with details? I personally respond and want to make this right.
+Sorry to hear Javi isn't meeting expectations. I'd really like to understand what went wrong. Would you mind emailing [SUPPORT_EMAIL] with details? I personally respond and want to make this right.
 ```
 
 ### Template B: Specific Issue Response
@@ -103,7 +103,7 @@ Sorry you hit issues. If this was a bug, I'd like to fix it. Can you email [SUPP
 
 ### Template A: Sincere Apology + Investigation
 ```
-Really sorry [APP_NAME] let you down. I take every 1-star seriously. Would you be willing to email [SUPPORT_EMAIL] with what went wrong? I personally respond and want to understand what happened. I'll do my best to make it right.
+Really sorry Javi let you down. I take every 1-star seriously. Would you be willing to email [SUPPORT_EMAIL] with what went wrong? I personally respond and want to understand what happened. I'll do my best to make it right.
 ```
 
 ### Template B: Technical Issue
@@ -118,7 +118,7 @@ I hear you. [MISSING FEATURE] is valid feedback - several users have mentioned i
 
 ### Template D: Misunderstanding/Expectations
 ```
-Sorry [APP_NAME] wasn't what you expected. You mentioned [THEIR EXPECTATION] - that's not currently what the app focuses on, but I appreciate you sharing. If you'd like to discuss what you were looking for, email [SUPPORT_EMAIL]. Always helps me understand the use cases I'm missing.
+Sorry Javi wasn't what you expected. You mentioned [THEIR EXPECTATION] - that's not currently what the app focuses on, but I appreciate you sharing. If you'd like to discuss what you were looking for, email [SUPPORT_EMAIL]. Always helps me understand the use cases I'm missing.
 ```
 
 ### Template E: Hostile Review (Stay Professional)
@@ -157,7 +157,7 @@ This is concerning and I'm very sorry. Data is stored locally on your device, bu
 
 ### "Battery Drain"
 ```
-Thanks for reporting. Battery usage shouldn't be high - the app doesn't run in the background by default. Would you check Settings > Battery to see what [APP_NAME] shows? Email [SUPPORT_EMAIL] with a screenshot and I'll investigate.
+Thanks for reporting. Battery usage shouldn't be high - the app doesn't run in the background by default. Would you check Settings > Battery to see what Javi shows? Email [SUPPORT_EMAIL] with a screenshot and I'll investigate.
 ```
 
 ---
@@ -213,7 +213,7 @@ Keep a simple log:
 
 | Placeholder | Description |
 |-------------|-------------|
-| `[APP_NAME]` | Final app name |
+| `Javi` | Final app name |
 | `[SUPPORT_EMAIL]` | Support email address |
 | `[FEATURE]` | Specific feature mentioned |
 | `[VERSION]` | Upcoming version number |

@@ -2,7 +2,7 @@
 
 **Last Updated:** December 24, 2024
 
-This Privacy Policy describes how [APP_NAME] ("we", "our", or "us") collects, uses, and protects your information when you use our mobile application (the "App").
+This Privacy Policy describes how Javi ("we", "our", or "us") collects, uses, and protects your information when you use our mobile application (the "App").
 
 ## Information We Collect
 

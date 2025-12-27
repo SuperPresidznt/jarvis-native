@@ -22,8 +22,8 @@ This report presents a comprehensive cybersecurity assessment of the Jarvis Nati
 - No hardcoded credentials or API keys in source code
 
 **Critical Risks Identified:**
-- 🔴 **HIGH:** Hardcoded HTTP backend URL in production code
-- 🔴 **HIGH:** Android backup enabled (`allowBackup="true"`) exposing encrypted data
+- ~~🔴 **HIGH:** Hardcoded HTTP backend URL in production code~~ ✅ **RESOLVED Dec 26, 2025** (Kai - CTO)
+- ~~🔴 **HIGH:** Android backup enabled (`allowBackup="true"`) exposing encrypted data~~ ✅ **RESOLVED Dec 26, 2025** (Kai - CTO)
 - 🟡 **MEDIUM:** Weak password policy (6 character minimum)
 - 🟡 **MEDIUM:** No certificate pinning for API communications
 - 🟡 **MEDIUM:** Missing input sanitization in database queries
@@ -1310,9 +1310,11 @@ proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pr
 
 ### 14.1 Critical Vulnerabilities (Immediate Action Required)
 
-#### 🔴 VULN-001: Unencrypted HTTP Communication
-**Severity:** CRITICAL (CVSS 9.1)
+#### ✅ VULN-001: Unencrypted HTTP Communication - RESOLVED
+**Severity:** CRITICAL (CVSS 9.1) → **RESOLVED**
 **Location:** `src/constants/config.ts:10`
+**Fixed by:** Kai (CTO) - December 26, 2025
+**Resolution:** Changed BASE_URL to HTTPS endpoint
 
 **Description:** All API communication occurs over HTTP, exposing credentials, tokens, and user data to network interception.
 
@@ -1344,9 +1346,11 @@ if (!API_CONFIG.BASE_URL.startsWith('https://')) {
 
 ---
 
-#### 🔴 VULN-002: Android Backup Enabled
-**Severity:** HIGH (CVSS 7.5)
+#### ✅ VULN-002: Android Backup Enabled - RESOLVED
+**Severity:** HIGH (CVSS 7.5) → **RESOLVED**
 **Location:** `android/app/src/main/AndroidManifest.xml:17`
+**Fixed by:** Kai (CTO) - December 26, 2025
+**Resolution:** Set `android:allowBackup="false"`
 
 **Description:** Android's auto-backup system enabled, allowing encrypted data to be extracted via ADB backup.
 
@@ -1574,8 +1578,8 @@ const safeTitle = sanitizeInput(userInput);
 
 | ID | Title | Severity | CVSS | Status | Priority |
 |----|-------|----------|------|--------|----------|
-| VULN-001 | Unencrypted HTTP | Critical | 9.1 | Open | P0 |
-| VULN-002 | Android Backup | High | 7.5 | Open | P0 |
+| VULN-001 | Unencrypted HTTP | Critical | 9.1 | ✅ **RESOLVED** | P0 |
+| VULN-002 | Android Backup | High | 7.5 | ✅ **RESOLVED** | P0 |
 | VULN-003 | Unencrypted SQLite | High | 7.2 | Open | P1 |
 | VULN-004 | Weak Password Policy | Medium | 5.3 | Open | P2 |
 | VULN-005 | No Cert Pinning | Medium | 6.5 | Open | P2 |
@@ -2102,9 +2106,9 @@ However, **critical vulnerabilities exist that prevent production deployment:**
 ### 20.2 Risk Summary
 
 **Critical Risks (Production Blockers):**
-- Unencrypted network communication (CVSS 9.1)
-- Android backup exposure (CVSS 7.5)
-- Plaintext database storage (CVSS 7.2)
+- ~~Unencrypted network communication (CVSS 9.1)~~ ✅ RESOLVED
+- ~~Android backup exposure (CVSS 7.5)~~ ✅ RESOLVED
+- Plaintext database storage (CVSS 7.2) - **Remaining P0 blocker**
 
 **High Risks (Pre-Release Fixes):**
 - Weak password requirements
@@ -2118,13 +2122,15 @@ However, **critical vulnerabilities exist that prevent production deployment:**
 
 ### 20.3 Deployment Recommendation
 
-**DO NOT DEPLOY TO PRODUCTION** until the following are addressed:
+**PROGRESS UPDATE - December 26, 2025:**
+- ✅ HTTPS migration complete (Kai - CTO)
+- ✅ Android backup disabled (Kai - CTO)
 
-**Mandatory (Block Production):**
-1. Migrate to HTTPS with valid TLS certificate
-2. Disable Android backup (`allowBackup="false"`)
-3. Implement SQLite encryption (SQLCipher)
-4. Generate production signing keys
+**Remaining Mandatory (Block Production):**
+1. ~~Migrate to HTTPS with valid TLS certificate~~ ✅ DONE
+2. ~~Disable Android backup (`allowBackup="false"`)~~ ✅ DONE
+3. Implement SQLite encryption (SQLCipher) - **STILL NEEDED**
+4. Generate production signing keys - **STILL NEEDED**
 
 **Strongly Recommended (Before Public Release):**
 5. Certificate pinning implementation
@@ -2199,6 +2205,7 @@ would be strongly recommended.
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2025-12-24 | Security Audit Team | Initial comprehensive assessment |
+| 1.1 | 2025-12-26 | Finn (CFO) | Marked VULN-001 (HTTP) and VULN-002 (Android backup) as resolved per Kai's fixes |
 
 ---
 
@@ -2206,5 +2213,6 @@ would be strongly recommended.
 
 *This security audit report is confidential and intended solely for internal use by the development team. Unauthorized distribution is prohibited.*
 
-**Last Updated:** December 24, 2025
+**Last Updated:** December 26, 2025 (Finn - CFO, marked VULN-001 and VULN-002 as resolved)
 **Next Review:** Before production deployment (mandatory)
+**Remaining Blockers:** 2 (SQLite encryption, production signing keys)

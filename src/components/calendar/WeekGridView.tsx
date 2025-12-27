@@ -30,6 +30,7 @@ interface WeekGridViewProps {
   events: CalendarEvent[];
   selectedDate: Date;
   onEventPress: (event: CalendarEvent) => void;
+  onDayPress?: (date: string) => void;
 }
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -39,6 +40,7 @@ export default function WeekGridView({
   events,
   selectedDate,
   onEventPress,
+  onDayPress,
 }: WeekGridViewProps) {
   const [eventConflicts, setEventConflicts] = useState<Map<string, number>>(new Map());
 
@@ -149,10 +151,13 @@ export default function WeekGridView({
           <View style={styles.headerRow}>
             {weekDates.map(date => {
               const today = isToday(date);
+              const dateStr = date.toISOString().split('T')[0];
               return (
-                <View
+                <TouchableOpacity
                   key={date.toISOString()}
                   style={[styles.dayHeader, { width: DAY_WIDTH }]}
+                  onPress={() => onDayPress?.(dateStr)}
+                  activeOpacity={onDayPress ? 0.7 : 1}
                 >
                   <Text style={styles.dayName}>{formatDayHeader(date)}</Text>
                   <View
@@ -170,7 +175,7 @@ export default function WeekGridView({
                       {date.getDate()}
                     </Text>
                   </View>
-                </View>
+                </TouchableOpacity>
               );
             })}
           </View>
@@ -197,9 +202,17 @@ export default function WeekGridView({
                     ]}
                   >
                     {dayEvents.length === 0 ? (
-                      <View style={styles.emptyDay}>
-                        <Text style={styles.emptyDayText}>-</Text>
-                      </View>
+                      <TouchableOpacity
+                        style={styles.emptyDay}
+                        onPress={() => onDayPress?.(dateStr)}
+                        activeOpacity={onDayPress ? 0.7 : 1}
+                      >
+                        <Icon
+                          name="notebook-plus-outline"
+                          size={16}
+                          color={colors.text.tertiary}
+                        />
+                      </TouchableOpacity>
                     ) : (
                       dayEvents.map((event, index) => {
                         const conflictCount = eventConflicts.get(event.id) || 0;

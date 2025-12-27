@@ -225,6 +225,43 @@ export const CREATE_TABLES = {
       FOREIGN KEY (conversation_id) REFERENCES ai_conversations(id) ON DELETE CASCADE
     );
   `,
+
+  journal_entries: `
+    CREATE TABLE IF NOT EXISTS journal_entries (
+      id TEXT PRIMARY KEY,
+      date TEXT NOT NULL UNIQUE,
+      content TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+  `,
+
+  goals: `
+    CREATE TABLE IF NOT EXISTS goals (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      description TEXT,
+      target_date TEXT,
+      status TEXT DEFAULT 'active',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      synced INTEGER DEFAULT 0
+    );
+  `,
+
+  goal_milestones: `
+    CREATE TABLE IF NOT EXISTS goal_milestones (
+      id TEXT PRIMARY KEY,
+      goal_id TEXT NOT NULL,
+      title TEXT NOT NULL,
+      completed INTEGER DEFAULT 0,
+      completed_at TEXT,
+      sort_order INTEGER DEFAULT 0,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      FOREIGN KEY (goal_id) REFERENCES goals(id) ON DELETE CASCADE
+    );
+  `,
 };
 
 /**
@@ -262,12 +299,24 @@ export const CREATE_INDEXES = {
   ai_messages_conversation: 'CREATE INDEX IF NOT EXISTS idx_ai_messages_conversation ON ai_messages(conversation_id);',
   ai_messages_timestamp: 'CREATE INDEX IF NOT EXISTS idx_ai_messages_timestamp ON ai_messages(timestamp);',
   ai_conversations_updated_at: 'CREATE INDEX IF NOT EXISTS idx_ai_conversations_updated_at ON ai_conversations(updated_at);',
+
+  journal_entries_date: 'CREATE INDEX IF NOT EXISTS idx_journal_entries_date ON journal_entries(date);',
+
+  goals_status: 'CREATE INDEX IF NOT EXISTS idx_goals_status ON goals(status);',
+  goals_target_date: 'CREATE INDEX IF NOT EXISTS idx_goals_target_date ON goals(target_date);',
+
+  goal_milestones_goal: 'CREATE INDEX IF NOT EXISTS idx_goal_milestones_goal ON goal_milestones(goal_id);',
+  goal_milestones_completed: 'CREATE INDEX IF NOT EXISTS idx_goal_milestones_completed ON goal_milestones(completed);',
+  goal_milestones_sort: 'CREATE INDEX IF NOT EXISTS idx_goal_milestones_sort ON goal_milestones(sort_order);',
 };
 
 /**
  * Drop all tables (for reset/testing)
  */
 export const DROP_TABLES = [
+  'DROP TABLE IF EXISTS goal_milestones',
+  'DROP TABLE IF EXISTS goals',
+  'DROP TABLE IF EXISTS journal_entries',
   'DROP TABLE IF EXISTS ai_messages',
   'DROP TABLE IF EXISTS ai_conversations',
   'DROP TABLE IF EXISTS pomodoro_settings',

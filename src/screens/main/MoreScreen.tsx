@@ -33,6 +33,13 @@ const menuSections: MenuSection[] = [
     title: 'Features',
     items: [
       {
+        id: 'goals',
+        icon: 'flag-outline',
+        label: 'Goals',
+        subtitle: 'Track progress with milestones',
+        screen: 'Goals',
+      },
+      {
         id: 'finance',
         icon: 'wallet',
         label: 'Finance',

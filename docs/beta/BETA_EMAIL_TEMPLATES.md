@@ -12,14 +12,14 @@
 
 **Subject Line:**
 ```
-Welcome to [APP_NAME] Beta - Here's how to get started
+Welcome to Javi Beta - Here's how to get started
 ```
 
 **Body:**
 ```
 Hey [FIRST_NAME],
 
-Thanks for joining the [APP_NAME] beta. You're one of [X] testers helping shape this app before public launch.
+Thanks for joining the Javi beta. You're one of [X] testers helping shape this app before public launch.
 
 HERE'S YOUR ACCESS:
 
@@ -66,7 +66,7 @@ Thank you for helping make this app better. Your feedback directly shapes what g
 Let me know if you hit any issues getting set up.
 
 [YOUR_NAME]
-[APP_NAME] Developer
+Javi Developer
 
 ---
 
@@ -81,8 +81,8 @@ P.S. Having trouble with TestFlight/Play Store? Reply and I'll help troubleshoot
 
 **Subject Line Options:**
 ```
-Option A: Quick question about [APP_NAME]
-Option B: How's your first week with [APP_NAME]?
+Option A: Quick question about Javi
+Option B: How's your first week with Javi?
 Option C: [FIRST_NAME], 2 quick questions
 ```
 
@@ -90,7 +90,7 @@ Option C: [FIRST_NAME], 2 quick questions
 ```
 Hey [FIRST_NAME],
 
-You've had [APP_NAME] for about a week now. Quick check-in:
+You've had Javi for about a week now. Quick check-in:
 
 TWO QUESTIONS:
 
@@ -137,14 +137,14 @@ P.S. Found a bug? Screenshot + "what you were doing when it happened" is all I n
 
 **Subject Line:**
 ```
-[APP_NAME] Beta Survey (5 mins) - Your feedback matters
+Javi Beta Survey (5 mins) - Your feedback matters
 ```
 
 **Body:**
 ```
 Hey [FIRST_NAME],
 
-The [APP_NAME] beta ends in [X] days. Before we wrap up, I'd love your structured feedback.
+The Javi beta ends in [X] days. Before we wrap up, I'd love your structured feedback.
 
 QUICK SURVEY (5 minutes):
 
@@ -195,16 +195,16 @@ P.S. If you stopped using the app mid-beta, I'd especially appreciate knowing wh
 
 **Subject Line Options:**
 ```
-Option A: [APP_NAME] is LIVE - Thank you
+Option A: Javi is LIVE - Thank you
 Option B: We launched! (And you helped make it happen)
-Option C: [FIRST_NAME], [APP_NAME] just went live
+Option C: [FIRST_NAME], Javi just went live
 ```
 
 **Body:**
 ```
 Hey [FIRST_NAME],
 
-It's official. [APP_NAME] is live on the App Store and Google Play.
+It's official. Javi is live on the App Store and Google Play.
 
 DOWNLOAD LINKS:
 
@@ -222,7 +222,7 @@ The app is better because you took time to test it and tell me what sucked.
 
 THE ASK:
 
-If you're still using [APP_NAME] and finding it useful, would you mind leaving a review?
+If you're still using Javi and finding it useful, would you mind leaving a review?
 
 Early reviews have a massive impact on App Store visibility. Like, disproportionately massive in the first 48 hours.
 
@@ -251,7 +251,7 @@ I'll send occasional updates (monthly, max). Unsubscribe link is at the bottom i
 Thank you again. Launching is terrifying. Having people who actually used it and gave honest feedback made it less terrifying.
 
 [YOUR_NAME]
-[APP_NAME] Developer
+Javi Developer
 
 ---
 
@@ -266,7 +266,7 @@ P.S. Know someone drowning in productivity apps? Feel free to share the links. W
 
 **Subject Line:**
 ```
-Quick update from [APP_NAME]
+Quick update from Javi
 ```
 
 **Body:**
@@ -318,7 +318,7 @@ P.S. Reply anytime with questions or feedback. I still read every email.
 
 | Placeholder | Description |
 |-------------|-------------|
-| `[APP_NAME]` | Final app name |
+| `Javi` | Final app name |
 | `[FIRST_NAME]` | Tester's first name (or "there" if unknown) |
 | `[YOUR_NAME]` | Developer name |
 | `[TESTFLIGHT_LINK]` | iOS TestFlight invitation URL |

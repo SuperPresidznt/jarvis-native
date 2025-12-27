@@ -1,7 +1,7 @@
 # App Store Copy & ASO
 
 **Status:** Ready for review
-**Note:** Replace `[APP_NAME]` with your final app name throughout
+**Note:** Replace `Javi` with your final app name throughout
 
 ---
 
@@ -9,11 +9,11 @@
 
 ### App Name (30 chars max)
 ```
-[APP_NAME] - AI Productivity
+Javi - AI Productivity
 ```
 Alternative options:
-- `[APP_NAME]: Tasks & Habits`
-- `[APP_NAME] - Life Dashboard`
+- `Javi: Tasks & Habits`
+- `Javi - Life Dashboard`
 
 ### Subtitle (30 chars max)
 ```
@@ -38,7 +38,7 @@ productivity,task manager,habit tracker,to-do list,calendar,budget,focus timer,p
 ```
 Feeling overwhelmed by scattered apps for tasks, habits, calendar, and finances?
 
-[APP_NAME] brings everything together in one powerful, beautifully designed productivity hub.
+Javi brings everything together in one powerful, beautifully designed productivity hub.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -109,9 +109,9 @@ PRIVACY FIRST
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-WHY [APP_NAME]?
+WHY Javi?
 
-Unlike single-purpose apps, [APP_NAME] connects your tasks, habits, calendar, and finances in one unified experience. See your complete day at a glance. Never switch between apps again.
+Unlike single-purpose apps, Javi connects your tasks, habits, calendar, and finances in one unified experience. See your complete day at a glance. Never switch between apps again.
 
 Download now and take control of your life.
 
@@ -138,7 +138,7 @@ Terms of Service: [TERMS_URL]
 
 ### App Name (50 chars max)
 ```
-[APP_NAME] - Tasks, Habits, Calendar & Budget
+Javi - Tasks, Habits, Calendar & Budget
 ```
 
 ### Short Description (80 chars max)
@@ -149,7 +149,7 @@ All-in-one productivity: tasks, habits, calendar, finance tracking, focus timer.
 ### Full Description (4000 chars max)
 
 ```
-Stop juggling multiple apps. [APP_NAME] brings tasks, habits, calendar, finance, and focus tools into one powerful productivity hub.
+Stop juggling multiple apps. Javi brings tasks, habits, calendar, finance, and focus tools into one powerful productivity hub.
 
 ▶ WHAT YOU GET
 
@@ -171,10 +171,10 @@ Pomodoro mode (25/5/15) or custom durations. Immersive full-screen timer. Link s
 ◆ BEAUTIFUL THEMES
 6 stunning presets: Neon Dark, Ocean Breeze, Sunset, Forest, Monochrome, Rose Gold. Make the app yours.
 
-▶ WHY [APP_NAME]?
+▶ WHY Javi?
 
 ✓ ONE APP FOR EVERYTHING
-No more switching between task managers, habit trackers, calendar apps, and budget tools. Everything lives in [APP_NAME].
+No more switching between task managers, habit trackers, calendar apps, and budget tools. Everything lives in Javi.
 
 ✓ PRIVACY FIRST
 All data stored locally on your device. No account required. No data collection. Your productivity stays private.
@@ -216,7 +216,7 @@ Terms of Service: [TERMS_URL]
 ### iOS
 
 ```
-Welcome to [APP_NAME] 1.0!
+Welcome to Javi 1.0!
 
 Your complete productivity hub is here:
 
@@ -246,7 +246,7 @@ We'd love your feedback! Tap Settings → Help & Support.
 ### Android
 
 ```
-[APP_NAME] 1.0 is here!
+Javi 1.0 is here!
 
 Your all-in-one productivity hub:
 
@@ -316,7 +316,7 @@ Your advantage: All-in-one vs single-purpose apps.
 
 | Placeholder | What to put |
 |-------------|-------------|
-| `[APP_NAME]` | Your final app name |
+| `Javi` | Your final app name |
 | `[YOUR_EMAIL]` | Support email |
 | `[PRIVACY_URL]` | Hosted privacy policy URL |
 | `[TERMS_URL]` | Hosted terms URL |

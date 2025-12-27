@@ -3,7 +3,7 @@
  * Provides consistent confirmation and alert dialogs
  */
 
-import { Alert, Platform } from 'react-native';
+import { Alert } from 'react-native';
 import { haptic } from './haptics';
 
 export interface ConfirmOptions {
@@ -181,6 +181,19 @@ export const confirmations = {
     confirmDestructive({
       title: 'Delete Habit',
       message: `Are you sure you want to delete "${habitName}" and all its logs? This action cannot be undone.`,
+      confirmText: 'Delete',
+      onConfirm,
+    });
+  },
+
+  /**
+   * Confirm generic item deletion
+   */
+  deleteItem: (itemName: string, itemType: string, onConfirm: () => void | Promise<void>) => {
+    const capitalizedType = itemType.charAt(0).toUpperCase() + itemType.slice(1);
+    confirmDestructive({
+      title: `Delete ${capitalizedType}`,
+      message: `Are you sure you want to delete "${itemName}"? This action cannot be undone.`,
       confirmText: 'Delete',
       onConfirm,
     });

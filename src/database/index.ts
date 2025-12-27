@@ -258,6 +258,82 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
     console.error('[DB] Migration: Error consolidating focus_sessions:', error);
   }
 
+  // Migration 7: Create journal_entries table
+  try {
+    const tableInfo = await db.getAllAsync<{ name: string }>(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='journal_entries'"
+    );
+
+    const hasJournalEntries = tableInfo.length > 0;
+
+    if (!hasJournalEntries) {
+      await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS journal_entries (
+          id TEXT PRIMARY KEY,
+          date TEXT NOT NULL UNIQUE,
+          content TEXT NOT NULL,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        );
+      `);
+      await db.execAsync('CREATE INDEX IF NOT EXISTS idx_journal_entries_date ON journal_entries(date);');
+      console.log('[DB] Migration: Created journal_entries table');
+    } else {
+      console.log('[DB] Migration: journal_entries table already exists');
+    }
+  } catch (error) {
+    console.error('[DB] Migration: Error creating journal_entries:', error);
+  }
+
+  // Migration 8: Create goals and goal_milestones tables
+  try {
+    const goalsTableInfo = await db.getAllAsync<{ name: string }>(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='goals'"
+    );
+
+    const hasGoals = goalsTableInfo.length > 0;
+
+    if (!hasGoals) {
+      await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS goals (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL,
+          description TEXT,
+          target_date TEXT,
+          status TEXT DEFAULT 'active',
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL,
+          synced INTEGER DEFAULT 0
+        );
+      `);
+      await db.execAsync('CREATE INDEX IF NOT EXISTS idx_goals_status ON goals(status);');
+      await db.execAsync('CREATE INDEX IF NOT EXISTS idx_goals_target_date ON goals(target_date);');
+
+      await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS goal_milestones (
+          id TEXT PRIMARY KEY,
+          goal_id TEXT NOT NULL,
+          title TEXT NOT NULL,
+          completed INTEGER DEFAULT 0,
+          completed_at TEXT,
+          sort_order INTEGER DEFAULT 0,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL,
+          FOREIGN KEY (goal_id) REFERENCES goals(id) ON DELETE CASCADE
+        );
+      `);
+      await db.execAsync('CREATE INDEX IF NOT EXISTS idx_goal_milestones_goal ON goal_milestones(goal_id);');
+      await db.execAsync('CREATE INDEX IF NOT EXISTS idx_goal_milestones_completed ON goal_milestones(completed);');
+      await db.execAsync('CREATE INDEX IF NOT EXISTS idx_goal_milestones_sort ON goal_milestones(sort_order);');
+
+      console.log('[DB] Migration: Created goals and goal_milestones tables');
+    } else {
+      console.log('[DB] Migration: goals tables already exist');
+    }
+  } catch (error) {
+    console.error('[DB] Migration: Error creating goals tables:', error);
+  }
+
   console.log('[DB] Migrations complete');
 }
 

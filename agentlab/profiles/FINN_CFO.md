@@ -52,6 +52,8 @@ Finn (CFO/Exec)
 | Data Safety section prep | `docs/beta/DATA_SAFETY_PREP.md` | Finn |
 | Accessibility audit prep | `docs/beta/ACCESSIBILITY_AUDIT_PREP.md` | Finn |
 | Launch checklist updates | `docs/LAUNCH_CHECKLIST.md` | Finn (dates/ownership) |
+| Subscription tiers reference | `docs/beta/SUBSCRIPTION_TIERS.md` | Finn |
+| Security audit update (v1.1) | `docs/beta/SECURITY_AUDIT_REPORT.md` | Finn (marked resolved items) |
 
 ## Current Status
 Available. Research + compliance prep complete. Awaiting:

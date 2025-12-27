@@ -226,4 +226,5 @@ export type SettingsStackParamList = {
   StorageOverview: undefined;
   DataManagement: undefined;
   CategoryManagement: undefined;
+  CustomColors: undefined;
 };

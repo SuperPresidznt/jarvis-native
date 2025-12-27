@@ -33,6 +33,7 @@ import { RecurrencePicker } from '../../components/RecurrencePicker';
 import type { RecurrenceRule } from '../../types';
 import DayTimelineView from '../../components/calendar/DayTimelineView';
 import WeekGridView from '../../components/calendar/WeekGridView';
+import { JournalNoteModal } from '../../components/calendar/JournalNoteModal';
 import { useOptimisticUpdate } from '../../hooks/useOptimisticUpdate';
 import { useRefreshControl } from '../../hooks/useRefreshControl';
 import { useDebounce } from '../../hooks/useDebounce';
@@ -77,6 +78,8 @@ export default function CalendarScreen({ embedded = false }: CalendarScreenProps
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const { updateOptimistically, isPending } = useOptimisticUpdate();
   const [eventConflicts, setEventConflicts] = useState<Map<string, number>>(new Map());
+  const [showJournalModal, setShowJournalModal] = useState(false);
+  const [journalDate, setJournalDate] = useState('');
 
   // Load events from local database
   const loadEvents = useCallback(async () => {
@@ -165,6 +168,12 @@ export default function CalendarScreen({ embedded = false }: CalendarScreenProps
     screenName: 'calendar',
     onRefresh: loadEvents,
   });
+
+  // Handle day press for journal
+  const handleDayPress = useCallback((date: string) => {
+    setJournalDate(date);
+    setShowJournalModal(true);
+  }, []);
 
   const handleDelete = async (eventId: string) => {
     const event = events.find(e => e.id === eventId);
@@ -342,6 +351,7 @@ export default function CalendarScreen({ embedded = false }: CalendarScreenProps
                 setShowCreateModal(true);
               }
             }}
+            onDayPress={handleDayPress}
           />
         </View>
       ) : viewMode === 'week' ? (
@@ -356,6 +366,7 @@ export default function CalendarScreen({ embedded = false }: CalendarScreenProps
                 setShowCreateModal(true);
               }
             }}
+            onDayPress={handleDayPress}
           />
         </View>
       ) : (
@@ -484,6 +495,16 @@ export default function CalendarScreen({ embedded = false }: CalendarScreenProps
         }}
         onSuccess={() => {
           setRefreshTrigger(prev => prev + 1);
+        }}
+      />
+
+      {/* Journal Note Modal */}
+      <JournalNoteModal
+        visible={showJournalModal}
+        date={journalDate}
+        onClose={() => {
+          setShowJournalModal(false);
+          setJournalDate('');
         }}
       />
     </View>

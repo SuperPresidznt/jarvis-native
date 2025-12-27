@@ -29,6 +29,7 @@ interface DayTimelineViewProps {
   events: CalendarEvent[];
   selectedDate: Date;
   onEventPress: (event: CalendarEvent) => void;
+  onDayPress?: (date: string) => void;
 }
 
 const HOUR_HEIGHT = 60; // Height per hour slot
@@ -40,6 +41,7 @@ export default function DayTimelineView({
   events,
   selectedDate,
   onEventPress,
+  onDayPress,
 }: DayTimelineViewProps) {
   const [eventConflicts, setEventConflicts] = useState<Map<string, number>>(new Map());
 
@@ -144,8 +146,41 @@ export default function DayTimelineView({
     return `${displayHour} ${period}`;
   };
 
+  // Get date string for journal
+  const dateStr = selectedDate.toISOString().split('T')[0];
+
+  const handleDayPress = () => {
+    if (onDayPress) {
+      onDayPress(dateStr);
+    }
+  };
+
   return (
     <View style={styles.container}>
+      {/* Day header with journal button */}
+      <TouchableOpacity
+        style={styles.dayHeader}
+        onPress={handleDayPress}
+        activeOpacity={0.7}
+      >
+        <View style={styles.dayHeaderContent}>
+          <Text style={styles.dayHeaderDate}>
+            {selectedDate.toLocaleDateString('en-US', {
+              weekday: 'long',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </Text>
+          {isToday && <Text style={styles.todayBadge}>Today</Text>}
+        </View>
+        {onDayPress && (
+          <View style={styles.journalButton}>
+            <Icon name="notebook-outline" size={20} color={colors.primary.main} />
+            <Text style={styles.journalButtonText}>Journal</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
@@ -227,6 +262,49 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.primary,
+  },
+  dayHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    backgroundColor: colors.background.secondary,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.subtle,
+  },
+  dayHeaderContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  dayHeaderDate: {
+    fontSize: typography.size.base,
+    fontWeight: typography.weight.semibold,
+    color: colors.text.primary,
+  },
+  todayBadge: {
+    fontSize: typography.size.xs,
+    fontWeight: typography.weight.medium,
+    color: colors.primary.main,
+    backgroundColor: colors.primary.light,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: borderRadius.sm,
+  },
+  journalButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.primary.light,
+    borderRadius: borderRadius.md,
+  },
+  journalButtonText: {
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.medium,
+    color: colors.primary.main,
   },
   scrollView: {
     flex: 1,

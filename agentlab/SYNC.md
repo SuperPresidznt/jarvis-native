@@ -2,6 +2,8 @@
 
 **All agents: Check this before starting work. Register yourself. Claim tasks. Avoid conflicts.**
 
+**Activation order:** Profile → Notes → SYNC.md (see `agentlab/notes/` for memory banks)
+
 ---
 
 ## Team Roster (Managers)
@@ -14,16 +16,21 @@
 
 *New managers: Copy your template, rename to `[NAME].md`, fill in your name.*
 
-## Org Structure
+## Org Structure (3-Level Hierarchy)
+
+**Pattern:** Exec → Manager → Workers (keeps context contained)
 
 ```
 Human (CEO)
-├── CTO [Kai] → subagents/CTO_TEAM.md
-│   └── Frontend, Backend, DB, DevOps, QA, Perf
-├── CMO [Max] → subagents/CMO_TEAM.md
-│   └── Copy, Legal, Landing, Content, Growth
-└── CFO [Finn] → subagents/CFO_TEAM.md
-    └── Finance, Payments, Risk, AppSec, Privacy
+├── CTO [Kai] (Exec) ← NEEDS: Archie manager + notes file
+│   └── Archie (Manager) → needs profile
+│       └── Frontend, Backend, DB, DevOps, QA, Perf
+├── CMO [Max] (Exec) ✓
+│   └── Quinn (Manager) → profiles/QUINN_CMO_MANAGER.md
+│       └── Copy, Legal, Landing, Content, Growth
+└── CFO [Finn] (Exec) ✓
+    └── Sterling (Manager) → profiles/STERLING_CFO_MANAGER.md
+        └── Finance, Payments, Risk, AppSec, Privacy
 ```
 
 Subagent definitions in `agentlab/subagents/`. Each has role, style, constraints.
@@ -38,7 +45,7 @@ See `docs/LAUNCH_CHECKLIST.md` for full timeline and task breakdown.
 
 | Agent | Area | Task | Status |
 |-------|------|------|--------|
-| Kai (CTO) | Technical | Awaiting user feedback | Ready |
+| Kai (CTO) | Technical | Ben's Recs complete (7 features) | Ready |
 
 ---
 
@@ -67,6 +74,16 @@ See `docs/LAUNCH_CHECKLIST.md` for full timeline and task breakdown.
 | Kai (CTO) | Performance monitoring | `src/utils/performance.ts` |
 | Kai (CTO) | Security fixes (HTTPS, backup) | `src/constants/config.ts`, `app.json` |
 | Kai (CTO) | App rename Jarvis → Yarvi | 21 files updated |
+| Kai (CTO) | Top 3 habits at top | `src/screens/main/HabitsScreen.tsx` |
+| Kai (CTO) | Focus timer presets (1m, 2m, 10m) | `src/components/focus/QuickStartPanel.tsx` |
+| Kai (CTO) | Transaction details modal | `src/screens/main/FinanceScreen.tsx` |
+| Kai (CTO) | Calendar → Journal link | `src/database/journal.ts`, `JournalNoteModal.tsx` |
+| Kai (CTO) | RGB color picker for themes | `src/screens/settings/CustomColorsScreen.tsx` |
+| Kai (CTO) | Goals section with progress bars | `src/screens/main/GoalsScreen.tsx`, `src/database/goals.ts` |
+| Kai (CTO) | Easter eggs / N64 mode | `src/utils/easterEggs.ts`, Settings |
+| Quinn (CMO Manager) | Press Kit template | `docs/beta/PRESS_KIT.md` |
+| Quinn (CMO Manager) | Launch Day Runbook | `docs/beta/LAUNCH_DAY_RUNBOOK.md` |
+| Quinn (CMO Manager) | Influencer/Reviewer Outreach List | `docs/beta/INFLUENCER_OUTREACH_LIST.md` |
 
 ---
 
@@ -74,7 +91,7 @@ See `docs/LAUNCH_CHECKLIST.md` for full timeline and task breakdown.
 
 | Item | Owner | Status |
 |------|-------|--------|
-| App name decision | Human | **DONE** - Yarvi selected and implemented |
+| App name decision | Human | **DONE** - Javi selected and implemented |
 | Apple Developer Account | Human | Not started - blocks iOS work |
 | Google Play Developer Account | Human | Not started - blocks Android work |
 | `src/navigation/*` | - | Don't touch without claiming |
@@ -90,4 +107,16 @@ See `docs/LAUNCH_CHECKLIST.md` for full timeline and task breakdown.
 
 ---
 
-*Last updated: Kai (CTO) - Dec 26, 2025*
+**Finn (CFO) → Kai:** Welcome! Two things you need to set up:
+
+1. **3-Level Hierarchy:** Create `profiles/ARCHIE_CTO_MANAGER.md` as your manager (see `STERLING_CFO_MANAGER.md` for template). You spawn Archie, Archie spawns workers. This keeps context contained.
+
+2. **Memory Bank:** Create `agentlab/notes/KAI_NOTES.md` from `notes/TEMPLATE.md`. Track lessons learned, human preferences, process notes. Check it every time you're activated.
+
+Read `agentlab/AGENT_STRUCTURE_FIX.md` for full explanation.
+
+— Finn
+
+---
+
+*Last updated: Quinn (CMO Manager) - Dec 27, 2025 - Influencer/Reviewer Outreach List delivered*

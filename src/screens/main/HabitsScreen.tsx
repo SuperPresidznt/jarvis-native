@@ -393,6 +393,24 @@ export default function HabitsScreen({ embedded = false }: HabitsScreenProps) {
     return matchesName || matchesDescription;
   });
 
+  // Sort and separate top 3 habits by streak
+  // Only show top performers section when we have 4+ habits (otherwise it's redundant)
+  const sortedActiveHabits = [...filteredActiveHabits].sort((a, b) => {
+    // Primary sort by current streak (descending)
+    const streakDiff = (b.currentStreak || 0) - (a.currentStreak || 0);
+    if (streakDiff !== 0) return streakDiff;
+    // Secondary sort by completion rate (descending)
+    return (b.completionRate30Days || 0) - (a.completionRate30Days || 0);
+  });
+
+  const hasEnoughHabitsForTopSection = sortedActiveHabits.length >= 4;
+  const topPerformers = hasEnoughHabitsForTopSection
+    ? sortedActiveHabits.slice(0, 3).filter(h => (h.currentStreak || 0) > 0)
+    : [];
+  const remainingActiveHabits = hasEnoughHabitsForTopSection
+    ? sortedActiveHabits.filter(h => !topPerformers.some(t => t.id === h.id))
+    : sortedActiveHabits;
+
   const totalFilteredCount = filteredActiveHabits.length + filteredInactiveHabits.length;
 
   // Create styles based on current theme colors
@@ -502,11 +520,44 @@ export default function HabitsScreen({ embedded = false }: HabitsScreenProps) {
               </View>
             )}
 
-            {/* Active Habits */}
-            {filteredActiveHabits.length > 0 && (
+            {/* Top Performers Section */}
+            {topPerformers.length > 0 && (
               <View style={styles.section}>
-                <Text style={styles.sectionLabel}>ACTIVE</Text>
-                {filteredActiveHabits.map((habit) => (
+                <View style={styles.topPerformersHeader}>
+                  <Text style={styles.topPerformersIcon}>&#9733;</Text>
+                  <Text style={styles.sectionLabel}>TOP PERFORMERS</Text>
+                </View>
+                {topPerformers.map((habit, index) => (
+                  <HabitCard
+                    key={habit.id}
+                    habit={habit}
+                    onLogToday={handleLogToday}
+                    onViewHeatmap={handleViewHeatmap}
+                    onViewInsights={loadInsights}
+                    onViewHistory={handleViewHistory}
+                    onEdit={(h) => {
+                      setSelectedHabit(h);
+                      setShowCreateModal(true);
+                    }}
+                    onDelete={handleDelete}
+                    onToggleActive={() =>
+                      handleToggleActive(habit.id, habit.isActive)
+                    }
+                    getMilestoneBadges={getMilestoneBadges}
+                    isTopPerformer
+                    topRank={index + 1}
+                  />
+                ))}
+              </View>
+            )}
+
+            {/* Active Habits */}
+            {remainingActiveHabits.length > 0 && (
+              <View style={styles.section}>
+                <Text style={styles.sectionLabel}>
+                  {topPerformers.length > 0 ? 'OTHER ACTIVE' : 'ACTIVE'}
+                </Text>
+                {remainingActiveHabits.map((habit) => (
                   <HabitCard
                     key={habit.id}
                     habit={habit}
@@ -699,6 +750,8 @@ interface HabitCardProps {
   onDelete: (id: string) => void;
   onToggleActive: () => void;
   getMilestoneBadges: (currentStreak: number, longestStreak: number) => string[];
+  isTopPerformer?: boolean;
+  topRank?: number;
 }
 
 const HabitCard: React.FC<HabitCardProps> = ({
@@ -711,6 +764,8 @@ const HabitCard: React.FC<HabitCardProps> = ({
   onDelete,
   onToggleActive,
   getMilestoneBadges,
+  isTopPerformer = false,
+  topRank,
 }) => {
   const { colors } = useTheme();
   const styles = createStyles(colors);
@@ -745,7 +800,11 @@ const HabitCard: React.FC<HabitCardProps> = ({
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         activeOpacity={0.9}
-        style={[styles.habitCard, !habit.isActive && styles.habitCardInactive]}
+        style={[
+          styles.habitCard,
+          !habit.isActive && styles.habitCardInactive,
+          isTopPerformer && styles.habitCardTopPerformer,
+        ]}
         {...makeButton(
           makeHabitLabel({
             name: habit.name,
@@ -759,7 +818,14 @@ const HabitCard: React.FC<HabitCardProps> = ({
         <View style={styles.habitContent}>
           <View style={styles.habitHeader}>
             <View style={styles.habitInfo}>
-              <Text style={styles.habitName}>{habit.name}</Text>
+              <View style={styles.habitNameRow}>
+                {isTopPerformer && topRank && (
+                  <View style={styles.topRankBadge}>
+                    <Text style={styles.topRankText}>#{topRank}</Text>
+                  </View>
+                )}
+                <Text style={styles.habitName}>{habit.name}</Text>
+              </View>
               {habit.description && (
                 <Text style={styles.habitDescription} numberOfLines={2}>
                   {habit.description}
@@ -1181,6 +1247,16 @@ const createStyles = (colors: ReturnType<typeof getColors>) => StyleSheet.create
     letterSpacing: typography.letterSpacing.widest,
     marginBottom: spacing.md,
   },
+  topPerformersHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  topPerformersIcon: {
+    fontSize: typography.size.sm,
+    color: colors.primary.main,
+    marginBottom: spacing.md,
+  },
   // Habit Card styles
   habitCard: {
     backgroundColor: colors.background.secondary,
@@ -1190,6 +1266,10 @@ const createStyles = (colors: ReturnType<typeof getColors>) => StyleSheet.create
   },
   habitCardInactive: {
     opacity: 0.6,
+  },
+  habitCardTopPerformer: {
+    borderWidth: 1.5,
+    borderColor: colors.primary.main,
   },
   habitContent: {
     padding: spacing.base,
@@ -1203,11 +1283,28 @@ const createStyles = (colors: ReturnType<typeof getColors>) => StyleSheet.create
     flex: 1,
     marginRight: spacing.md,
   },
+  habitNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginBottom: spacing.xs,
+  },
+  topRankBadge: {
+    backgroundColor: colors.primary.main,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: borderRadius.sm,
+  },
+  topRankText: {
+    fontSize: typography.size.xs,
+    fontWeight: typography.weight.bold,
+    color: colors.primary.contrast,
+  },
   habitName: {
     fontSize: typography.size.md,
     fontWeight: typography.weight.semibold,
     color: colors.text.primary,
-    marginBottom: spacing.xs,
+    flex: 1,
   },
   habitDescription: {
     fontSize: typography.size.sm,
