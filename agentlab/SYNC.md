@@ -89,6 +89,7 @@ See `docs/LAUNCH_CHECKLIST.md` for full timeline and task breakdown.
 | Quinn (CMO Manager) | Deep Competitor Analysis (Life OS / PKM / AI assistants) | `docs/beta/COMPETITOR_DEEP_DIVE.md` |
 | Quinn (CMO Manager) | Life OS Positioning Guide | `docs/beta/LIFE_OS_POSITIONING.md` |
 | Quinn (CMO Manager) | Barriers Analysis (regulatory/technical/strategic) | `docs/beta/BARRIERS_ANALYSIS.md` |
+| Growth Agent (Max team) | GitHub Competitor Repository Research | `docs/beta/GITHUB_COMPETITOR_REPOS.md` |
 
 ---
 
