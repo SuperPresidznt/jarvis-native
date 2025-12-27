@@ -12,6 +12,11 @@ import {
 } from './index';
 import type { RecurrenceRule } from '../types';
 import * as notificationService from '../services/notifications';
+import {
+  createCalendarEventSchema,
+  updateCalendarEventSchema,
+  validateOrThrow,
+} from '../validation';
 
 export interface CalendarEvent {
   id: string;
@@ -158,27 +163,30 @@ export async function getEvent(id: string): Promise<CalendarEvent | null> {
  * Create a new event
  */
 export async function createEvent(data: CreateEventData): Promise<CalendarEvent> {
+  // Validate input
+  const validated = validateOrThrow(createCalendarEventSchema, data);
+
   const id = generateId();
   const now = getCurrentTimestamp();
 
   // Schedule notification if reminder is set
   let notificationId: string | null = null;
 
-  if (data.reminderMinutes && data.startTime) {
+  if (validated.reminderMinutes && validated.startTime) {
     try {
-      const eventStart = new Date(data.startTime);
+      const eventStart = new Date(validated.startTime);
       const reminderTime = new Date(
-        eventStart.getTime() - (data.reminderMinutes * 60 * 1000)
+        eventStart.getTime() - (validated.reminderMinutes * 60 * 1000)
       );
 
       if (reminderTime > new Date()) {
         notificationId = await notificationService.scheduleEventNotification({
           title: 'Event Reminder',
-          body: `${data.title} starts in ${notificationService.formatReminderTime(data.reminderMinutes)}`,
+          body: `${validated.title} starts in ${notificationService.formatReminderTime(validated.reminderMinutes)}`,
           data: {
             eventId: id,
             type: 'event_reminder',
-            eventTitle: data.title,
+            eventTitle: validated.title,
           },
           triggerDate: reminderTime,
         });
@@ -199,15 +207,15 @@ export async function createEvent(data: CreateEventData): Promise<CalendarEvent>
 
   const params = [
     id,
-    data.title,
-    data.description || null,
-    data.startTime,
-    data.endTime,
-    data.location || null,
-    JSON.stringify(data.attendees || []),
-    data.isAllDay ? 1 : 0,
-    data.recurrence ? JSON.stringify(data.recurrence) : null,
-    data.reminderMinutes ?? null,
+    validated.title,
+    validated.description || null,
+    validated.startTime,
+    validated.endTime,
+    validated.location || null,
+    JSON.stringify(validated.attendees || []),
+    validated.isAllDay ? 1 : 0,
+    validated.recurrence ? JSON.stringify(validated.recurrence) : null,
+    validated.reminderMinutes ?? null,
     notificationId,
     now,
     now,
@@ -227,6 +235,9 @@ export async function createEvent(data: CreateEventData): Promise<CalendarEvent>
  * Update an event
  */
 export async function updateEvent(id: string, data: UpdateEventData): Promise<CalendarEvent> {
+  // Validate input
+  const validated = validateOrThrow(updateCalendarEventSchema, data);
+
   const now = getCurrentTimestamp();
 
   // Get existing event for notification handling
@@ -246,9 +257,9 @@ export async function updateEvent(id: string, data: UpdateEventData): Promise<Ca
 
   // Schedule new notification if reminder is set
   let notificationId: string | null = null;
-  const startTime = data.startTime || existingEvent.startTime;
-  const reminderMinutes = data.reminderMinutes !== undefined
-    ? data.reminderMinutes
+  const startTime = validated.startTime || existingEvent.startTime;
+  const reminderMinutes = validated.reminderMinutes !== undefined
+    ? validated.reminderMinutes
     : existingEvent.reminderMinutes;
 
   if (reminderMinutes && startTime) {
@@ -259,7 +270,7 @@ export async function updateEvent(id: string, data: UpdateEventData): Promise<Ca
       );
 
       if (reminderTime > new Date()) {
-        const title = data.title || existingEvent.title;
+        const title = validated.title || existingEvent.title;
         notificationId = await notificationService.scheduleEventNotification({
           title: 'Event Reminder',
           body: `${title} starts in ${notificationService.formatReminderTime(reminderMinutes)}`,
@@ -279,49 +290,49 @@ export async function updateEvent(id: string, data: UpdateEventData): Promise<Ca
   const updates: string[] = [];
   const params: any[] = [];
 
-  if (data.title !== undefined) {
+  if (validated.title !== undefined) {
     updates.push('title = ?');
-    params.push(data.title);
+    params.push(validated.title);
   }
 
-  if (data.description !== undefined) {
+  if (validated.description !== undefined) {
     updates.push('description = ?');
-    params.push(data.description || null);
+    params.push(validated.description || null);
   }
 
-  if (data.startTime !== undefined) {
+  if (validated.startTime !== undefined) {
     updates.push('start_time = ?');
-    params.push(data.startTime);
+    params.push(validated.startTime);
   }
 
-  if (data.endTime !== undefined) {
+  if (validated.endTime !== undefined) {
     updates.push('end_time = ?');
-    params.push(data.endTime);
+    params.push(validated.endTime);
   }
 
-  if (data.location !== undefined) {
+  if (validated.location !== undefined) {
     updates.push('location = ?');
-    params.push(data.location || null);
+    params.push(validated.location || null);
   }
 
-  if (data.attendees !== undefined) {
+  if (validated.attendees !== undefined) {
     updates.push('attendees = ?');
-    params.push(JSON.stringify(data.attendees));
+    params.push(JSON.stringify(validated.attendees));
   }
 
-  if (data.isAllDay !== undefined) {
+  if (validated.isAllDay !== undefined) {
     updates.push('is_all_day = ?');
-    params.push(data.isAllDay ? 1 : 0);
+    params.push(validated.isAllDay ? 1 : 0);
   }
 
-  if (data.recurrence !== undefined) {
+  if (validated.recurrence !== undefined) {
     updates.push('recurring = ?');
-    params.push(data.recurrence ? JSON.stringify(data.recurrence) : null);
+    params.push(validated.recurrence ? JSON.stringify(validated.recurrence) : null);
   }
 
-  if (data.reminderMinutes !== undefined) {
+  if (validated.reminderMinutes !== undefined) {
     updates.push('reminder_minutes = ?');
-    params.push(data.reminderMinutes);
+    params.push(validated.reminderMinutes);
   }
 
   // Update notification ID regardless of whether a new one was scheduled

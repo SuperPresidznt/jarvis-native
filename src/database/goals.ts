@@ -11,6 +11,12 @@ import {
   executeWrite,
   executeTransaction,
 } from './index';
+import {
+  createGoalSchema,
+  updateGoalSchema,
+  createMilestoneSchema,
+  validateOrThrow,
+} from '../validation';
 
 // ============================================================================
 // Types
@@ -127,6 +133,9 @@ function rowToMilestone(row: MilestoneRow): GoalMilestone {
  * Create a new goal
  */
 export async function createGoal(input: CreateGoalInput): Promise<Goal> {
+  // Validate input
+  const validated = validateOrThrow(createGoalSchema, input);
+
   const id = generateId();
   const now = getCurrentTimestamp();
 
@@ -137,18 +146,18 @@ export async function createGoal(input: CreateGoalInput): Promise<Goal> {
 
   await executeWrite(sql, [
     id,
-    input.name,
-    input.description ?? null,
-    input.targetDate ?? null,
+    validated.name,
+    validated.description ?? null,
+    validated.targetDate ?? null,
     now,
     now,
   ]);
 
   return {
     id,
-    name: input.name,
-    description: input.description,
-    targetDate: input.targetDate,
+    name: validated.name,
+    description: validated.description,
+    targetDate: validated.targetDate,
     status: 'active',
     createdAt: now,
     updatedAt: now,
@@ -187,25 +196,28 @@ export async function getAllGoals(status?: GoalStatus): Promise<Goal[]> {
  * Update a goal
  */
 export async function updateGoal(id: string, input: UpdateGoalInput): Promise<Goal | null> {
+  // Validate input
+  const validated = validateOrThrow(updateGoalSchema, input);
+
   const now = getCurrentTimestamp();
   const updates: string[] = [];
   const params: (string | null)[] = [];
 
-  if (input.name !== undefined) {
+  if (validated.name !== undefined) {
     updates.push('name = ?');
-    params.push(input.name);
+    params.push(validated.name);
   }
-  if (input.description !== undefined) {
+  if (validated.description !== undefined) {
     updates.push('description = ?');
-    params.push(input.description ?? null);
+    params.push(validated.description ?? null);
   }
-  if (input.targetDate !== undefined) {
+  if (validated.targetDate !== undefined) {
     updates.push('target_date = ?');
-    params.push(input.targetDate ?? null);
+    params.push(validated.targetDate ?? null);
   }
-  if (input.status !== undefined) {
+  if (validated.status !== undefined) {
     updates.push('status = ?');
-    params.push(input.status);
+    params.push(validated.status);
   }
 
   if (updates.length === 0) {
@@ -238,27 +250,30 @@ export async function deleteGoal(id: string): Promise<void> {
  * Create a new milestone
  */
 export async function createMilestone(input: CreateMilestoneInput): Promise<GoalMilestone> {
+  // Validate input
+  const validated = validateOrThrow(createMilestoneSchema, input);
+
   const id = generateId();
   const now = getCurrentTimestamp();
 
   // Get the max sort_order for this goal
   const maxOrderResult = await executeQuerySingle<{ max_order: number | null }>(
     'SELECT MAX(sort_order) as max_order FROM goal_milestones WHERE goal_id = ?',
-    [input.goalId]
+    [validated.goalId]
   );
-  const sortOrder = input.sortOrder ?? ((maxOrderResult?.max_order ?? -1) + 1);
+  const sortOrder = validated.sortOrder ?? ((maxOrderResult?.max_order ?? -1) + 1);
 
   const sql = `
     INSERT INTO goal_milestones (id, goal_id, title, completed, sort_order, created_at, updated_at)
     VALUES (?, ?, ?, 0, ?, ?, ?)
   `;
 
-  await executeWrite(sql, [id, input.goalId, input.title, sortOrder, now, now]);
+  await executeWrite(sql, [id, validated.goalId, validated.title, sortOrder, now, now]);
 
   return {
     id,
-    goalId: input.goalId,
-    title: input.title,
+    goalId: validated.goalId,
+    title: validated.title,
     completed: false,
     sortOrder,
     createdAt: now,

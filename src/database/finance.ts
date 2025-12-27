@@ -10,6 +10,15 @@ import {
   executeQuerySingle,
   executeWrite,
 } from './index';
+import {
+  createTransactionSchema,
+  updateTransactionSchema,
+  createAssetSchema,
+  updateAssetSchema,
+  createLiabilitySchema,
+  updateLiabilitySchema,
+  validateOrThrow,
+} from '../validation';
 
 export type TransactionType = 'income' | 'expense';
 
@@ -144,6 +153,9 @@ export async function createTransaction(data: {
   description?: string;
   currency?: string;
 }): Promise<Transaction> {
+  // Validate input
+  const validated = validateOrThrow(createTransactionSchema, data);
+
   const id = generateId();
   const now = getCurrentTimestamp();
 
@@ -156,12 +168,12 @@ export async function createTransaction(data: {
 
   const params = [
     id,
-    data.type,
-    data.amount,
-    data.category,
-    data.date,
-    data.description || null,
-    data.currency || 'USD',
+    validated.type,
+    validated.amount,
+    validated.category,
+    validated.date,
+    validated.description || null,
+    validated.currency || 'USD',
     now,
     now,
   ];
@@ -191,39 +203,42 @@ export async function updateTransaction(
     currency: string;
   }>
 ): Promise<Transaction> {
+  // Validate input
+  const validated = validateOrThrow(updateTransactionSchema, data);
+
   const now = getCurrentTimestamp();
 
   const updates: string[] = [];
   const params: any[] = [];
 
-  if (data.type !== undefined) {
+  if (validated.type !== undefined) {
     updates.push('type = ?');
-    params.push(data.type);
+    params.push(validated.type);
   }
 
-  if (data.amount !== undefined) {
+  if (validated.amount !== undefined) {
     updates.push('amount = ?');
-    params.push(data.amount);
+    params.push(validated.amount);
   }
 
-  if (data.category !== undefined) {
+  if (validated.category !== undefined) {
     updates.push('category = ?');
-    params.push(data.category);
+    params.push(validated.category);
   }
 
-  if (data.date !== undefined) {
+  if (validated.date !== undefined) {
     updates.push('date = ?');
-    params.push(data.date);
+    params.push(validated.date);
   }
 
-  if (data.description !== undefined) {
+  if (validated.description !== undefined) {
     updates.push('description = ?');
-    params.push(data.description || null);
+    params.push(validated.description || null);
   }
 
-  if (data.currency !== undefined) {
+  if (validated.currency !== undefined) {
     updates.push('currency = ?');
-    params.push(data.currency);
+    params.push(validated.currency);
   }
 
   updates.push('updated_at = ?');
@@ -280,6 +295,9 @@ export async function createAsset(data: {
   value: number;
   currency?: string;
 }): Promise<Asset> {
+  // Validate input
+  const validated = validateOrThrow(createAssetSchema, data);
+
   const id = generateId();
   const now = getCurrentTimestamp();
 
@@ -289,7 +307,15 @@ export async function createAsset(data: {
     ) VALUES (?, ?, ?, ?, ?, ?, ?, 0)
   `;
 
-  const params = [id, data.name, data.type, data.value, data.currency || 'USD', now, now];
+  const params = [
+    id,
+    validated.name,
+    validated.type,
+    validated.value,
+    validated.currency || 'USD',
+    now,
+    now,
+  ];
 
   await executeWrite(sql, params);
 
@@ -314,29 +340,32 @@ export async function updateAsset(
     currency: string;
   }>
 ): Promise<Asset> {
+  // Validate input
+  const validated = validateOrThrow(updateAssetSchema, data);
+
   const now = getCurrentTimestamp();
 
   const updates: string[] = [];
   const params: any[] = [];
 
-  if (data.name !== undefined) {
+  if (validated.name !== undefined) {
     updates.push('name = ?');
-    params.push(data.name);
+    params.push(validated.name);
   }
 
-  if (data.type !== undefined) {
+  if (validated.type !== undefined) {
     updates.push('type = ?');
-    params.push(data.type);
+    params.push(validated.type);
   }
 
-  if (data.value !== undefined) {
+  if (validated.value !== undefined) {
     updates.push('value = ?');
-    params.push(data.value);
+    params.push(validated.value);
   }
 
-  if (data.currency !== undefined) {
+  if (validated.currency !== undefined) {
     updates.push('currency = ?');
-    params.push(data.currency);
+    params.push(validated.currency);
   }
 
   updates.push('updated_at = ?');
@@ -394,6 +423,9 @@ export async function createLiability(data: {
   interestRate?: number;
   currency?: string;
 }): Promise<Liability> {
+  // Validate input
+  const validated = validateOrThrow(createLiabilitySchema, data);
+
   const id = generateId();
   const now = getCurrentTimestamp();
 
@@ -405,11 +437,11 @@ export async function createLiability(data: {
 
   const params = [
     id,
-    data.name,
-    data.type,
-    data.amount,
-    data.interestRate || null,
-    data.currency || 'USD',
+    validated.name,
+    validated.type,
+    validated.amount,
+    validated.interestRate || null,
+    validated.currency || 'USD',
     now,
     now,
   ];
@@ -438,34 +470,37 @@ export async function updateLiability(
     currency: string;
   }>
 ): Promise<Liability> {
+  // Validate input
+  const validated = validateOrThrow(updateLiabilitySchema, data);
+
   const now = getCurrentTimestamp();
 
   const updates: string[] = [];
   const params: any[] = [];
 
-  if (data.name !== undefined) {
+  if (validated.name !== undefined) {
     updates.push('name = ?');
-    params.push(data.name);
+    params.push(validated.name);
   }
 
-  if (data.type !== undefined) {
+  if (validated.type !== undefined) {
     updates.push('type = ?');
-    params.push(data.type);
+    params.push(validated.type);
   }
 
-  if (data.amount !== undefined) {
+  if (validated.amount !== undefined) {
     updates.push('amount = ?');
-    params.push(data.amount);
+    params.push(validated.amount);
   }
 
-  if (data.interestRate !== undefined) {
+  if (validated.interestRate !== undefined) {
     updates.push('interest_rate = ?');
-    params.push(data.interestRate || null);
+    params.push(validated.interestRate || null);
   }
 
-  if (data.currency !== undefined) {
+  if (validated.currency !== undefined) {
     updates.push('currency = ?');
-    params.push(data.currency);
+    params.push(validated.currency);
   }
 
   updates.push('updated_at = ?');

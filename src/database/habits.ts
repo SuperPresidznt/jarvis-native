@@ -10,6 +10,12 @@ import {
   executeQuerySingle,
   executeWrite,
 } from './index';
+import {
+  createHabitSchema,
+  updateHabitSchema,
+  logHabitCompletionSchema,
+  validateOrThrow,
+} from '../validation';
 
 export type HabitCadence = 'daily' | 'weekly' | 'monthly';
 
@@ -131,6 +137,9 @@ export async function getHabit(id: string): Promise<Habit | null> {
  * Create a new habit
  */
 export async function createHabit(data: CreateHabitData): Promise<Habit> {
+  // Validate input
+  const validated = validateOrThrow(createHabitSchema, data);
+
   const id = generateId();
   const now = getCurrentTimestamp();
 
@@ -144,11 +153,11 @@ export async function createHabit(data: CreateHabitData): Promise<Habit> {
 
   const params = [
     id,
-    data.name,
-    data.description || null,
-    data.cadence || 'daily',
-    data.targetCount || 1,
-    data.reminderTime || null,
+    validated.name,
+    validated.description || null,
+    validated.cadence || 'daily',
+    validated.targetCount || 1,
+    validated.reminderTime || null,
     now,
     now,
   ];
@@ -167,49 +176,52 @@ export async function createHabit(data: CreateHabitData): Promise<Habit> {
  * Update a habit
  */
 export async function updateHabit(id: string, data: UpdateHabitData): Promise<Habit> {
+  // Validate input
+  const validated = validateOrThrow(updateHabitSchema, data);
+
   const now = getCurrentTimestamp();
 
   const updates: string[] = [];
   const params: any[] = [];
 
-  if (data.name !== undefined) {
+  if (validated.name !== undefined) {
     updates.push('name = ?');
-    params.push(data.name);
+    params.push(validated.name);
   }
 
-  if (data.description !== undefined) {
+  if (validated.description !== undefined) {
     updates.push('description = ?');
-    params.push(data.description || null);
+    params.push(validated.description || null);
   }
 
-  if (data.cadence !== undefined) {
+  if (validated.cadence !== undefined) {
     updates.push('cadence = ?');
-    params.push(data.cadence);
+    params.push(validated.cadence);
   }
 
-  if (data.targetCount !== undefined) {
+  if (validated.targetCount !== undefined) {
     updates.push('target_count = ?');
-    params.push(data.targetCount);
+    params.push(validated.targetCount);
   }
 
-  if (data.currentStreak !== undefined) {
+  if (validated.currentStreak !== undefined) {
     updates.push('current_streak = ?');
-    params.push(data.currentStreak);
+    params.push(validated.currentStreak);
   }
 
-  if (data.longestStreak !== undefined) {
+  if (validated.longestStreak !== undefined) {
     updates.push('longest_streak = ?');
-    params.push(data.longestStreak);
+    params.push(validated.longestStreak);
   }
 
-  if (data.reminderTime !== undefined) {
+  if (validated.reminderTime !== undefined) {
     updates.push('reminder_time = ?');
-    params.push(data.reminderTime || null);
+    params.push(validated.reminderTime || null);
   }
 
-  if (data.notificationId !== undefined) {
+  if (validated.notificationId !== undefined) {
     updates.push('notification_id = ?');
-    params.push(data.notificationId || null);
+    params.push(validated.notificationId || null);
   }
 
   updates.push('updated_at = ?');
@@ -247,6 +259,9 @@ export async function logHabitCompletion(
   completed: boolean,
   notes?: string
 ): Promise<HabitLog> {
+  // Validate input
+  const validated = validateOrThrow(logHabitCompletionSchema, { habitId, date, completed, notes });
+
   const id = generateId();
   const now = getCurrentTimestamp();
 
@@ -260,14 +275,23 @@ export async function logHabitCompletion(
     )
   `;
 
-  const params = [habitId, date, id, habitId, date, completed ? 1 : 0, notes || null, now];
+  const params = [
+    validated.habitId,
+    validated.date,
+    id,
+    validated.habitId,
+    validated.date,
+    validated.completed ? 1 : 0,
+    validated.notes || null,
+    now,
+  ];
 
   await executeWrite(sql, params);
 
   // Update streak after logging
-  await updateHabitStreak(habitId);
+  await updateHabitStreak(validated.habitId);
 
-  const log = await getHabitLog(habitId, date);
+  const log = await getHabitLog(validated.habitId, validated.date);
   if (!log) {
     throw new Error('Failed to create habit log');
   }

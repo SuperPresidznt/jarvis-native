@@ -13,6 +13,7 @@ import {
 } from './index';
 import type { RecurrenceRule } from '../types';
 import type { TaskFilters } from '../store/taskFilterStore';
+import { createTaskSchema, updateTaskSchema, validateOrThrow } from '../validation';
 
 export type TaskStatus = 'todo' | 'in_progress' | 'blocked' | 'completed' | 'cancelled';
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
@@ -290,6 +291,9 @@ export async function getTasksByProject(projectId: string): Promise<Task[]> {
  * Create a new task
  */
 export async function createTask(data: CreateTaskData): Promise<Task> {
+  // Validate input
+  const validated = validateOrThrow(createTaskSchema, data);
+
   const id = generateId();
   const now = getCurrentTimestamp();
 
@@ -302,16 +306,16 @@ export async function createTask(data: CreateTaskData): Promise<Task> {
 
   const params = [
     id,
-    data.title,
-    data.description || null,
-    data.status || 'todo',
-    data.priority || 'medium',
-    data.effort || null,
-    data.impact || null,
-    data.dueDate || null,
-    data.projectId || null,
-    JSON.stringify(data.tags || []),
-    data.recurrence ? JSON.stringify(data.recurrence) : null,
+    validated.title,
+    validated.description || null,
+    validated.status || 'todo',
+    validated.priority || 'medium',
+    validated.effort || null,
+    validated.impact || null,
+    validated.dueDate || null,
+    validated.projectId || null,
+    JSON.stringify(validated.tags || []),
+    validated.recurrence ? JSON.stringify(validated.recurrence) : null,
     now,
     now,
   ];
@@ -330,64 +334,67 @@ export async function createTask(data: CreateTaskData): Promise<Task> {
  * Update a task
  */
 export async function updateTask(id: string, data: UpdateTaskData): Promise<Task> {
+  // Validate input
+  const validated = validateOrThrow(updateTaskSchema, data);
+
   const now = getCurrentTimestamp();
 
   const updates: string[] = [];
   const params: any[] = [];
 
-  if (data.title !== undefined) {
+  if (validated.title !== undefined) {
     updates.push('title = ?');
-    params.push(data.title);
+    params.push(validated.title);
   }
 
-  if (data.description !== undefined) {
+  if (validated.description !== undefined) {
     updates.push('description = ?');
-    params.push(data.description || null);
+    params.push(validated.description || null);
   }
 
-  if (data.status !== undefined) {
+  if (validated.status !== undefined) {
     updates.push('status = ?');
-    params.push(data.status);
+    params.push(validated.status);
   }
 
-  if (data.priority !== undefined) {
+  if (validated.priority !== undefined) {
     updates.push('priority = ?');
-    params.push(data.priority);
+    params.push(validated.priority);
   }
 
-  if (data.effort !== undefined) {
+  if (validated.effort !== undefined) {
     updates.push('effort = ?');
-    params.push(data.effort || null);
+    params.push(validated.effort || null);
   }
 
-  if (data.impact !== undefined) {
+  if (validated.impact !== undefined) {
     updates.push('impact = ?');
-    params.push(data.impact || null);
+    params.push(validated.impact || null);
   }
 
-  if (data.dueDate !== undefined) {
+  if (validated.dueDate !== undefined) {
     updates.push('due_date = ?');
-    params.push(data.dueDate || null);
+    params.push(validated.dueDate || null);
   }
 
-  if (data.completedAt !== undefined) {
+  if (validated.completedAt !== undefined) {
     updates.push('completed_at = ?');
-    params.push(data.completedAt || null);
+    params.push(validated.completedAt || null);
   }
 
-  if (data.projectId !== undefined) {
+  if (validated.projectId !== undefined) {
     updates.push('project_id = ?');
-    params.push(data.projectId || null);
+    params.push(validated.projectId || null);
   }
 
-  if (data.tags !== undefined) {
+  if (validated.tags !== undefined) {
     updates.push('tags = ?');
-    params.push(JSON.stringify(data.tags));
+    params.push(JSON.stringify(validated.tags));
   }
 
-  if (data.recurrence !== undefined) {
+  if (validated.recurrence !== undefined) {
     updates.push('recurrence_rule = ?');
-    params.push(data.recurrence ? JSON.stringify(data.recurrence) : null);
+    params.push(validated.recurrence ? JSON.stringify(validated.recurrence) : null);
   }
 
   updates.push('updated_at = ?');

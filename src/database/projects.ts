@@ -10,6 +10,7 @@ import {
   executeQuerySingle,
   executeWrite,
 } from './index';
+import { createProjectSchema, updateProjectSchema, validateOrThrow } from '../validation';
 
 export type ProjectStatus = 'active' | 'archived' | 'completed';
 
@@ -179,6 +180,9 @@ export async function getProjectsWithStats(includeArchived: boolean = false): Pr
  * Create a new project
  */
 export async function createProject(data: CreateProjectData): Promise<Project> {
+  // Validate input
+  const validated = validateOrThrow(createProjectSchema, data);
+
   const id = generateId();
   const now = getCurrentTimestamp();
 
@@ -190,10 +194,10 @@ export async function createProject(data: CreateProjectData): Promise<Project> {
 
   const params = [
     id,
-    data.name,
-    data.description || null,
-    data.color || null,
-    data.status || 'active',
+    validated.name,
+    validated.description || null,
+    validated.color || null,
+    validated.status || 'active',
     now,
     now,
   ];
@@ -212,29 +216,32 @@ export async function createProject(data: CreateProjectData): Promise<Project> {
  * Update a project
  */
 export async function updateProject(id: string, data: UpdateProjectData): Promise<Project> {
+  // Validate input
+  const validated = validateOrThrow(updateProjectSchema, data);
+
   const now = getCurrentTimestamp();
 
   const updates: string[] = [];
   const params: any[] = [];
 
-  if (data.name !== undefined) {
+  if (validated.name !== undefined) {
     updates.push('name = ?');
-    params.push(data.name);
+    params.push(validated.name);
   }
 
-  if (data.description !== undefined) {
+  if (validated.description !== undefined) {
     updates.push('description = ?');
-    params.push(data.description || null);
+    params.push(validated.description || null);
   }
 
-  if (data.color !== undefined) {
+  if (validated.color !== undefined) {
     updates.push('color = ?');
-    params.push(data.color || null);
+    params.push(validated.color || null);
   }
 
-  if (data.status !== undefined) {
+  if (validated.status !== undefined) {
     updates.push('status = ?');
-    params.push(data.status);
+    params.push(validated.status);
   }
 
   updates.push('updated_at = ?');
