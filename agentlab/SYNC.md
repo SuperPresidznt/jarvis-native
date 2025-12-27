@@ -46,6 +46,7 @@ See `docs/LAUNCH_CHECKLIST.md` for full timeline and task breakdown.
 | Agent | Area | Task | Status |
 |-------|------|------|--------|
 | Kai (CTO) | Technical | Ben's Recs complete (7 features) | Ready |
+| Sterling (CFO Manager) | Pricing | Lifetime tier research + documentation | Done |
 
 ---
 
@@ -90,6 +91,12 @@ See `docs/LAUNCH_CHECKLIST.md` for full timeline and task breakdown.
 | Quinn (CMO Manager) | Life OS Positioning Guide | `docs/beta/LIFE_OS_POSITIONING.md` |
 | Quinn (CMO Manager) | Barriers Analysis (regulatory/technical/strategic) | `docs/beta/BARRIERS_ANALYSIS.md` |
 | Growth Agent (Max team) | GitHub Competitor Repository Research | `docs/beta/GITHUB_COMPETITOR_REPOS.md` |
+| Legal Agent (Max team) | Regulatory Compliance Research | `docs/beta/LEGAL_COMPLIANCE_REQUIREMENTS.md` |
+| Growth Agent (Max team) | Fork Analysis (bestfriendai) | `docs/beta/FORK_ANALYSIS.md` |
+| Growth Agent (Max team) | bestfriendai User Investigation | `docs/beta/BESTFRIENDAI_INVESTIGATION.md` |
+| Sterling (CFO Manager) | Lifetime pricing tier research | `docs/beta/SUBSCRIPTION_TIERS.md` |
+| Growth Agent (Max team) | bestfriendai Fork Code Review (deep dive) | `docs/beta/FORK_CODE_REVIEW.md` |
+| Copy Agent (Quinn team) | App Store Copy - Proactive AI rewrite | `docs/beta/APP_STORE_COPY.md` |
 
 ---
 
@@ -125,4 +132,22 @@ Read `agentlab/AGENT_STRUCTURE_FIX.md` for full explanation.
 
 ---
 
-*Last updated: Quinn (CMO Manager) - Dec 27, 2025 - Deep competitor research, Life OS positioning, and barriers analysis delivered*
+**Max (CMO) → Kai (CTO) - Dec 27, 2025:**
+
+Found critical technical debt during fork analysis. Read `docs/beta/FORK_CODE_REVIEW.md` for details.
+
+**HIGH PRIORITY:**
+1. **react-native-chart-kit is DEPRECATED** - Last update Dec 2022, 500+ open issues. Migrate to Victory Native XL (active, modern, Reanimated 3).
+2. **Zero input validation** - No Zod or similar. Forms go straight to DB. Add validation layer.
+
+**MEDIUM PRIORITY:**
+3. Repository pattern for DB abstraction (cleaner than direct SQLite calls)
+4. Test coverage (we have 1 test, fork has 30+)
+
+The fork (bestfriendai) went cloud-first direction - different from our local-first strategy. Not a threat, but their patterns are worth cherry-picking.
+
+— Max
+
+---
+
+*Last updated: Max (CMO) - Dec 27, 2025 - Added tech debt findings for Kai*

@@ -1,6 +1,6 @@
 # App Store Copy & ASO
 
-**Status:** Ready for review
+**Status:** Updated - Proactive AI Lead Angle
 **Note:** Replace `Javi` with your final app name throughout
 
 ---
@@ -9,119 +9,106 @@
 
 ### App Name (30 chars max)
 ```
-Javi - AI Productivity
+Javi - Your Proactive AI
 ```
 Alternative options:
-- `Javi: Tasks & Habits`
-- `Javi - Life Dashboard`
+- `Javi: AI That Speaks First`
+- `Javi - Life OS`
 
 ### Subtitle (30 chars max)
 ```
-Tasks, Habits, Focus & Finance
+AI That Speaks Up For You
 ```
 Alternatives:
-- `Your Personal AI Assistant`
-- `Organize Everything in One App`
+- `Your Life, One Proactive AI`
+- `Not Another Chatbot`
 
 ### Promotional Text (170 chars - can update without review)
 ```
-NEW: Complete life dashboard with task management, habit tracking, calendar, finance tools, and focus timer. All your productivity needs in one beautiful app.
+NEW: The AI assistant that actually knows your life and speaks up when it matters. Tasks, habits, money, focus - all connected. Private. Offline. Proactive.
 ```
 
 ### Keywords (100 chars, comma-separated, no spaces)
 ```
-productivity,task manager,habit tracker,to-do list,calendar,budget,focus timer,pomodoro,GTD,planner
+AI assistant,proactive AI,life OS,habit tracker,task manager,budget,focus timer,offline,private,GTD
 ```
 
 ### Description (4000 chars max)
 
 ```
-Feeling overwhelmed by scattered apps for tasks, habits, calendar, and finances?
+Tired of AI that only responds when you ask?
 
-Javi brings everything together in one powerful, beautifully designed productivity hub.
+Javi is different. It knows your tasks, habits, money, and schedule - then speaks up when it matters. No prompting. No commands. Just a Jarvis-like assistant that actually understands your life.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-TASK MANAGEMENT
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• Create unlimited tasks with priorities and due dates
-• Organize with projects and tags
-• Multiple views: All tasks, by project, by status
-• Swipe actions for quick completion
-• Priority system with visual indicators
+This is not another chatbot. This is your Life OS.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-HABIT TRACKING
+WHY Javi IS DIFFERENT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• Daily check-ins with streak tracking
-• Visual analytics: Best times, weekly patterns
-• Smart reminders so you never break a streak
-• Habit insights to optimize your routine
-• Skip days without losing your streak
+
+PROACTIVE, NOT REACTIVE
+Other AI assistants wait for you to ask. Javi sees patterns across your entire life and speaks up first:
+• "You're overspending on dining - 40% above your budget"
+• "Your gym habit dropped this week - want a reminder?"
+• "You have a deadline tomorrow but nothing scheduled to work on it"
+
+CONTEXT THAT PERSISTS
+ChatGPT forgets you after each chat. Siri only knows basic commands. Javi remembers everything - your tasks, habits, spending patterns, calendar, focus sessions - and connects the dots.
+
+TRULY PRIVATE
+Your life data never leaves your device. No cloud. No account required. No company reading your habits and finances.
+
+WORKS OFFLINE
+Full functionality without internet. Your AI assistant works on a plane, in the subway, anywhere.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-CALENDAR & SCHEDULING
+YOUR COMPLETE LIFE OS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• Week grid and day timeline views
-• Event creation with reminders
-• Conflict detection (no double-bookings)
-• All-day event support
-• Color-coded categories
+
+◆ TASKS & PROJECTS
+Create tasks with priorities, deadlines, and projects. Swipe to complete. AI notices when deadlines cluster or tasks stall.
+
+◆ HABIT TRACKING
+Daily check-ins with streak tracking. AI spots patterns in your consistency and nudges you before you break a streak.
+
+◆ FINANCE DASHBOARD
+Track income, expenses, and budgets. AI alerts you to unusual spending and budget overruns before they become problems.
+
+◆ CALENDAR & SCHEDULING
+Week and day views with conflict detection. AI sees gaps between what you plan and what you actually do.
+
+◆ FOCUS TIMER
+Pomodoro and custom deep work sessions. AI learns when you focus best and suggests optimal work windows.
+
+◆ JOURNAL
+Capture thoughts linked to your calendar. AI understands context across your day.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-FINANCE DASHBOARD
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• Track income and expenses
-• Set and monitor budgets
-• Visual charts: Spending trends, categories
-• Cash-on-hand tracking
-• Export to CSV for tax prep
-
+VS THE COMPETITION
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-FOCUS TIMER
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• Pomodoro mode (25/5/15 cycles)
-• Custom duration for deep work
-• Immersive timer with celebration animations
-• Session history and stats
-• Link focus sessions to tasks
+ChatGPT: No persistent memory. No location reminders. Not offline. Not private.
+
+Siri/Google: Basic commands only. Cannot analyze patterns across finance, habits, and tasks.
+
+Default Apps: No AI. No consolidation. No proactive insights.
+
+Javi: All your life data connected. AI that speaks first. 100% private. 100% offline.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 BEAUTIFUL THEMES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• 6 stunning theme presets
-• Neon Dark, Ocean Breeze, Sunset, Forest, Monochrome, Rose Gold
-• Consistent design across all features
+6 stunning presets including Neon Dark, Ocean Breeze, Sunset, Forest, Monochrome, and Rose Gold.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-PRIVACY FIRST
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• All data stored locally on your device
-• No account required to start
-• Export your data anytime
-• Your productivity, your privacy
+This is not a productivity app. This is the operating system for your life.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-WHY Javi?
-
-Unlike single-purpose apps, Javi connects your tasks, habits, calendar, and finances in one unified experience. See your complete day at a glance. Never switch between apps again.
-
-Download now and take control of your life.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-COMING SOON
-• AI assistant for productivity insights
-• Voice input for quick capture
-• Cloud sync across devices
-• Google Calendar integration
+Download Javi and meet the AI that actually knows you.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -138,71 +125,92 @@ Terms of Service: [TERMS_URL]
 
 ### App Name (50 chars max)
 ```
-Javi - Tasks, Habits, Calendar & Budget
+Javi - Proactive AI Life Assistant
 ```
 
 ### Short Description (80 chars max)
 ```
-All-in-one productivity: tasks, habits, calendar, finance tracking, focus timer.
+AI that knows your life and speaks up. Tasks, habits, money, focus. Offline.
 ```
 
 ### Full Description (4000 chars max)
 
 ```
-Stop juggling multiple apps. Javi brings tasks, habits, calendar, finance, and focus tools into one powerful productivity hub.
+Stop prompting. Start living.
 
-▶ WHAT YOU GET
+Javi is the AI assistant that actually knows your life - tasks, habits, money, schedule, everything - and speaks up when it matters.
 
-◆ TASK MANAGEMENT
-Create unlimited tasks with priorities, projects, and due dates. Swipe to complete. Filter by status, priority, or project. Get things done faster.
+Not another chatbot. A Jarvis for your real life.
+
+▶ WHAT MAKES Javi DIFFERENT
+
+◆ PROACTIVE AI
+Other AI waits for you to ask. Javi notices patterns and speaks first:
+• Spending trending above budget? Javi alerts you.
+• Habit streak at risk? Javi nudges you.
+• Deadline approaching with no work scheduled? Javi flags it.
+
+◆ PERSISTENT CONTEXT
+ChatGPT forgets you after each conversation. Javi remembers your tasks, habits, spending patterns, and schedule - connecting insights across your whole life.
+
+◆ TRULY PRIVATE
+All data stays on your device. No cloud sync required. No account needed. No company analyzing your life data.
+
+◆ 100% OFFLINE
+Works without internet. Your AI assistant is always available.
+
+▶ YOUR COMPLETE LIFE OS
+
+◆ TASKS & PROJECTS
+Unlimited tasks with priorities and deadlines. AI spots stalled projects and deadline clusters.
 
 ◆ HABIT TRACKING
-Build better habits with daily check-ins and streak tracking. Smart reminders keep you on track. Analytics show your best times and weekly patterns.
-
-◆ CALENDAR
-Week grid and day timeline views. Create events with reminders. Automatic conflict detection prevents double-bookings.
+Daily check-ins and streak tracking. AI predicts when you might break a streak and intervenes.
 
 ◆ FINANCE DASHBOARD
-Track every dollar. Log income and expenses. Set budgets and watch your progress. Visual charts show spending trends and category breakdowns.
+Track income, expenses, and budgets. AI catches unusual spending and budget overruns early.
+
+◆ CALENDAR
+Week and day views with conflict detection. AI understands the gap between plans and action.
 
 ◆ FOCUS TIMER
-Pomodoro mode (25/5/15) or custom durations. Immersive full-screen timer. Link sessions to tasks for complete productivity tracking.
+Pomodoro and custom sessions. AI learns your best focus windows.
 
-◆ BEAUTIFUL THEMES
-6 stunning presets: Neon Dark, Ocean Breeze, Sunset, Forest, Monochrome, Rose Gold. Make the app yours.
+◆ JOURNAL
+Thoughts linked to your calendar and mood. AI has full context on your days.
 
-▶ WHY Javi?
+▶ VS THE ALTERNATIVES
 
-✓ ONE APP FOR EVERYTHING
-No more switching between task managers, habit trackers, calendar apps, and budget tools. Everything lives in Javi.
+ChatGPT: No persistent memory. No location-based reminders. Not offline. Not private.
 
-✓ PRIVACY FIRST
-All data stored locally on your device. No account required. No data collection. Your productivity stays private.
+Siri/Google Assistant: Basic commands. Cannot analyze cross-domain patterns.
 
-✓ OFFLINE READY
-Works without internet. Your data is always accessible.
+Separate Apps: No AI. No consolidation. No proactive insights.
 
-✓ EXPORT ANYTIME
-Export all your data to JSON or CSV. Your data belongs to you.
+Javi: Connected life data + proactive AI + total privacy + offline-first.
 
 ▶ PERFECT FOR
 
-• Professionals managing work and personal tasks
-• Students tracking assignments and study habits
-• Anyone building better daily routines
-• Budget-conscious people tracking expenses
-• Remote workers needing focus time management
+• People tired of AI that forgets them
+• Privacy-conscious users who want AI without cloud dependency
+• Anyone juggling tasks, habits, and finances across scattered apps
+• Remote workers and travelers who need offline reliability
 
-▶ COMING SOON
+▶ BEAUTIFUL THEMES
 
-• AI assistant for productivity insights
-• Voice input for quick capture
-• Google Calendar sync
-• Cloud backup
+6 presets: Neon Dark, Ocean Breeze, Sunset, Forest, Monochrome, Rose Gold.
+
+▶ THE BOTTOM LINE
+
+This is not a productivity app. This is a Life OS with proactive AI that speaks up so you do not have to prompt.
+
+Private. Offline. Proactive.
+
+Download Javi and meet the assistant that actually knows you.
 
 ▶ SUPPORT
 
-Questions? Feedback? We respond to every message.
+Questions? We respond to every message.
 Email: [YOUR_EMAIL]
 
 Privacy Policy: [PRIVACY_URL]
@@ -216,48 +224,53 @@ Terms of Service: [TERMS_URL]
 ### iOS
 
 ```
-Welcome to Javi 1.0!
+Meet Javi - the AI that speaks up.
 
-Your complete productivity hub is here:
+This is not another productivity app. This is your Life OS.
+
+◆ PROACTIVE AI
+Javi knows your tasks, habits, money, and schedule - and speaks up when it matters. No prompting required.
 
 ◆ TASKS & PROJECTS
-Unlimited tasks with priorities, due dates, and project organization.
+Unlimited tasks with priorities and deadlines. AI notices when things stall.
 
 ◆ HABIT TRACKING
-Daily check-ins, streak tracking, and smart analytics.
+Streaks and daily check-ins. AI predicts when you might slip.
 
-◆ CALENDAR
-Week and day views with conflict detection.
-
-◆ FINANCE
-Income, expenses, budgets, and spending insights.
+◆ FINANCE DASHBOARD
+Track spending and budgets. AI alerts you before you overspend.
 
 ◆ FOCUS TIMER
-Pomodoro mode and custom durations for deep work.
+Pomodoro and custom sessions. AI learns when you work best.
+
+◆ CALENDAR & JOURNAL
+Full day context. AI connects the dots.
 
 ◆ 6 BEAUTIFUL THEMES
-Neon Dark, Ocean Breeze, Sunset, Forest, Monochrome, Rose Gold.
+Make it yours.
 
-All your data stays on your device. No account required.
-
-We'd love your feedback! Tap Settings → Help & Support.
+100% private. 100% offline. 100% proactive.
 ```
 
 ### Android
 
 ```
-Javi 1.0 is here!
+Javi 1.0 - The AI that speaks up.
 
-Your all-in-one productivity hub:
+Your Life OS is here:
 
-✓ Tasks & Projects - Unlimited tasks with priorities and organization
-✓ Habit Tracking - Streaks, check-ins, and analytics
-✓ Calendar - Week/day views with conflict detection
-✓ Finance - Income, expenses, and budget tracking
-✓ Focus Timer - Pomodoro and custom deep work sessions
-✓ 6 Themes - Beautiful designs to match your style
+✓ Proactive AI that knows your whole life
+✓ Tasks & Projects with AI insights
+✓ Habit Tracking with streak protection
+✓ Finance Dashboard with spending alerts
+✓ Focus Timer that learns your patterns
+✓ Calendar & Journal with full context
+✓ 6 Beautiful Themes
 
-100% offline. Your data stays on your device.
+Not a chatbot. Not a productivity app.
+A Jarvis that speaks first.
+
+100% private. 100% offline. Your data never leaves your device.
 
 Questions? Email us at [YOUR_EMAIL]
 ```
@@ -272,7 +285,7 @@ Questions? Email us at [YOUR_EMAIL]
 
 ### Android
 - **Category:** Productivity
-- **Tags:** Task Manager, Habit Tracker, Calendar, Budget, Focus Timer
+- **Tags:** AI Assistant, Life OS, Habit Tracker, Task Manager, Budget Tracker
 
 ---
 
@@ -290,25 +303,61 @@ Both platforms - answer "None" to all content questions:
 
 ---
 
-## ASO Tips
+## ASO Strategy - Proactive AI Angle
 
-### Keywords to Target (by search volume)
-1. "to do list" - very high volume
-2. "habit tracker" - high volume
-3. "task manager" - high volume
-4. "productivity app" - high volume
-5. "pomodoro timer" - medium volume
-6. "budget tracker" - medium volume
-7. "daily planner" - medium volume
+### Primary Keywords (differentiation focus)
+1. "AI assistant" - high volume, positions against ChatGPT/Siri
+2. "proactive AI" - low competition, high intent
+3. "life OS" - emerging category, low competition
+4. "offline AI" - privacy differentiator
+5. "private AI assistant" - trust signal
 
-### Competitors to Study
-- Todoist (tasks)
-- Habitica (habits)
-- Fantastical (calendar)
-- YNAB (finance)
-- Forest (focus)
+### Secondary Keywords (volume play)
+6. "habit tracker" - high volume
+7. "task manager" - high volume
+8. "budget tracker" - medium volume
+9. "focus timer" - medium volume
+10. "daily planner" - medium volume
 
-Your advantage: All-in-one vs single-purpose apps.
+### Competitive Positioning
+
+| Competitor | Their Weakness | Javi Advantage |
+|------------|----------------|----------------|
+| ChatGPT | No persistent memory, cloud-only, no life data | Persistent context across all life areas, offline |
+| Siri/Google | Commands only, no analysis, limited domains | Cross-domain pattern recognition, proactive alerts |
+| Todoist | No AI, tasks only | AI insights + tasks + habits + finance + focus |
+| Notion | Complex setup, cloud-dependent | Simple, instant, offline, private |
+| YNAB | Finance only, subscription | Finance + everything else, proactive AI |
+
+### Messaging Hierarchy
+
+1. **Lead:** Proactive AI that speaks first
+2. **Support:** Knows your whole life (tasks, habits, money, focus)
+3. **Differentiator:** Private and offline (vs ChatGPT/cloud apps)
+4. **Category:** Life OS, not productivity app
+
+---
+
+## Tagline Options
+
+**Primary recommendation:**
+```
+The AI that speaks first.
+```
+
+**Alternatives:**
+```
+AI that knows your life.
+```
+```
+Not a chatbot. A Jarvis.
+```
+```
+Proactive. Private. Offline.
+```
+```
+Your life, one AI.
+```
 
 ---
 
@@ -323,17 +372,17 @@ Your advantage: All-in-one vs single-purpose apps.
 
 ---
 
-## Screenshot Text Overlays
+## Screenshot Text Overlays (Updated)
 
 Use these as captions on your screenshots:
 
-1. **Dashboard:** "Your Day at a Glance"
-2. **Tasks:** "Get Things Done"
-3. **Habits:** "Build Better Habits"
-4. **Calendar:** "Never Miss a Deadline"
-5. **Finance:** "Track Every Dollar"
-6. **Focus:** "Deep Work Made Easy"
+1. **AI Insight:** "AI That Speaks First"
+2. **Dashboard:** "Your Whole Life, Connected"
+3. **Tasks:** "AI Spots Stalled Projects"
+4. **Habits:** "AI Protects Your Streaks"
+5. **Finance:** "AI Catches Overspending"
+6. **Focus:** "AI Learns When You Work Best"
 
 ---
 
-*Ready for store submission once placeholders are filled.*
+*Updated: Proactive AI lead angle. Ready for store submission once placeholders are filled.*
