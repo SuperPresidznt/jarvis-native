@@ -4,11 +4,7 @@ A proactive AI assistant that manages your tasks, habits, finances, and focus - 
 
 ## Download
 
-**[Download Latest APK](../../releases/latest)**
-
-## Features
-
-- AI that speaks up when it matters
+**[Download Latest APK](../../releases/latest
 - Tasks & Projects
 - Habit tracking with streaks
 - Finance dashboard
